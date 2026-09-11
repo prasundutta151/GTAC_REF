@@ -57,6 +57,14 @@ body {
   box-shadow: var(--shadow-lg);
 }
 
+.header-badges {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
 .brand-badge {
   display: inline-block;
   font-family: 'JetBrains Mono', monospace;
@@ -66,8 +74,36 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.25);
   padding: 4px 12px;
   border-radius: 9999px;
-  margin-bottom: 12px;
   text-transform: uppercase;
+}
+
+.connection-badge {
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+}
+
+.status-online {
+  background: rgba(16, 185, 129, 0.2);
+  color: #a7f3d0;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.status-offline {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+}
+
+.status-checking {
+  background: rgba(255, 255, 255, 0.1);
+  color: #cbd5e1;
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
 .app-header h1 {

@@ -14,7 +14,10 @@
     <!-- Header -->
     <header class="app-header">
       <div class="header-content">
-        <div class="brand-badge">NCRA • TIFR • GMRT</div>
+        <div class="header-badges">
+          <div class="brand-badge">NCRA • TIFR • GMRT</div>
+          <div id="connection-status-badge" class="connection-badge status-checking">Checking server...</div>
+        </div>
         <h1>GTAC Referee Registration / Suggestion Form</h1>
         <p class="subtitle">Giant Metrewave Radio Telescope Time Allocation Committee (GTAC)</p>
       </div>
@@ -177,6 +180,7 @@
     </div>
   </div>
 
+  <script src="db_data.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

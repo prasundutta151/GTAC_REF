@@ -1,5 +1,6 @@
 /**
- * GTAC Referee Form & Database Management Script
+ * GTAC Referee Registration / Suggestion Form Script
+ * Supports both Live Server Mode (http://localhost:8080) and Local File Mode (file://)
  */
 
 // Global State
@@ -9,7 +10,8 @@ const state = {
   career_status: [],
   referees: [],
   refereeCount: 0,
-  refereeBlocks: [] // list of block IDs
+  refereeBlocks: [], // list of block IDs
+  isLiveServer: false
 };
 
 // Submitter Expertise Picker Instance
@@ -25,6 +27,7 @@ const refereeContainer = document.getElementById('referee-list');
 const btnAddReferee = document.getElementById('btn-add-referee');
 const modalSuccess = document.getElementById('modal-success');
 const btnCloseModal = document.getElementById('btn-close-modal');
+const statusBadge = document.getElementById('connection-status-badge');
 
 /**
  * Reusable Expertise Selector Class (Select from Dropdown List + Chips)
@@ -172,77 +175,135 @@ function initSubmitterExpertisePicker() {
 }
 
 /**
- * Fetch database items from backend API
+ * Update Connection Status Indicator in Header
+ */
+function updateConnectionBadge(status) {
+  if (!statusBadge) return;
+  statusBadge.className = 'connection-badge';
+  if (status === 'online') {
+    statusBadge.classList.add('status-online');
+    statusBadge.innerHTML = '🟢 Connected to Server (port 8080)';
+    state.isLiveServer = true;
+  } else if (status === 'file-mode') {
+    statusBadge.classList.add('status-offline');
+    statusBadge.innerHTML = '🟡 Local File Mode (Full DB Active)';
+    state.isLiveServer = false;
+  } else {
+    statusBadge.classList.add('status-offline');
+    statusBadge.innerHTML = '🟡 Server Offline (Local DB Active)';
+    state.isLiveServer = false;
+  }
+}
+
+/**
+ * Load Database from Embedded Database or Server API
  */
 async function loadDatabase() {
+  const isFileProtocol = (window.location.protocol === 'file:');
+
+  if (isFileProtocol) {
+    // Under file://, relative fetch is blocked by browsers. Use complete embedded dataset immediately.
+    useEmbeddedDatabase();
+    updateConnectionBadge('file-mode');
+    return;
+  }
+
+  // Under http:, try fetching live API
   try {
     const res = await fetch('/api/database');
-    if (!res.ok) throw new Error('API request failed');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
+
     state.affiliations = data.affiliations || [];
     state.expertise = data.expertise || [];
     state.career_status = data.career_status || [];
     state.referees = data.referees || [];
 
-    populateSelect(userAffiliationSelect, state.affiliations, true);
-    populateSelect(userCareerSelect, state.career_status, false);
-    userExpPicker.populate();
-
-    // Re-populate all active referee cards
-    state.refereeBlocks.forEach(blockId => {
-      const card = document.getElementById(blockId);
-      if (card && card.expPicker) {
-        card.expPicker.populate();
-      }
-    });
+    populateAllSelects();
+    updateConnectionBadge('online');
   } catch (err) {
-    console.error('Failed to load database from API, using offline fallback:', err);
-    loadOfflineFallback();
+    // If server is not running on this port, fall back to embedded data
+    useEmbeddedDatabase();
+    updateConnectionBadge('server-offline');
   }
 }
 
 /**
- * Fallback static database if server API is not reachable
+ * Use Complete Embedded Dataset (from db_data.js or built-in registry)
  */
-function loadOfflineFallback() {
-  state.affiliations = [
-    { id: 'AFF_001', label: 'National Centre for Radio Astrophysics (NCRA-TIFR), Pune' },
-    { id: 'AFF_002', label: 'Inter-University Centre for Astronomy and Astrophysics (IUCAA), Pune' },
-    { id: 'AFF_003', label: 'Raman Research Institute (RRI), Bengaluru' },
-    { id: 'AFF_004', label: 'Indian Institute of Science (IISc), Bengaluru' },
-    { id: 'AFF_005', label: 'Tata Institute of Fundamental Research (TIFR), Mumbai' },
-    { id: 'AFF_015', label: 'National Radio Astronomy Observatory (NRAO), USA' }
-  ];
-  state.expertise = [
-    { id: 'EXP_01', label: 'Pulsars, Fast Transients & Neutron Stars' },
-    { id: 'EXP_02', label: 'Epoch of Reionization (EoR) & 21cm Cosmology' },
-    { id: 'EXP_03', label: 'Extragalactic Neutral Hydrogen (HI) & Galaxy Dynamics' },
-    { id: 'EXP_04', label: 'Active Galactic Nuclei (AGN) & Relativistic Radio Jets' },
-    { id: 'EXP_11', label: 'Low-Frequency Radio Interferometry Techniques' }
-  ];
-  state.career_status = [
-    { id: 'CAR_01', label: 'Undergraduate' },
-    { id: 'CAR_02', label: 'PhD Student' },
-    { id: 'CAR_03', label: 'Post Doctoral Fellow' },
-    { id: 'CAR_04', label: 'Faculty Member' },
-    { id: 'CAR_05', label: 'Scientist' },
-    { id: 'CAR_06', label: 'Engineer' },
-    { id: 'CAR_07', label: 'Others' }
-  ];
-  state.referees = [
-    { unique_id: 'REF_0001', referee_name: 'Prof. Yashwant Gupta', email: 'ygupta@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_01;EXP_14', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
-    { unique_id: 'REF_0002', referee_name: 'Prof. Jayaram Chengalur', email: 'chengalur@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_03;EXP_11', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
-    { unique_id: 'REF_0008', referee_name: 'Dr. Ananda Hota', email: 'ananda.hota@cbs.ac.in', affiliation: 'AFF_005', expertise: 'EXP_03;EXP_04', career_status: 'CAR_05', referee_status: 'suggested', available: 'true' }
-  ];
+function useEmbeddedDatabase() {
+  if (window.GTAC_DATABASE) {
+    state.affiliations = window.GTAC_DATABASE.affiliations || [];
+    state.expertise = window.GTAC_DATABASE.expertise || [];
+    state.career_status = window.GTAC_DATABASE.career_status || [];
+    state.referees = window.GTAC_DATABASE.referees || [];
+  } else {
+    // In-memory fallback if db_data.js was not loaded
+    state.affiliations = [
+      { id: 'AFF_001', label: 'National Centre for Radio Astrophysics (NCRA-TIFR), Pune' },
+      { id: 'AFF_002', label: 'Inter-University Centre for Astronomy and Astrophysics (IUCAA), Pune' },
+      { id: 'AFF_003', label: 'Raman Research Institute (RRI), Bengaluru' },
+      { id: 'AFF_004', label: 'Indian Institute of Science (IISc), Bengaluru' },
+      { id: 'AFF_005', label: 'Tata Institute of Fundamental Research (TIFR), Mumbai' },
+      { id: 'AFF_006', label: 'Indian Institute of Astrophysics (IIA), Bengaluru' },
+      { id: 'AFF_007', label: 'Physical Research Laboratory (PRL), Ahmedabad' },
+      { id: 'AFF_008', label: 'Indian Institute of Technology Bombay (IIT Bombay)' },
+      { id: 'AFF_015', label: 'National Radio Astronomy Observatory (NRAO), Socorro/Charlottesville, USA' },
+      { id: 'AFF_016', label: 'European Southern Observatory (ESO), Garching, Germany' }
+    ];
+    state.expertise = [
+      { id: 'EXP_01', label: 'Pulsars, Fast Transients & Neutron Stars' },
+      { id: 'EXP_02', label: 'Epoch of Reionization (EoR) & 21cm Cosmology' },
+      { id: 'EXP_03', label: 'Extragalactic Neutral Hydrogen (HI) & Galaxy Dynamics' },
+      { id: 'EXP_04', label: 'Active Galactic Nuclei (AGN) & Relativistic Radio Jets' },
+      { id: 'EXP_05', label: 'Galaxy Clusters, Relics, Halos & Cosmic Web' },
+      { id: 'EXP_11', label: 'Low-Frequency Radio Interferometry Techniques & Algorithms' },
+      { id: 'EXP_14', label: 'Radio Instrumentation, Receivers & Digital Backends' }
+    ];
+    state.career_status = [
+      { id: 'CAR_01', label: 'Undergraduate' },
+      { id: 'CAR_02', label: 'PhD Student' },
+      { id: 'CAR_03', label: 'Post Doctoral Fellow' },
+      { id: 'CAR_04', label: 'Faculty Member' },
+      { id: 'CAR_05', label: 'Scientist' },
+      { id: 'CAR_06', label: 'Engineer' },
+      { id: 'CAR_07', label: 'Others' }
+    ];
+    state.referees = [
+      { unique_id: 'REF_0001', referee_name: 'Prof. Yashwant Gupta', email: 'ygupta@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_01;EXP_14', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
+      { unique_id: 'REF_0002', referee_name: 'Prof. Jayaram Chengalur', email: 'chengalur@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_03;EXP_11', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
+      { unique_id: 'REF_0003', referee_name: 'Prof. Somak Raychaudhury', email: 'somak@iucaa.in', affiliation: 'AFF_002', expertise: 'EXP_04;EXP_05', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
+      { unique_id: 'REF_0008', referee_name: 'Dr. Ananda Hota', email: 'ananda.hota@cbs.ac.in', affiliation: 'AFF_005', expertise: 'EXP_03;EXP_04', career_status: 'CAR_05', referee_status: 'suggested', available: 'true' }
+    ];
+  }
+  populateAllSelects();
+}
+
+/**
+ * Populate all dropdowns across form
+ */
+function populateAllSelects() {
   populateSelect(userAffiliationSelect, state.affiliations, true);
   populateSelect(userCareerSelect, state.career_status, false);
-  userExpPicker.populate();
+  if (userExpPicker) userExpPicker.populate();
+
+  state.refereeBlocks.forEach(blockId => {
+    const card = document.getElementById(blockId);
+    if (card) {
+      const aff = card.querySelector('.ref-aff');
+      const car = card.querySelector('.ref-career');
+      if (aff) populateSelect(aff, state.affiliations, true);
+      if (car) populateSelect(car, state.career_status, false);
+      if (card.expPicker) card.expPicker.populate();
+    }
+  });
 }
 
 /**
  * Populate select dropdowns
  */
 function populateSelect(selectEl, items, includeOthers = false) {
+  if (!selectEl) return;
   const currentVal = selectEl.value;
   selectEl.innerHTML = '';
   const defaultOption = document.createElement('option');
@@ -311,7 +372,7 @@ function setupEventListeners() {
   form.addEventListener('reset', () => {
     setTimeout(() => {
       userAffOtherBox.classList.add('hidden');
-      userExpPicker.clear();
+      if (userExpPicker) userExpPicker.clear();
       refereeContainer.innerHTML = '';
       state.refereeBlocks = [];
       state.refereeCount = 0;
@@ -608,26 +669,73 @@ function setupRefereeCardListeners(card, blockIndex) {
     }
     btnAi.textContent = 'Thinking...';
     btnAi.disabled = true;
-    try {
-      const res = await fetch('/api/gemini-suggest', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: nameVal })
-      });
-      const data = await res.json();
-      applyAiSuggestions(card, data);
-    } catch (err) {
-      console.warn('AI suggestion failed:', err);
-    } finally {
-      btnAi.textContent = '✨ Ask Gemini';
-      btnAi.disabled = false;
+
+    if (state.isLiveServer) {
+      try {
+        const res = await fetch('/api/gemini-suggest', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: nameVal })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          applyAiSuggestions(card, data);
+          return;
+        }
+      } catch (err) {
+        // Fall back to client heuristic
+      } finally {
+        btnAi.textContent = '✨ Ask Gemini';
+        btnAi.disabled = false;
+      }
     }
+
+    // Client-side heuristic fallback (works offline / file://)
+    const fallback = clientHeuristicSuggest(nameVal);
+    applyAiSuggestions(card, fallback);
+    btnAi.textContent = '✨ Ask Gemini';
+    btnAi.disabled = false;
   });
 
   // Remove button
   btnRemove.addEventListener('click', () => {
     removeRefereeBlock(card.id);
   });
+}
+
+/**
+ * Client-Side Heuristic Suggestion (for offline / file:// mode)
+ */
+function clientHeuristicSuggest(cleanName) {
+  const nameLower = cleanName.toLowerCase();
+  const suggestions = {
+    source: 'Smart Knowledge Base',
+    affiliation: '',
+    email_domain: '',
+    expertise: []
+  };
+
+  if (nameLower.includes('chengalur') || nameLower.includes('yashwant') || nameLower.includes('bhaswati') || nameLower.includes('gupta')) {
+    suggestions.affiliation = 'AFF_001';
+    suggestions.email_domain = 'ncra.tifr.res.in';
+    suggestions.expertise = ['EXP_01', 'EXP_03', 'EXP_11'];
+  } else if (nameLower.includes('somak') || nameLower.includes('raychaudhury') || nameLower.includes('kembhavi')) {
+    suggestions.affiliation = 'AFF_002';
+    suggestions.email_domain = 'iucaa.in';
+    suggestions.expertise = ['EXP_04', 'EXP_05'];
+  } else if (nameLower.includes('deshpande') || nameLower.includes('ramesh')) {
+    suggestions.affiliation = 'AFF_003';
+    suggestions.email_domain = 'rri.res.in';
+    suggestions.expertise = ['EXP_01', 'EXP_14'];
+  } else {
+    const parts = cleanName.split(' ');
+    if (parts.length >= 2) {
+      const last = parts[parts.length - 1].toLowerCase();
+      const firstInit = parts[0][0].toLowerCase();
+      suggestions.email_hint = `${firstInit}${last}@`;
+    }
+  }
+  return suggestions;
 }
 
 /**
@@ -701,27 +809,29 @@ function setupAutocomplete(card, inputEl, fieldKey) {
     }
 
     debounceTimer = setTimeout(async () => {
-      // Search client database cache first
+      // 1. Search in-memory database cache
       let matches = state.referees.filter(r => {
         const val = (r[fieldKey] || '').toLowerCase();
         return val.includes(query);
       });
 
-      // If online API available, also query server
-      try {
-        const res = await fetch(`/api/referees/lookup?q=${encodeURIComponent(query)}`);
-        if (res.ok) {
-          const apiData = await res.json();
-          if (apiData.matches && apiData.matches.length > 0) {
-            matches = apiData.matches;
+      // 2. If live server is connected, query API for freshest entries
+      if (state.isLiveServer) {
+        try {
+          const res = await fetch(`/api/referees/lookup?q=${encodeURIComponent(query)}`);
+          if (res.ok) {
+            const apiData = await res.json();
+            if (apiData.matches && apiData.matches.length > 0) {
+              matches = apiData.matches;
+            }
           }
+        } catch (e) {
+          // Fallback to local matches silently
         }
-      } catch (e) {
-        // Fallback to local matches
       }
 
       renderAutocompleteDropdown(card, dropdown, matches, inputEl);
-    }, 200);
+    }, 180);
   });
 
   // Close dropdown on click outside
@@ -746,7 +856,7 @@ function renderAutocompleteDropdown(card, dropdown, matches, inputEl) {
   matches.forEach(ref => {
     const item = document.createElement('div');
     item.className = 'autocomplete-item';
-    const isVer = ref.referee_status === 'verified';
+    const isVer = (ref.referee_status === 'verified');
     const badgeClass = isVer ? 'badge-verified' : 'badge-suggested';
     const badgeText = isVer ? 'Verified' : 'Suggested';
 
@@ -986,6 +1096,15 @@ async function handleFormSubmit(e) {
   btnSubmit.disabled = true;
   btnSubmit.textContent = 'Submitting...';
 
+  // If running in local file:// mode, handle locally without network fetch
+  if (!state.isLiveServer || window.location.protocol === 'file:') {
+    handleLocalSubmission(payload);
+    btnSubmit.disabled = false;
+    btnSubmit.textContent = 'Submit Referee Registration / Suggestions';
+    return;
+  }
+
+  // Otherwise, post to backend server
   try {
     const response = await fetch('/api/submit', {
       method: 'POST',
@@ -999,14 +1118,75 @@ async function handleFormSubmit(e) {
 
     const result = await response.json();
     showSuccessModal(result, payload);
-    // Reload database in background to get newly assigned IDs & affiliations
     await loadDatabase();
   } catch (err) {
-    console.error('Submission failed:', err);
-    alert('Submission error: ' + err.message);
+    // If backend request fails, fall back to local save
+    handleLocalSubmission(payload);
   } finally {
     btnSubmit.disabled = false;
     btnSubmit.textContent = 'Submit Referee Registration / Suggestions';
+  }
+}
+
+/**
+ * Handle Submission Locally (for file:// mode or server offline)
+ */
+function handleLocalSubmission(payload) {
+  // Find highest existing REF_XXXX ID
+  let maxId = 0;
+  state.referees.forEach(r => {
+    const m = (r.unique_id || '').match(/REF_(\d+)/);
+    if (m) maxId = Math.max(maxId, parseInt(m[1], 10));
+  });
+
+  const assignedIds = [];
+  payload.referees.forEach(r => {
+    // Check if already in DB
+    const existing = state.referees.find(x =>
+      x.email.toLowerCase() === r.email.toLowerCase() ||
+      x.referee_name.toLowerCase() === r.name.toLowerCase()
+    );
+
+    let uid = existing ? existing.unique_id : null;
+    if (!uid) {
+      maxId += 1;
+      uid = `REF_${String(maxId).padStart(4, '0')}`;
+      state.referees.push({
+        unique_id: uid,
+        referee_name: r.name,
+        email: r.email,
+        affiliation: r.affiliation,
+        expertise: (r.expertise || []).join(';'),
+        career_status: r.career_status,
+        referee_status: 'suggested',
+        available: 'true'
+      });
+    }
+    assignedIds.push(uid);
+  });
+
+  // Handle new "Others" affiliation locally
+  if (payload.user_affiliation === 'OTHERS' && payload.user_affiliation_other) {
+    const nextAffId = `AFF_${String(state.affiliations.length + 1).padStart(3, '0')}`;
+    state.affiliations.push({ id: nextAffId, label: payload.user_affiliation_other });
+    populateAllSelects();
+  }
+
+  // Save to browser localStorage
+  try {
+    const history = JSON.parse(localStorage.getItem('gtac_submissions') || '[]');
+    const subId = `SUB_${Date.now()}`;
+    history.push({ subId, timestamp: new Date().toISOString(), payload, assignedIds });
+    localStorage.setItem('gtac_submissions', JSON.stringify(history));
+
+    const result = {
+      submission_id: subId,
+      assigned_referee_ids: assignedIds,
+      is_local: true
+    };
+    showSuccessModal(result, payload);
+  } catch (e) {
+    alert('Submission recorded in local memory.');
   }
 }
 
@@ -1024,15 +1204,25 @@ function showSuccessModal(result, payload) {
   });
   refSummaryHtml += '</ul>';
 
+  const isLocal = result.is_local || (!state.isLiveServer);
+  const syncNotice = isLocal ? `
+    <div style="margin-top: 12px; padding: 10px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; font-size: 0.85rem; color: #92400e;">
+      <strong>Notice:</strong> Saved in local browser session. To write submissions directly into the disk files (<code>database/Referee_database_A.csv</code>), run:
+      <pre style="margin-top: 4px; font-family: monospace; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">./util --serve</pre>
+    </div>
+  ` : `
+    <p style="margin-top: 10px; font-size: 0.85rem; color: #166534;">
+      ✓ All entries, custom affiliations, and unique IDs have been permanently committed to <code>database/Referee_database_A.csv</code> and ASCII files.
+    </p>
+  `;
+
   modalBody.innerHTML = `
     <p><strong>Submission ID:</strong> <code>${result.submission_id}</code></p>
     <p><strong>Submitter:</strong> ${payload.user_name} (${payload.user_email})</p>
     <p><strong>Review Volunteer:</strong> This Cycle: <em>${payload.review_this_cycle.toUpperCase()}</em> | Future Cycles: <em>${payload.review_future_cycles.toUpperCase()}</em></p>
-    <p style="margin-top: 10px;"><strong>Referees Registered in <code>Referee_database_A.csv</code>:</strong></p>
+    <p style="margin-top: 10px;"><strong>Referees Registered:</strong></p>
     ${refSummaryHtml}
-    <p style="margin-top: 10px; font-size: 0.85rem; color: #166534;">
-      ✓ All entries, custom affiliations, and unique IDs have been permanently committed to the database.
-    </p>
+    ${syncNotice}
   `;
 
   modalSuccess.classList.remove('hidden');

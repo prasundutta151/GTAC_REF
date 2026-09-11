@@ -29,6 +29,25 @@ EXPERTISE_FILE = DB_DIR / "expertise.txt"
 CAREER_STATUS_FILE = DB_DIR / "career_status.txt"
 REFEREE_DB_FILE = DB_DIR / "Referee_database_A.csv"
 SUBMISSIONS_FILE = DB_DIR / "form_submissions.csv"
+DB_DATA_JS = DEV_DIR / "db_data.js"
+
+
+def sync_db_data_js() -> None:
+    """Generate static dev/db_data.js for standalone/offline file:// viewing."""
+    try:
+        data = {
+            "affiliations": parse_pipe_ascii(AFFILIATIONS_FILE),
+            "expertise": parse_pipe_ascii(EXPERTISE_FILE),
+            "career_status": parse_pipe_ascii(CAREER_STATUS_FILE),
+            "referees": load_referees()
+        }
+        content = (
+            "// Auto-generated database export for standalone file:// support\n"
+            "window.GTAC_DATABASE = " + json.dumps(data, indent=2) + ";\n"
+        )
+        DB_DATA_JS.write_text(content, encoding="utf-8")
+    except Exception as e:
+        print(f"[WARN] Failed to sync db_data.js: {e}")
 
 
 def parse_pipe_ascii(file_path: Path) -> List[Dict[str, str]]:
@@ -355,6 +374,7 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
 
                 body_data["suggested_referees_ids"] = saved_ids
                 sub_id = record_submission(body_data)
+                sync_db_data_js()
 
                 self.send_json_response({
                     "status": "success",
@@ -385,6 +405,7 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
 
 def run_server(port: int = 8080) -> None:
     """Run threaded HTTP server."""
+    sync_db_data_js()
     class ThreadedHTTPServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
         daemon_threads = True
 

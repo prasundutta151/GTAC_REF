@@ -14,6 +14,7 @@ The following table summarizes all files and directories in this repository and 
 | `dev/index.html` | File | Main responsive HTML5 form for GTAC referee registration and suggestions. |
 | `dev/style.css` | File | Modern stylesheet featuring GTAC branding, card layouts, and verified/suggested status badges. |
 | `dev/app.js` | File | Client-side application logic: dynamic referee cards, self-referee auto-fill & locking, and live DB lookup. |
+| `dev/db_data.js` | File | Standalone database export bundle providing instant offline/file:// protocol support. |
 | `dev/server.py` | Executable | Lightweight zero-dependency Python 3 HTTP & REST API server handling static assets, lookup, and submissions. |
 | `dev/DEV_NOTES.md` | File | Running developer activity log, file manifest, task records, and verification history (legacy notes removed). |
 | `dev/DEV_NOTES` | Symlink | Convenience link pointing to `dev/DEV_NOTES.md`. |
@@ -51,6 +52,44 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 18:15:00 IST
+
+Prompt / Request
+- Address browser "Load failed" error when opening the form and clarify whether the database already exists.
+
+Changes Made
+- Resolved cause of "Load failed": Browsers (especially Safari on macOS) block relative `fetch('/api/database')` requests under the `file://` scheme when opening `index.html` directly from the filesystem without the local server running.
+- `dev/db_data.js`:
+  - Created standalone auto-generated database export bundle (`window.GTAC_DATABASE`) containing the complete database from disk (all 30 affiliations, all 18 expertise topics, all 7 career statuses, and all 10 referees).
+- `dev/index.html`:
+  - Included `<script src="db_data.js"></script>` before `app.js`.
+  - Added `#connection-status-badge` to header dynamically showing connection state.
+- `dev/style.css`:
+  - Added `.connection-badge`, `.status-online`, `.status-offline`, and `.status-checking` styling.
+- `dev/app.js`:
+  - Detects `file://` protocol or server unreachable and seamlessly uses the full embedded database without triggering network errors.
+  - Added local submission handling (`localStorage`) with unique `REF_XXXX` ID assignment when in `file://` mode.
+  - Added client-side heuristic suggestion fallback when in `file://` mode.
+- `dev/server.py`:
+  - Added `sync_db_data_js()` to automatically re-sync `dev/db_data.js` whenever disk database files change or on server start.
+- `util`:
+  - Bumped version to `01.00.04`.
+
+Verification
+- Verified `dev/db_data.js` contains 30 affiliations, 18 expertise topics, and 10 referees.
+- Verified `python3 dev/server.py 8080` serves correctly with HTTP 200 and `/api/database` returns full dataset.
+- Verified opening via `file://` operates seamlessly without throwing "Load failed".
+
+Notes
+- The database exists in `database/` (`affiliations.txt`, `expertise.txt`, `career_status.txt`, `Referee_database_A.csv`, `form_submissions.csv`).
+- The form now works seamlessly in BOTH modes:
+  1. Direct double-click `index.html` (`file://` local file mode).
+  2. Local server mode (`http://localhost:8080`) via `./util --serve`.
+
+---
 
 ## 2026-09-11 16:20:00 IST
 
