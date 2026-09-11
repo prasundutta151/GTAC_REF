@@ -77,6 +77,34 @@ Notes
 
 ---
 
+## 2026-09-11 19:10:00 IST
+
+Prompt / Request
+- Refine referee card layout: move the Affiliation field directly below the Email field.
+- Remove the redundant text label "STATUS:", keeping only the career status (Faculty Member, Engineer, Scientist, etc.) in the colored pill bubble beside Email.
+
+Changes Made
+- `dev/lookup.js`:
+  - Reorganized card middle section from a 3-column grid into a vertical structured list (`card-details-list`).
+  - Row 1: Displays `✉️ Email: <email>` alongside the colored career status pill bubble `<span class="career-status-pill">${carLabel}</span>`. Removed the `Status:` label text entirely.
+  - Row 2: Displays `🏛️ Affiliation: <institution>` positioned directly below the email row.
+- `dev/lookup.css`:
+  - Added flex rules for `.card-details-list`, `.detail-row-email`, and `.detail-row-affiliation` to ensure clean vertical stacking and alignment.
+- `wiki/Referee-Directory.md`:
+  - Updated ASCII card diagram and typography breakdown to reflect the new vertical hierarchy.
+  - Pushed updated wiki pages via `./util --wiki-push`.
+- GitHub Pages (`docs/`):
+  - Re-synchronized `docs/` bundle via `./util --sync-docs`.
+
+Verification
+- Tested server on test port 8899 and verified rendered HTML output in browser.
+- Confirmed `./util --wiki-push` and `./util --sync-docs` executed with zero errors.
+
+Notes
+- Both `creation` and `main` branches synchronized on remote origin.
+
+---
+
 ## 2026-09-11 19:05:00 IST
 
 Prompt / Request

@@ -463,24 +463,21 @@
           </div>
         </div>
 
-        <!-- Middle Details Grid (Email, Affiliation, Career) -->
-        <div class="card-details-grid">
-          <div class="detail-item">
-            <span class="detail-icon">✉️</span>
-            <span class="detail-label">Email:</span>
-            <a href="mailto:${escapeHtml(ref.email)}" class="referee-email-link">${escapeHtml(ref.email)}</a>
+        <!-- Middle Details: Email with Career Status Bubble, and Affiliation below -->
+        <div class="card-details-list">
+          <div class="detail-row-email">
+            <div class="detail-item">
+              <span class="detail-icon">✉️</span>
+              <span class="detail-label">Email:</span>
+              <a href="mailto:${escapeHtml(ref.email)}" class="referee-email-link">${escapeHtml(ref.email)}</a>
+            </div>
+            <span class="career-status-pill">${escapeHtml(carLabel)}</span>
           </div>
 
-          <div class="detail-item">
+          <div class="detail-item detail-row-affiliation">
             <span class="detail-icon">🏛️</span>
             <span class="detail-label">Affiliation:</span>
             <span class="affiliation-value">${escapeHtml(affLabel)}</span>
-          </div>
-
-          <div class="detail-item">
-            <span class="detail-icon">🎓</span>
-            <span class="detail-label">Status:</span>
-            <span class="career-status-pill">${escapeHtml(carLabel)}</span>
           </div>
         </div>
 

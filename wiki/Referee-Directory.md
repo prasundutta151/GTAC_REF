@@ -81,22 +81,21 @@ Information on each referee card is structured using distinct typography:
 ┌────────────────────────────────────────────────────────────────────────┐
 │ [ACCENT BAR]                                                           │
 │                                                                        │
-│   [REF_0001]   Prof. Yashwant Gupta        [ 🟠 VERIFIED REFEREE ]     │
-│                ygupta@ncra.tifr.res.in     [ 🟢 Available for Review ] │
-│                                                                        │
-│   ✉️ Email: ygupta@ncra.tifr.res.in                                    │
+│   [REF_0001]   Yashwant Gupta              [ 🟠 VERIFIED REFEREE ]     │
+│                                            [ 🟢 Available for Review ] │
+│ ────────────────────────────────────────────────────────────────────── │
+│   ✉️ Email: ygupta@ncra.tifr.res.in   [ FACULTY MEMBER ]               │
 │   🏛️ Affiliation: National Centre for Radio Astrophysics (NCRA-TIFR)  │
-│   🎓 Status: FACULTY MEMBER                                            │
-│                                                                        │
-│   🏷️ Expertise: [ Pulsars, Transients ] [ Interferometry Techniques ]  │
+│ ────────────────────────────────────────────────────────────────────── │
+│   Expertise Domains: [ Pulsars, Transients ] [ Interferometry ]        │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **Referee Name**: Rendered in **`Space Grotesk`** (bold display serif/sans, `700` weight, `1.35rem`, dark slate `#0f172a`).
 2. **Unique ID**: Rendered in **`JetBrains Mono`** (high-tech monospace, `600` weight, padded capsule background).
 3. **Email Address**: Rendered in **`JetBrains Mono`** (monospace, clickable `mailto:` link in sky blue `#0284c7`).
-4. **Affiliation**: Rendered in **`Inter`** (`600` weight, dark slate `#1e293b`) with institutional building icon `🏛️`.
-5. **Career Status**: Rendered in **`Inter`** (`700` weight, uppercase tracked pill badge in violet `#5b21b6`).
+4. **Career Status Bubble**: Colored pill bubble beside Email (**`Inter`**, `700` uppercase tracking, e.g. `[ FACULTY MEMBER ]`, without any redundant "Status:" text).
+5. **Affiliation**: Placed directly below the email field, rendered in **`Inter`** (`600` weight, dark slate `#1e293b`) with institutional building icon `🏛️`.
 6. **Scientific Expertise**: Rendered as distinct rounded tag chips with borders (`#cbd5e1`) and scientific tag icon `🏷️`.
 
 ---
