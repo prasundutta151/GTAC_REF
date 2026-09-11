@@ -34,10 +34,15 @@ The following table summarizes all files and directories in this repository and 
 | `doc/database_guide.html` | File | Detailed documentation of ASCII taxonomies, CSV registries, and schemas. |
 | `doc/api_guide.html` | File | Comprehensive REST API endpoints and `util` CLI command reference. |
 | `doc/doc_style.css` | File | Responsive GTAC-themed stylesheet for documentation pages. |
+| `docs/` | Directory | Standalone GitHub Pages deployment bundle containing the live web form, static assets, and HTML documentation. |
+| `wiki/` | Directory | GitHub Wiki repository markdown suite (`Home.md`, `Form-Guide.md`, `Database-Architecture.md`, `REST-API-and-CLI.md`, `_Sidebar.md`, `_Footer.md`). |
 | `README.html` | Symlink | Root convenience link pointing to `doc/README.html`. |
 | `dev/doc` | Symlink | Convenience link pointing to `doc/` directory. |
 | `index.html` | Symlink | Root convenience link pointing to `dev/index.html`. |
-| `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--change-branch`, and `--release`. |
+| `style.css` | Symlink | Root convenience link pointing to `dev/style.css`. |
+| `app.js` | Symlink | Root convenience link pointing to `dev/app.js`. |
+| `db_data.js` | Symlink | Root convenience link pointing to `dev/db_data.js`. |
+| `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--sync-docs`, `--wiki-push`, `--change-branch`, and `--release`. |
 | `VERSION` | File | Plaintext file containing current release version in `ZZ.YY.XX` format. |
 | `AGENT_RULES.md` | File | Coding agent guidelines, prompt logging protocols, and multi-agent coordination standards for `GTAC_REF`. |
 | `README.md` | File | Project overview, directory layout, and developer onboarding instructions. |
@@ -62,6 +67,45 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 19:15:00 IST
+
+Prompt / Request
+- Make the git wiki working for this project such that anybody can see and interact with the form and the documentation once the link is shared.
+
+Changes Made
+- `docs/` (GitHub Pages Bundle):
+  - Created dedicated standalone directory `docs/` configured for GitHub Pages hosting (`https://prasundutta151.github.io/GTAC_REF/`).
+  - Copied `index.html`, `dev/style.css`, `dev/app.js`, `dev/db_data.js`, and `database/cycle.txt` into `docs/` to provide immediate static execution with zero build dependencies.
+  - Copied full multi-page HTML documentation (`README.html`, `form_guide.html`, `database_guide.html`, `api_guide.html`, `doc_style.css`) into `docs/doc/`.
+  - Added `docs/.nojekyll` to bypass Jekyll processing on GitHub Pages.
+- `wiki/` (GitHub Wiki Markdown Suite):
+  - Created standalone wiki repository suite matching GitHub Wiki format:
+    - `wiki/Home.md`: Master wiki landing page with direct links to the live interactive form, interactive HTML documentation, repository, feature matrix, and developer quick start.
+    - `wiki/Form-Guide.md`: Complete specification of submitter fields, Question 6 cycle logic, dark add-bar interaction, Gemini validation, and submission summary.
+    - `wiki/Database-Architecture.md`: Detailed breakdown of ASCII taxonomy files, CSV registries, ID allocation schemes, and offline exports.
+    - `wiki/REST-API-and-CLI.md`: Full documentation for REST API endpoints (`/api/database`, `/api/cycle`, `/api/referees/lookup`, `/api/gemini-validate`, `/api/submit`) and developer CLI tools.
+    - `wiki/_Sidebar.md`: Navigation sidebar with links to wiki pages and live web form.
+    - `wiki/_Footer.md`: Standard footer with institutional attribution.
+- Root Symlinks:
+  - Added root symlinks `style.css -> dev/style.css`, `app.js -> dev/app.js`, and `db_data.js -> dev/db_data.js` so `index.html` runs seamlessly when opened directly from the repo root.
+- `util`:
+  - Added `--sync-docs` command to automatically synchronize latest code, assets, and documentation into `docs/`.
+  - Added `--wiki-push [WIKI_URL]` command to package and push `wiki/` markdown pages directly to the GitHub Wiki git repository (`git@github.com:prasundutta151/GTAC_REF.wiki.git`).
+  - Bumped version to `01.00.10`.
+
+Verification
+- Executed `./util --sync-docs` and verified `docs/` is updated and complete.
+- Executed `./util --help` and verified `--sync-docs` and `--wiki-push` flags are recognized.
+- Executed `./util --status` and verified version `01.00.10` and git working tree status.
+- Verified all wiki markdown documents have valid GitHub wiki links and direct URLs to GitHub Pages.
+
+Notes
+- Live Web Form: `https://prasundutta151.github.io/GTAC_REF/`
+- Live HTML Documentation: `https://prasundutta151.github.io/GTAC_REF/doc/README.html`
+- GitHub Wiki URL: `https://github.com/prasundutta151/GTAC_REF/wiki`
 
 ---
 

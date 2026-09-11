@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTAC Referee System — System Overview & Documentation</title>
+  <link rel="stylesheet" href="doc_style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="doc-header">
+    <a href="README.html" class="doc-brand">
+      <span class="doc-brand-logo">📡</span>
+      <div>
+        <span class="doc-brand-title">GTAC Referee System</span>
+        <span class="doc-brand-subtitle">Giant Metrewave Radio Telescope (GMRT)</span>
+      </div>
+    </a>
+    <nav class="doc-nav">
+      <a href="README.html" class="doc-nav-link active">Overview</a>
+      <a href="form_guide.html" class="doc-nav-link">Form Guide</a>
+      <a href="database_guide.html" class="doc-nav-link">Database Guide</a>
+      <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
+      <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
+      <span class="version-badge">v01.00.08</span>
+    </nav>
+  </header>
+
+  <div class="doc-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-title">Getting Started</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#intro" class="sidebar-link active">Introduction</a></li>
+        <li class="sidebar-item"><a href="#architecture" class="sidebar-link">System Architecture</a></li>
+        <li class="sidebar-item"><a href="#quickstart" class="sidebar-link">Quick Start</a></li>
+      </ul>
+
+      <div class="sidebar-title">Detailed Documentation</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="form_guide.html" class="sidebar-link">📋 Form System Guide</a></li>
+        <li class="sidebar-item"><a href="database_guide.html" class="sidebar-link">🗄️ Database Architecture</a></li>
+        <li class="sidebar-item"><a href="api_guide.html" class="sidebar-link">⚡ REST API & CLI Reference</a></li>
+      </ul>
+
+      <div class="sidebar-title">Key Capabilities</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#gemini-val" class="sidebar-link">Gemini Auto-Validation</a></li>
+        <li class="sidebar-item"><a href="#title-strip" class="sidebar-link">Title Stripping</a></li>
+        <li class="sidebar-item"><a href="#half-initials" class="sidebar-link">Half-Initials Matching</a></li>
+        <li class="sidebar-item"><a href="#self-preference" class="sidebar-link">Self-Entry Preference</a></li>
+        <li class="sidebar-item"><a href="#dual-mode" class="sidebar-link">Dual-Mode Operation</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="doc-content">
+      
+      <section id="intro" class="doc-section">
+        <h1>GTAC Referee Registration & Suggestion System</h1>
+        <p class="doc-lead">
+          A dedicated, zero-dependency peer-review intake and referee registry built for the <strong>Giant Metrewave Radio Telescope Time Allocation Committee (GTAC)</strong>. The system facilitates seamless volunteer registration, peer reviewer recommendations, institutional verification, and real-time database indexing.
+        </p>
+
+        <div class="callout callout-info">
+          <strong>System Objective:</strong> Standardize the collection of referee recommendations, automatically cross-check existing reviewer records, validate academic email credentials using Gemini AI, and authoritatively index new experts into GTAC's registry.
+        </div>
+
+        <div class="card-grid">
+          <div class="feature-card">
+            <span class="feature-icon">📝</span>
+            <h3>Dynamic Web Form</h3>
+            <p>Interactive HTML5 interface supporting submitter profiling, dynamic "+ Others" taxonomy expansion, and sequential referee cards.</p>
+            <p style="margin-top: 12px;"><a href="form_guide.html" style="color: var(--primary); font-weight: 600;">Explore Form Guide &rarr;</a></p>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">🗄️</span>
+            <h3>ASCII & CSV Database</h3>
+            <p>Transparent, version-controllable plain-text database system pairing human-readable pipe-delimited taxonomies with structured CSV registries.</p>
+            <p style="margin-top: 12px;"><a href="database_guide.html" style="color: var(--primary); font-weight: 600;">Explore Database Guide &rarr;</a></p>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">🤖</span>
+            <h3>Gemini AI Validation</h3>
+            <p>Automatic real-time validation of names and emails by default, displaying "Validated email" badges while preserving 100% field editability.</p>
+            <p style="margin-top: 12px;"><a href="#gemini-val" style="color: var(--primary); font-weight: 600;">Learn More &rarr;</a></p>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">🛠️</span>
+            <h3>CLI & Dual-Mode</h3>
+            <p>Robust Python CLI (`util`) providing built-in HTTP server, automated semantic versioning, git management, and offline `file://` execution.</p>
+            <p style="margin-top: 12px;"><a href="api_guide.html" style="color: var(--primary); font-weight: 600;">Explore API & CLI &rarr;</a></p>
+          </div>
+        </div>
+      </section>
+
+      <section id="architecture" class="doc-section">
+        <h2>System Architecture</h2>
+        <p>The system is organized into modular layers with zero external binary or npm dependencies, running entirely on standard modern browsers and Python 3:</p>
+
+        <pre><code>┌────────────────────────────────────────────────────────────────────────┐
+│                        FRONTEND CLIENT (dev/)                          │
+│   • index.html       : Responsive UI with GTAC Theme & Modern Badges   │
+│   • style.css        : Flexbox/Grid CSS with Dark Add-Bar & Dialogs    │
+│   • app.js           : State, Auto-Validation, Autocomplete & Sync    │
+│   • db_data.js       : Pre-bundled Dataset for Offline/file:// Support │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ HTTP REST API or file://
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                      BACKEND SERVER (dev/server.py)                    │
+│   • GET  /api/database         : Delivers Affiliations, Exp, Referees │
+│   • GET  /api/cycle            : Reads cycle dynamically from cycle.txt│
+│   • GET  /api/referees/lookup  : Half-initials & Substring matching    │
+│   • POST /api/gemini-validate  : Validates academic credentials & email│
+│   • POST /api/submit           : Allocates IDs & Appends to disk files │
+└──────────────────────────────────┬─────────────────────────────────────┘
+                                   │ Direct File I/O
+                                   ▼
+┌────────────────────────────────────────────────────────────────────────┐
+│                       DATABASE STORE (database/)                       │
+│   • cycle.txt                  : Current GTAC Proposal Cycle (e.g. 52) │
+│   • affiliations.txt           : Pipe-delimited (AFF_XXX | Institution)│
+│   • expertise.txt              : Pipe-delimited (EXP_XX  | Domain)     │
+│   • career_status.txt          : Pipe-delimited (CAR_XX  | Stage)      │
+│   • Referee_database_A.csv     : Primary Registry of all GTAC Referees │
+│   • form_submissions.csv       : Immutable Audit Log of Submissions    │
+└────────────────────────────────────────────────────────────────────────┘</code></pre>
+      </section>
+
+      <section id="quickstart" class="doc-section">
+        <h2>Quick Start</h2>
+        <p>You can run and interact with the application using either of two supported operating modes:</p>
+
+        <div class="workflow-step">
+          <div class="step-circle">1</div>
+          <div class="step-body">
+            <h4>Live Server Mode (Recommended for Full Database Disk I/O)</h4>
+            <p>Start the lightweight local server using the built-in management CLI:</p>
+            <pre><code>./util --serve 8080</code></pre>
+            <p>Open <a href="http://localhost:8080" target="_blank"><code>http://localhost:8080</code></a> in your browser. All form submissions, new affiliations, and custom expertise entries are immediately written to disk files.</p>
+          </div>
+        </div>
+
+        <div class="workflow-step">
+          <div class="step-circle">2</div>
+          <div class="step-body">
+            <h4>Standalone Offline Mode (Direct Browser Double-Click)</h4>
+            <p>Double-click <a href="../index.html"><code>index.html</code></a> directly in your operating system's file manager (opening under the <code>file://</code> protocol).</p>
+            <p>The application automatically detects the offline environment and instantly mounts the complete embedded database from <code>dev/db_data.js</code> with local session persistence.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="gemini-val" class="doc-section">
+        <h2>Gemini AI Auto-Validation & "Validated Email"</h2>
+        <p>
+          To maintain high data quality, the system automatically checks referee credentials against Gemini AI by default as soon as the user enters a Name or Email.
+        </p>
+        <ul>
+          <li><strong>Syntax & Domain Verification:</strong> Verifies standard RFC email formatting and verifies whether the domain belongs to recognized astrophysics research centres (e.g., NCRA-TIFR, IUCAA, RRI, IISc, TIFR, IIA, PRL, ARIES, etc.) or academic TLDs (<code>.res.in</code>, <code>.ac.in</code>, <code>.edu</code>, <code>.mpg.de</code>).</li>
+          <li><strong>"Validated email" Notice:</strong> Displays a distinct green pill <span class="badge badge-valid">✓ Validated email</span> directly underneath the email field with confirmation details.</li>
+          <li><strong>Always Editable:</strong> Unlike strict locking systems, the form <strong>never disables or locks inputs</strong> into a read-only state. Reviewer names, emails, and affiliations remain completely editable at all times.</li>
+        </ul>
+      </section>
+
+      <section id="title-strip" class="doc-section">
+        <h2>Title Stripping Protocol</h2>
+        <p>
+          Honorific prefixes (<code>Dr</code>, <code>Dr.</code>, <code>Prof</code>, <code>Prof.</code>, <code>Professor</code>, <code>Mr</code>, <code>Ms</code>, <code>Mrs</code>, <code>Shri</code>, <code>Smt</code>) are automatically removed prior to database insertion.
+        </p>
+        <p>
+          This ensures uniform sorting, prevents duplicate database entries, and allows consistent alphabetical indexing (e.g., <code>Prof. Yashwant Gupta</code> &rarr; <code>Yashwant Gupta</code>).
+        </p>
+      </section>
+
+      <section id="half-initials" class="doc-section">
+        <h2>Half-Initials Matching</h2>
+        <p>
+          Researchers are often cited using initials instead of full first names. The GTAC matching engine performs fuzzy half-initials resolution:
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Input Name Formats</th>
+                <th>Target Database Record</th>
+                <th>Resolution Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Y. Gupta</code>, <code>Y Gupta</code>, <code>Gupta, Y.</code></td>
+                <td><code>Yashwant Gupta</code> (REF_0001)</td>
+                <td><span class="badge badge-valid">Matched</span></td>
+              </tr>
+              <tr>
+                <td><code>J. Chengalur</code>, <code>Prof. J. Chengalur</code></td>
+                <td><code>Jayaram Chengalur</code> (REF_0002)</td>
+                <td><span class="badge badge-valid">Matched</span></td>
+              </tr>
+              <tr>
+                <td><code>P. Dutta</code>, <code>Prasun Dutta</code></td>
+                <td><code>Prasun Dutta</code> (REF_0011)</td>
+                <td><span class="badge badge-valid">Matched</span></td>
+              </tr>
+              <tr>
+                <td><code>A. Gupta</code></td>
+                <td><code>Yashwant Gupta</code> (REF_0001)</td>
+                <td><span class="badge badge-suggested">Mismatch (Safe)</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="self-preference" class="doc-section">
+        <h2>Submitter Self-Entry Preference</h2>
+        <p>
+          If the submitter volunteers to review proposals (Question 6 = Yes), Block 1 is designated as their own profile. Submitter entries in Section 1 maintain <strong>absolute authority</strong> and will never be overwritten by database lookup results. When saving, their current profile updates their database record authoritatively.
+        </p>
+      </section>
+
+      <section id="dual-mode" class="doc-section">
+        <h2>Dual-Mode Compatibility Matrix</h2>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Live Server Mode (<code>http://</code>)</th>
+                <th>Standalone File Mode (<code>file://</code>)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Database Source</td>
+                <td>Live disk ASCII & CSV files</td>
+                <td>Embedded <code>db_data.js</code></td>
+              </tr>
+              <tr>
+                <td>Persistence</td>
+                <td>Permanent disk write</td>
+                <td>Browser <code>localStorage</code></td>
+              </tr>
+              <tr>
+                <td>Gemini Check</td>
+                <td>Live API or Backend Heuristics</td>
+                <td>Client Heuristics</td>
+              </tr>
+              <tr>
+                <td>CORS / Load Failed</td>
+                <td>Zero errors (Local HTTP)</td>
+                <td>Zero errors (Inline bundle)</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>GTAC Referee System Documentation • Giant Metrewave Radio Telescope (NCRA-TIFR)</p>
+    <p style="margin-top: 4px;"><a href="form_guide.html">Form Guide</a> | <a href="database_guide.html">Database Architecture</a> | <a href="api_guide.html">REST API & CLI Reference</a></p>
+  </footer>
+
+</body>
+</html>

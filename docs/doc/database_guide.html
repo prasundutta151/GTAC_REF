@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTAC Referee System — Database Architecture</title>
+  <link rel="stylesheet" href="doc_style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="doc-header">
+    <a href="README.html" class="doc-brand">
+      <span class="doc-brand-logo">📡</span>
+      <div>
+        <span class="doc-brand-title">GTAC Referee System</span>
+        <span class="doc-brand-subtitle">Database Architecture</span>
+      </div>
+    </a>
+    <nav class="doc-nav">
+      <a href="README.html" class="doc-nav-link">Overview</a>
+      <a href="form_guide.html" class="doc-nav-link">Form Guide</a>
+      <a href="database_guide.html" class="doc-nav-link active">Database Guide</a>
+      <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
+      <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
+      <span class="version-badge">v01.00.08</span>
+    </nav>
+  </header>
+
+  <div class="doc-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-title">Database Architecture</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#overview" class="sidebar-link active">Overview & Manifest</a></li>
+        <li class="sidebar-item"><a href="#cycle-txt" class="sidebar-link">cycle.txt Configuration</a></li>
+        <li class="sidebar-item"><a href="#ascii-files" class="sidebar-link">ASCII Pipe Taxonomies</a></li>
+        <li class="sidebar-item"><a href="#referee-db" class="sidebar-link">Referee_database_A.csv</a></li>
+        <li class="sidebar-item"><a href="#submissions-csv" class="sidebar-link">form_submissions.csv</a></li>
+        <li class="sidebar-item"><a href="#db-data-js" class="sidebar-link">db_data.js Offline Bundle</a></li>
+      </ul>
+
+      <div class="sidebar-title">Other Manuals</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="README.html" class="sidebar-link">🏠 Overview</a></li>
+        <li class="sidebar-item"><a href="form_guide.html" class="sidebar-link">📋 Form System Guide</a></li>
+        <li class="sidebar-item"><a href="api_guide.html" class="sidebar-link">⚡ REST API & CLI Reference</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="doc-content">
+      
+      <section id="overview" class="doc-section">
+        <h1>Database Architecture & Data Layer</h1>
+        <p class="doc-lead">
+          The database is designed around simplicity, human readability, and version control integrity. It uses structured ASCII pipe-delimited files for taxonomic lists and standard comma-separated values (CSV) for relational registries.
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>File Path</th>
+                <th>Format</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>database/cycle.txt</code></td>
+                <td>Plaintext</td>
+                <td>Current GTAC proposal cycle number (e.g. <code>52</code>).</td>
+              </tr>
+              <tr>
+                <td><code>database/affiliations.txt</code></td>
+                <td>Pipe ASCII</td>
+                <td>Observatory and university directory (<code>AFF_XXX | Name</code>).</td>
+              </tr>
+              <tr>
+                <td><code>database/expertise.txt</code></td>
+                <td>Pipe ASCII</td>
+                <td>Radio astronomy and physics research domains (<code>EXP_XX | Topic</code>).</td>
+              </tr>
+              <tr>
+                <td><code>database/career_status.txt</code></td>
+                <td>Pipe ASCII</td>
+                <td>Academic career stages (<code>CAR_XX | Stage</code>).</td>
+              </tr>
+              <tr>
+                <td><code>database/Referee_database_A.csv</code></td>
+                <td>CSV</td>
+                <td>Primary registry of verified and suggested referees.</td>
+              </tr>
+              <tr>
+                <td><code>database/form_submissions.csv</code></td>
+                <td>CSV</td>
+                <td>Immutable audit log recording every registration and recommendation.</td>
+              </tr>
+              <tr>
+                <td><code>dev/db_data.js</code></td>
+                <td>JavaScript</td>
+                <td>Auto-generated client export bundle for standalone offline execution.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="cycle-txt" class="doc-section">
+        <h2>Cycle Configuration (cycle.txt)</h2>
+        <p>
+          Stores the active GTAC proposal cycle.
+        </p>
+        <pre><code>52</code></pre>
+        <h3>Characteristics:</h3>
+        <ul>
+          <li><strong>Instant Propagation:</strong> Updating the integer in <code>database/cycle.txt</code> immediately updates the Question 6 label in the web form and the backend REST API (<code>/api/cycle</code>) without requiring server restarts.</li>
+          <li><strong>Convenience Symlinks:</strong> Symlinked to <code>cycle.txt</code> (project root) and <code>dev/cycle.txt</code> for transparent access across all directory contexts.</li>
+        </ul>
+      </section>
+
+      <section id="ascii-files" class="doc-section">
+        <h2>ASCII Pipe-Delimited Taxonomies</h2>
+        <p>
+          All controlled vocabularies are stored as human-readable pipe-delimited ASCII files with the standard format:
+        </p>
+        <pre><code>ID | Description</code></pre>
+
+        <h3>1. Affiliations Directory (<code>affiliations.txt</code>)</h3>
+        <p>
+          Contains 30+ observatories, institutions, and universities. Uses sequential identifier prefix <code>AFF_</code>.
+        </p>
+        <pre><code>AFF_001 | National Centre for Radio Astrophysics (NCRA-TIFR), Pune
+AFF_002 | Inter-University Centre for Astronomy and Astrophysics (IUCAA), Pune
+AFF_003 | Raman Research Institute (RRI), Bengaluru
+AFF_004 | Indian Institute of Science (IISc), Bengaluru
+AFF_005 | Tata Institute of Fundamental Research (TIFR), Mumbai
+AFF_006 | Indian Institute of Astrophysics (IIA), Bengaluru
+AFF_007 | Physical Research Laboratory (PRL), Ahmedabad
+...</code></pre>
+        <div class="callout callout-info">
+          <strong>Dynamic Expansion:</strong> When a user enters a new institution via "+ Others", the system automatically generates the next sequential identifier (e.g. <code>AFF_031</code>) and appends the institution to this file.
+        </div>
+
+        <h3>2. Expertise Taxonomy (<code>expertise.txt</code>)</h3>
+        <p>
+          Covers 18 specialized radio astronomy and astrophysics domains. Uses identifier prefix <code>EXP_</code>.
+        </p>
+        <pre><code>EXP_01 | Pulsars, Transients and Fast Radio Bursts
+EXP_02 | Cosmology, Epoch of Reionization and 21cm
+EXP_03 | Neutral Hydrogen (HI) in Galaxies
+EXP_04 | Active Galactic Nuclei, Jets and Quasars
+EXP_05 | Galaxy Clusters, Relics, Halos and Cosmic Rays
+EXP_06 | Star Formation, Interstellar Medium and Molecular Clouds
+EXP_07 | Magnetic Fields and Polarimetry
+...</code></pre>
+
+        <h3>3. Career Status Categories (<code>career_status.txt</code>)</h3>
+        <p>
+          Categorizes researcher seniority levels using prefix <code>CAR_</code>.
+        </p>
+        <pre><code>CAR_01 | Undergraduate Student
+CAR_02 | PhD Student / Graduate Student
+CAR_03 | Post-Doctoral Fellow
+CAR_04 | Faculty Member (Assistant / Associate / Full Professor)
+CAR_05 | Scientist / Staff Astronomer
+CAR_06 | Engineer / Technical Staff
+CAR_07 | Others</code></pre>
+      </section>
+
+      <section id="referee-db" class="doc-section">
+        <h2>Primary Referee Registry (Referee_database_A.csv)</h2>
+        <p>
+          The authoritative registry containing all prospective and verified peer reviewers for GTAC proposals.
+        </p>
+
+        <h3>CSV Schema Definition:</h3>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Column Header</th>
+                <th>Format / Type</th>
+                <th>Example Value</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>unique_id</code></td>
+                <td><code>REF_XXXX</code></td>
+                <td><code>REF_0001</code></td>
+                <td>Unique sequential identifier assigned to each referee.</td>
+              </tr>
+              <tr>
+                <td><code>referee_name</code></td>
+                <td>String (Cleaned)</td>
+                <td><code>Yashwant Gupta</code></td>
+                <td>Full name with all honorific titles (Dr, Prof) stripped.</td>
+              </tr>
+              <tr>
+                <td><code>email</code></td>
+                <td>Email String</td>
+                <td><code>ygupta@ncra.tifr.res.in</code></td>
+                <td>Primary academic contact email.</td>
+              </tr>
+              <tr>
+                <td><code>affiliation</code></td>
+                <td><code>AFF_XXX</code> or String</td>
+                <td><code>AFF_001</code></td>
+                <td>Institution foreign key or custom affiliation label.</td>
+              </tr>
+              <tr>
+                <td><code>expertise</code></td>
+                <td>Semicolon List</td>
+                <td><code>EXP_01;EXP_14</code></td>
+                <td>Delimited list of matching expertise domain IDs.</td>
+              </tr>
+              <tr>
+                <td><code>career_status</code></td>
+                <td><code>CAR_XX</code></td>
+                <td><code>CAR_04</code></td>
+                <td>Seniority classification foreign key.</td>
+              </tr>
+              <tr>
+                <td><code>referee_status</code></td>
+                <td><code>verified</code> | <code>suggested</code></td>
+                <td><code>verified</code></td>
+                <td>Editorial verification status within GTAC.</td>
+              </tr>
+              <tr>
+                <td><code>available</code></td>
+                <td><code>true</code> | <code>false</code></td>
+                <td><code>true</code></td>
+                <td>Willingness / availability flag for review assignments.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>De-duplication & Update Resolution:</h3>
+        <ol>
+          <li><strong>Exact Email Match:</strong> If incoming referee email matches an existing record, the record is updated rather than duplicated.</li>
+          <li><strong>Exact Name Match:</strong> Title-stripped name comparison.</li>
+          <li><strong>Half-Initials Match:</strong> Fuzzy match on surname + initials (e.g. <code>Y. Gupta</code> matches <code>Yashwant Gupta</code>).</li>
+          <li><strong>Self-Entry Priority:</strong> When a submitter submits their own profile, their entered data updates their record authoritatively.</li>
+        </ol>
+      </section>
+
+      <section id="submissions-csv" class="doc-section">
+        <h2>Submissions Audit Log (form_submissions.csv)</h2>
+        <p>
+          Maintains an immutable record of every completed form submission.
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Column Header</th>
+                <th>Type</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>submission_id</code></td>
+                <td><code>SUB_<timestamp></code></td>
+                <td>Unique submission identifier generated at submission time.</td>
+              </tr>
+              <tr>
+                <td><code>timestamp</code></td>
+                <td>ISO-8601 UTC</td>
+                <td>Full timestamp of submission (e.g. <code>2026-09-11T12:48:08Z</code>).</td>
+              </tr>
+              <tr>
+                <td><code>user_name</code></td>
+                <td>String</td>
+                <td>Cleaned submitter name.</td>
+              </tr>
+              <tr>
+                <td><code>user_email</code></td>
+                <td>String</td>
+                <td>Submitter email address.</td>
+              </tr>
+              <tr>
+                <td><code>user_affiliation</code></td>
+                <td><code>AFF_XXX</code></td>
+                <td>Submitter affiliation ID.</td>
+              </tr>
+              <tr>
+                <td><code>user_career_status</code></td>
+                <td><code>CAR_XX</code></td>
+                <td>Submitter career status ID.</td>
+              </tr>
+              <tr>
+                <td><code>user_expertise</code></td>
+                <td>Semicolon List</td>
+                <td>Submitter expertise domain IDs.</td>
+              </tr>
+              <tr>
+                <td><code>review_this_cycle</code></td>
+                <td><code>yes</code> | <code>no</code></td>
+                <td>Willingness for the current GTAC cycle.</td>
+              </tr>
+              <tr>
+                <td><code>review_future_cycles</code></td>
+                <td><code>yes</code> | <code>no</code></td>
+                <td>Willingness for future GTAC cycles.</td>
+              </tr>
+              <tr>
+                <td><code>suggested_referees</code></td>
+                <td>JSON Array</td>
+                <td>List of <code>REF_XXXX</code> identifiers submitted in this session.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="db-data-js" class="doc-section">
+        <h2>Offline Export Bundle (db_data.js)</h2>
+        <p>
+          To allow the form to run completely standalone when opened via <code>file://</code> without local web server requirements, <code>dev/server.py</code> automatically exports the disk database to <code>dev/db_data.js</code>:
+        </p>
+        <pre><code>// Auto-generated database export for standalone file:// support
+window.GTAC_DATABASE = {
+  "cycle": "52",
+  "affiliations": [ ... ],
+  "expertise": [ ... ],
+  "career_status": [ ... ],
+  "referees": [ ... ]
+};</code></pre>
+        <p>
+          This eliminates browser CORS restrictions and avoids "Load failed" errors.
+        </p>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>GTAC Referee System Documentation • Giant Metrewave Radio Telescope (NCRA-TIFR)</p>
+    <p style="margin-top: 4px;"><a href="README.html">Overview</a> | <a href="form_guide.html">Form Guide</a> | <a href="api_guide.html">REST API & CLI Reference</a></p>
+  </footer>
+
+</body>
+</html>

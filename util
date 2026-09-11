@@ -14,6 +14,7 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 from typing import List, Tuple
 
 PROJECT_NAME = "GTAC_REF"
@@ -264,6 +265,96 @@ def cmd_git_push(branch: str | None, message: str | None) -> None:
         print(f"           Ensure remote repository exists and SSH keys are configured.")
 
 
+def cmd_sync_docs() -> None:
+    """Synchronize source code, static assets, and documentation into docs/ for GitHub Pages."""
+    docs_dir = PROJECT_ROOT / "docs"
+    docs_dir.mkdir(parents=True, exist_ok=True)
+
+    # 1. Sync web form files
+    shutil.copy2(PROJECT_ROOT / "index.html", docs_dir / "index.html")
+    shutil.copy2(PROJECT_ROOT / "dev" / "style.css", docs_dir / "style.css")
+    shutil.copy2(PROJECT_ROOT / "dev" / "app.js", docs_dir / "app.js")
+    shutil.copy2(PROJECT_ROOT / "dev" / "db_data.js", docs_dir / "db_data.js")
+    shutil.copy2(PROJECT_ROOT / "database" / "cycle.txt", docs_dir / "cycle.txt")
+
+    # 2. Touch .nojekyll so GitHub Pages does not run Jekyll transformations
+    (docs_dir / ".nojekyll").touch()
+
+    # 3. Sync doc/ into docs/doc/
+    docs_doc_dir = docs_dir / "doc"
+    docs_doc_dir.mkdir(parents=True, exist_ok=True)
+    src_doc_dir = PROJECT_ROOT / "doc"
+    if src_doc_dir.exists():
+        for doc_file in src_doc_dir.iterdir():
+            if doc_file.is_file() and not doc_file.name.startswith("."):
+                shutil.copy2(doc_file, docs_doc_dir / doc_file.name)
+
+    print(f"[SYNC-DOCS] Successfully synchronized GitHub Pages bundle in {docs_dir.name}/:")
+    print("            - docs/index.html (Interactive web form)")
+    print("            - docs/style.css, docs/app.js, docs/db_data.js, docs/cycle.txt")
+    print("            - docs/doc/* (README.html, form_guide.html, database_guide.html, api_guide.html)")
+    print("            - docs/.nojekyll (Bypasses Jekyll processing)")
+    print("            Live URL: https://prasundutta151.github.io/GTAC_REF/")
+
+
+def cmd_wiki_push(wiki_url: str | None = None) -> None:
+    """Push markdown documentation from wiki/ to the GitHub Wiki repository."""
+    wiki_dir = PROJECT_ROOT / "wiki"
+    if not wiki_dir.exists():
+        print("[WIKI-PUSH] Error: wiki/ directory does not exist.")
+        return
+
+    # Check wiki remote URL
+    if not wiki_url:
+        rem_res = run_cmd(["git", "remote", "get-url", "origin"], capture=True)
+        if rem_res.returncode == 0 and rem_res.stdout.strip():
+            origin = rem_res.stdout.strip()
+            if origin.endswith(".git"):
+                wiki_url = origin[:-4] + ".wiki.git"
+            else:
+                wiki_url = origin + ".wiki.git"
+        else:
+            wiki_url = f"git@github.com:prasundutta151/{PROJECT_NAME}.wiki.git"
+
+    print(f"[WIKI-PUSH] Preparing to push {wiki_dir.name}/ to GitHub Wiki at {wiki_url}...")
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmppath = Path(tmpdir)
+        # Copy markdown files from wiki/
+        copied_files = []
+        for item in wiki_dir.iterdir():
+            if item.name.startswith("."):
+                continue
+            if item.is_file():
+                shutil.copy2(item, tmppath / item.name)
+                copied_files.append(item.name)
+            elif item.is_dir():
+                shutil.copytree(item, tmppath / item.name)
+                copied_files.append(f"{item.name}/")
+
+        # Initialize git repo in staging directory
+        run_cmd(["git", "init", "-b", "master"], cwd=tmppath)
+        run_cmd(["git", "config", "user.name", "GTAC Admin"], cwd=tmppath)
+        run_cmd(["git", "config", "user.email", "gtac@ncra.tifr.res.in"], cwd=tmppath)
+        run_cmd(["git", "add", "-A"], cwd=tmppath)
+        ver = read_version()
+        run_cmd(["git", "commit", "-m", f"docs(wiki): update GTAC Referee System wiki pages (v{ver})"], cwd=tmppath)
+
+        # Push to remote wiki repository
+        print(f"[WIKI-PUSH] Pushing {len(copied_files)} wiki pages to master branch...")
+        push_res = run_cmd(["git", "push", "--force", wiki_url, "master"], cwd=tmppath, capture=True)
+        if push_res.returncode == 0:
+            print("[WIKI-PUSH] Successfully pushed wiki pages to GitHub Wiki!")
+            print("            Wiki URL: https://github.com/prasundutta151/GTAC_REF/wiki")
+        else:
+            print(f"[WIKI-PUSH] Warning: Push to wiki remote returned code {push_res.returncode}.")
+            if push_res.stderr:
+                print(f"            {push_res.stderr.strip()}")
+            print("            Tips:")
+            print("            1. Ensure GitHub Wiki is enabled in your repository: Settings -> Features -> Wikis.")
+            print("            2. If you haven't created the first wiki page on GitHub yet, open the Wiki tab in GitHub and click 'Create the first page'.")
+            print("            3. Check that your SSH keys or personal access tokens are authenticated with GitHub.")
+
+
 def cmd_status() -> None:
     """Display project status."""
     print(f"Project: {PROJECT_NAME}")
@@ -290,6 +381,8 @@ def parse_args() -> argparse.Namespace:
   ./util --change-branch           # List all branches
   ./util --git-push                # Stage, commit, and push to remote
   ./util --git-push -m "My update" # Stage, commit with message, and push
+  ./util --sync-docs               # Sync docs/ bundle for GitHub Pages
+  ./util --wiki-push               # Push wiki/ markdown pages to GitHub Wiki
   ./util --status                  # Show repo and version status
 """
     )
@@ -329,6 +422,18 @@ def parse_args() -> argparse.Namespace:
         "-m", "--message",
         metavar="MSG",
         help="Commit message for --git-push"
+    )
+    parser.add_argument(
+        "--sync-docs",
+        action="store_true",
+        help="Synchronize form assets and HTML docs into docs/ for GitHub Pages"
+    )
+    parser.add_argument(
+        "--wiki-push",
+        nargs="?",
+        const="",
+        metavar="WIKI_URL",
+        help="Push markdown documentation in wiki/ to GitHub Wiki repository"
     )
     parser.add_argument(
         "--serve",
@@ -372,6 +477,13 @@ def main() -> int:
             target_branch = args.subcommand[1] if len(args.subcommand) > 1 else None
             cmd_change_branch(target_branch)
             return 0
+        elif cmd0 == "sync-docs":
+            cmd_sync_docs()
+            return 0
+        elif cmd0 in ("wiki-push", "wiki"):
+            target_wiki = args.subcommand[1] if len(args.subcommand) > 1 else None
+            cmd_wiki_push(wiki_url=target_wiki)
+            return 0
 
     if args.show_version:
         print(read_version())
@@ -379,6 +491,14 @@ def main() -> int:
 
     if args.version is not None:
         cmd_version(args.version)
+        action_taken = True
+
+    if args.sync_docs:
+        cmd_sync_docs()
+        action_taken = True
+
+    if args.wiki_push is not None:
+        cmd_wiki_push(wiki_url=args.wiki_push if args.wiki_push != "" else None)
         action_taken = True
 
     if args.serve is not None:
