@@ -28,7 +28,24 @@ Notes
 
 ---
 
-## 2. Code Style & Naming Conventions
+## 2. Continuous HTML Documentation Maintenance (`doc/` & `docs/`)
+
+Whenever **anything** is done (new features, UI/styling changes, database schema modifications, REST API updates, CLI enhancements, or bug fixes):
+1. **Immediately Update HTML Documentation (`doc/`)**:
+   - The dedicated multi-page HTML documentation in `doc/` must always be kept synchronized:
+     - **Form UI, Validation, Field Behavior**: Update `doc/form_guide.html`.
+     - **Database Schemas, Taxonomies, Registries**: Update `doc/database_guide.html`.
+     - **REST API Endpoints, Server Architecture, CLI Flags**: Update `doc/api_guide.html`.
+     - **System Overview, Architecture, Navigation**: Update `doc/README.html`.
+   - No task or implementation is considered complete unless the corresponding HTML documentation is updated.
+2. **Synchronize GitHub Pages Deployment Bundle (`docs/`)**:
+   - Always run `./util --sync-docs` so that the live public GitHub Pages site in `docs/` (`docs/index.html`, `docs/doc/*`, etc.) immediately reflects the latest changes.
+3. **Keep GitHub Wiki Updated (`wiki/`)**:
+   - Ensure the markdown pages in `wiki/` (`Home.md`, `Form-Guide.md`, `Database-Architecture.md`, `REST-API-and-CLI.md`) reflect corresponding changes before pushing with `./util --wiki-push`.
+
+---
+
+## 3. Code Style & Naming Conventions
 
 All new code and modifications must strictly conform to existing codebase patterns:
 
@@ -60,7 +77,7 @@ All new code and modifications must strictly conform to existing codebase patter
 
 ---
 
-## 3. Multi-Agent Coordination & Safety (.agent_lock Protocol)
+## 4. Multi-Agent Coordination & Safety (.agent_lock Protocol)
 
 To prevent simultaneous execution, race conditions, and broken Git states when working with multiple AI agents:
 
@@ -87,7 +104,7 @@ To prevent simultaneous execution, race conditions, and broken Git states when w
 
 ---
 
-## 4. Development Workspace Boundaries
+## 5. Development Workspace Boundaries
 
 To ensure seamless developer workflow while maintaining strict workspace security:
 

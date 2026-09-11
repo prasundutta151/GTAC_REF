@@ -23,7 +23,7 @@
       <a href="database_guide.html" class="doc-nav-link">Database Guide</a>
       <a href="api_guide.html" class="doc-nav-link active">API & CLI</a>
       <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
-      <span class="version-badge">v01.00.08</span>
+      <span class="version-badge">v01.00.10</span>
     </nav>
   </header>
 
@@ -207,6 +207,14 @@
               <tr>
                 <td><code>./util --git-push [-m MSG]</code></td>
                 <td>Stages all project files, commits with structured message, and pushes to remote.</td>
+              </tr>
+              <tr>
+                <td><code>./util --sync-docs</code></td>
+                <td>Synchronizes code, assets, and guides into <code>docs/</code> for GitHub Pages.</td>
+              </tr>
+              <tr>
+                <td><code>./util --wiki-push [WIKI_URL]</code></td>
+                <td>Pushes markdown documentation in <code>wiki/</code> to the GitHub Wiki repository.</td>
               </tr>
               <tr>
                 <td><code>./util --change-branch [BR]</code></td>

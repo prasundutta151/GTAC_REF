@@ -70,6 +70,33 @@ Notes
 
 ---
 
+## 2026-09-11 18:43:00 IST
+
+Prompt / Request
+- In rules for the agents (`AGENT_RULES.md`), add a mandatory rule that the HTML documentation (`doc/`) must be updated whenever anything is done in the project.
+
+Changes Made
+- `AGENT_RULES.md`:
+  - Added Section 2: "Continuous HTML Documentation Maintenance (`doc/` & `docs/`)", making it a required protocol for all AI coding assistants to immediately update relevant HTML documentation files (`doc/form_guide.html`, `doc/database_guide.html`, `doc/api_guide.html`, `doc/README.html`) whenever any task, UI tweak, schema modification, or CLI enhancement is performed.
+  - Required running `./util --sync-docs` to keep the live GitHub Pages bundle (`docs/`) synchronized.
+  - Required updating GitHub Wiki markdown files (`wiki/`) to reflect structural changes.
+  - Renumbered subsequent sections (Code Style -> Section 3, Multi-Agent Coordination -> Section 4, Workspace Boundaries -> Section 5).
+- `doc/`:
+  - Updated `doc/api_guide.html` CLI table with `./util --sync-docs` and `./util --wiki-push`.
+  - Updated release version badges across `doc/README.html`, `doc/form_guide.html`, `doc/database_guide.html`, and `doc/api_guide.html` to `v01.00.10`.
+- `docs/`:
+  - Re-synchronized `docs/` using `./util --sync-docs`.
+
+Verification
+- Verified `AGENT_RULES.md` markdown structure and section numbering.
+- Ran `./util --sync-docs` to confirm clean asset synchronization.
+- Verified working tree with `./util --status`.
+
+Notes
+- Future AI assistants must strictly check `doc/` and update HTML files alongside any code edits.
+
+---
+
 ## 2026-09-11 19:15:00 IST
 
 Prompt / Request
