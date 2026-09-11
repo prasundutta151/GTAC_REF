@@ -1,0 +1,24 @@
+# macOS
+.DS_Store
+._*
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pytest_cache/
+.mypy_cache/
+
+# Release archives
+versions/*.tar
+versions/*.tar.gz
+*.tar
+*.tar.gz
+
+# Temporary / editor files
+*.swp
+*.swo
+*~
+*.tmp
+.agent_lock.tmp

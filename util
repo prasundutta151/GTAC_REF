@@ -1,0 +1,399 @@
+#!/usr/bin/env python3
+"""GTAC_REF Utility Script.
+
+Provides CLI functionality for versioning, git branch management,
+repository synchronization, and release packaging.
+"""
+from __future__ import annotations
+
+import argparse
+import os
+from pathlib import Path
+import re
+import shutil
+import subprocess
+import sys
+import tarfile
+from typing import List, Tuple
+
+PROJECT_NAME = "GTAC_REF"
+VERSION_FILE_NAME = "VERSION"
+DEFAULT_BRANCH = "creation"
+
+
+def find_project_root() -> Path:
+    """Find the root directory of the GTAC_REF repository."""
+    candidate = Path(__file__).resolve().parent
+    # If script is a symlink in dev/, resolve parent of target or traverse up
+    while candidate != candidate.parent:
+        if (candidate / VERSION_FILE_NAME).exists() or (candidate / ".git").exists():
+            return candidate
+        candidate = candidate.parent
+    # Fallback to script's directory
+    return Path(__file__).resolve().parent
+
+
+PROJECT_ROOT = find_project_root()
+VERSION_PATH = PROJECT_ROOT / VERSION_FILE_NAME
+
+
+def read_version() -> str:
+    """Read current version from the VERSION file."""
+    if not VERSION_PATH.exists():
+        return "01.00.00"
+    return VERSION_PATH.read_text(encoding="utf-8").strip()
+
+
+def write_version(ver: str) -> None:
+    """Write version string to VERSION file atomically."""
+    tmp_file = VERSION_PATH.with_suffix(".tmp")
+    tmp_file.write_text(ver + "\n", encoding="utf-8")
+    tmp_file.replace(VERSION_PATH)
+
+
+def parse_version_parts(ver: str) -> Tuple[List[int], List[int], str]:
+    """Parse ZZ.YY.XX version format preserving digit width."""
+    # Matches groups like 01.00.00 or 1.2.3
+    parts = ver.split(".")
+    nums: List[int] = []
+    widths: List[int] = []
+    for p in parts:
+        clean = re.sub(r"[^\d]", "", p)
+        if clean:
+            nums.append(int(clean))
+            widths.append(len(p))
+        else:
+            nums.append(0)
+            widths.append(2)
+    # Ensure 3 components [ZZ, YY, XX]
+    while len(nums) < 3:
+        nums.append(0)
+        widths.append(2)
+    return nums[:3], widths[:3], ver
+
+
+def format_version(nums: List[int], widths: List[int]) -> str:
+    """Format version numbers using original digit widths."""
+    formatted = []
+    for num, width in zip(nums, widths):
+        w = max(width, 2)
+        formatted.append(f"{num:0{w}d}")
+    return ".".join(formatted)
+
+
+def bump_version_component(action: str, current_ver: str) -> str:
+    """Bump ZZ, YY, or XX component of the version."""
+    nums, widths, _ = parse_version_parts(current_ver)
+    action_lower = action.lower()
+
+    if action_lower in ("xx", "minor", "patch", "bump"):
+        # The user refers to XX in ZZ.YY.XX as minor/patch bump
+        nums[2] += 1
+    elif action_lower in ("yy", "middle"):
+        nums[1] += 1
+        nums[2] = 0
+    elif action_lower in ("zz", "major"):
+        nums[0] += 1
+        nums[1] = 0
+        nums[2] = 0
+    else:
+        # Check if action is a direct version specification like 01.02.00
+        if re.match(r"^\d+(\.\d+)+$", action):
+            return action
+        else:
+            # Default bump XX
+            nums[2] += 1
+
+    return format_version(nums, widths)
+
+
+def run_cmd(cmd: List[str], cwd: Path = PROJECT_ROOT, capture: bool = False) -> subprocess.CompletedProcess:
+    """Execute a shell command in project directory."""
+    return subprocess.run(
+        cmd,
+        cwd=cwd,
+        text=True,
+        capture_output=capture,
+        check=False
+    )
+
+
+def cmd_version(arg_val: str | None) -> None:
+    """Handle --version flag logic."""
+    current = read_version()
+    if arg_val is None or arg_val == "" or arg_val == "__BUMP__":
+        new_ver = bump_version_component("bump", current)
+        write_version(new_ver)
+        print(f"[VERSION] Updated version: {current} -> {new_ver}")
+    else:
+        arg_str = str(arg_val).strip()
+        if arg_str.lower() in ("show", "get"):
+            print(f"[VERSION] Current version: {current}")
+            return
+        elif arg_str.lower() in ("xx", "patch", "minor", "bump", "yy", "zz", "major"):
+            new_ver = bump_version_component(arg_str, current)
+            write_version(new_ver)
+            print(f"[VERSION] Updated version ({arg_str}): {current} -> {new_ver}")
+        else:
+            # Explicit version number provided
+            write_version(arg_str)
+            print(f"[VERSION] Version set: {current} -> {arg_str}")
+
+
+def get_current_branch() -> str:
+    """Return currently checked out git branch."""
+    res = run_cmd(["git", "branch", "--show-current"], capture=True)
+    if res.returncode == 0 and res.stdout.strip():
+        return res.stdout.strip()
+    return DEFAULT_BRANCH
+
+
+def cmd_change_branch(branch_name: str | None) -> None:
+    """List or switch git branches."""
+    if not branch_name:
+        print("[GIT] Available local branches:")
+        res = run_cmd(["git", "branch", "-a"], capture=True)
+        if res.returncode == 0:
+            for line in res.stdout.splitlines():
+                print(f"  {line}")
+        else:
+            print("  (No git repository or branches found)")
+        return
+
+    curr = get_current_branch()
+    if curr == branch_name:
+        print(f"[GIT] Already on branch '{branch_name}'.")
+        return
+
+    # Check if branch exists
+    res = run_cmd(["git", "show-ref", "--verify", f"refs/heads/{branch_name}"], capture=True)
+    if res.returncode == 0:
+        checkout_res = run_cmd(["git", "checkout", branch_name])
+        if checkout_res.returncode == 0:
+            print(f"[GIT] Switched to branch '{branch_name}'.")
+        else:
+            print(f"[GIT] Failed to switch to branch '{branch_name}'.")
+    else:
+        # Create and switch
+        print(f"[GIT] Branch '{branch_name}' does not exist locally. Creating...")
+        checkout_res = run_cmd(["git", "checkout", "-b", branch_name])
+        if checkout_res.returncode == 0:
+            print(f"[GIT] Created and checked out new branch '{branch_name}'.")
+        else:
+            print(f"[GIT] Failed to create branch '{branch_name}'.")
+
+
+def cmd_release() -> None:
+    """Create a release tarball excluding development and transient files."""
+    version = read_version()
+    versions_dir = PROJECT_ROOT / "versions"
+    versions_dir.mkdir(parents=True, exist_ok=True)
+
+    archive_name = f"{PROJECT_NAME}-{version}.tar.gz"
+    archive_path = versions_dir / archive_name
+
+    excluded_rel_paths = {
+        ".git",
+        "dev",
+        "versions",
+        "__pycache__",
+        ".pytest_cache",
+        ".mypy_cache",
+        ".DS_Store",
+        ".agent_lock.tmp",
+    }
+
+    print(f"[RELEASE] Packaging {PROJECT_NAME} version {version}...")
+    with tarfile.open(archive_path, "w:gz") as tar:
+        for item in sorted(PROJECT_ROOT.iterdir()):
+            if item.name in excluded_rel_paths:
+                continue
+            if item.name.endswith(".tmp") or item.name.endswith(".tar.gz") or item.name.endswith(".tar"):
+                continue
+
+            def tar_filter(tarinfo: tarfile.TarInfo) -> tarfile.TarInfo | None:
+                # Exclude any nested unwanted items
+                basename = Path(tarinfo.name).name
+                if basename in {".DS_Store", "__pycache__", ".git"}:
+                    return None
+                return tarinfo
+
+            tar.add(item, arcname=f"{PROJECT_NAME}-{version}/{item.name}", filter=tar_filter)
+
+    size_kb = archive_path.stat().st_size / 1024.0
+    print(f"[RELEASE] Successfully created release tarball:")
+    print(f"          Path: {archive_path}")
+    print(f"          Size: {size_kb:.2f} KB")
+
+
+def cmd_git_push(branch: str | None, message: str | None) -> None:
+    """Stage, commit, and push changes to remote repository."""
+    active_branch = branch or get_current_branch()
+    print(f"[GIT-PUSH] Staging all project changes...")
+    run_cmd(["git", "add", "-A"])
+
+    # Check status
+    st_res = run_cmd(["git", "status", "--porcelain"], capture=True)
+    if not st_res.stdout.strip():
+        print("[GIT-PUSH] Working directory clean. No new changes to commit.")
+    else:
+        commit_msg = message or f"Update {PROJECT_NAME} v{read_version()} on {active_branch}"
+        print(f"[GIT-PUSH] Committing with message: '{commit_msg}'")
+        c_res = run_cmd(["git", "commit", "-m", commit_msg])
+        if c_res.returncode != 0:
+            print("[GIT-PUSH] Commit failed.")
+            return
+
+    # Check remote origin
+    rem_res = run_cmd(["git", "remote", "get-url", "origin"], capture=True)
+    if rem_res.returncode != 0:
+        print(f"[GIT-PUSH] Warning: No git remote 'origin' configured.")
+        print(f"           Local commit succeeded on branch '{active_branch}'.")
+        print(f"           To configure remote, run:")
+        print(f"             git remote add origin git@github.com:prasundutta151/{PROJECT_NAME}.git")
+        return
+
+    remote_url = rem_res.stdout.strip()
+    print(f"[GIT-PUSH] Pushing branch '{active_branch}' to remote ({remote_url})...")
+    push_res = run_cmd(["git", "push", "-u", "origin", active_branch])
+    if push_res.returncode == 0:
+        print(f"[GIT-PUSH] Successfully pushed to origin/{active_branch}.")
+    else:
+        print(f"[GIT-PUSH] Warning: Push to remote returned code {push_res.returncode}.")
+        print(f"           Your local commits on branch '{active_branch}' are safe.")
+        print(f"           Ensure remote repository exists and SSH keys are configured.")
+
+
+def cmd_status() -> None:
+    """Display project status."""
+    print(f"Project: {PROJECT_NAME}")
+    print(f"Root:    {PROJECT_ROOT}")
+    print(f"Version: {read_version()}")
+    print(f"Branch:  {get_current_branch()}")
+    print("\n--- Git Status ---")
+    run_cmd(["git", "status", "-s"])
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(
+        prog="util",
+        description=f"{PROJECT_NAME} developer and deployment utility",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""Examples:
+  ./util --version                 # Bump minor/patch (XX in ZZ.YY.XX)
+  ./util --version 01.01.00        # Set explicit version
+  ./util --version major           # Bump ZZ in ZZ.YY.XX
+  ./util --show-version            # Show current version
+  ./util --release                 # Build release tarball under versions/
+  ./util --change-branch creation  # Switch or create branch 'creation'
+  ./util --change-branch           # List all branches
+  ./util --git-push                # Stage, commit, and push to remote
+  ./util --git-push -m "My update" # Stage, commit with message, and push
+  ./util --status                  # Show repo and version status
+"""
+    )
+
+    parser.add_argument(
+        "--version",
+        nargs="?",
+        const="__BUMP__",
+        metavar="VERSION",
+        help="Increment minor/patch (XX) in ZZ.YY.XX, or specify explicit version / component (major/minor/patch)"
+    )
+    parser.add_argument(
+        "--show-version",
+        "-v",
+        action="store_true",
+        help="Print current version"
+    )
+    parser.add_argument(
+        "--release",
+        action="store_true",
+        help=f"Package {PROJECT_NAME} distribution tarball into versions/"
+    )
+    parser.add_argument(
+        "--change-branch",
+        "--branch",
+        nargs="?",
+        const="",
+        metavar="BRANCH",
+        help="Switch to or create BRANCH; if no name provided, lists local branches"
+    )
+    parser.add_argument(
+        "--git-push",
+        action="store_true",
+        help="Stage all changes, commit, and push to origin"
+    )
+    parser.add_argument(
+        "-m", "--message",
+        metavar="MSG",
+        help="Commit message for --git-push"
+    )
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show project version and git status"
+    )
+
+    # Support git push subcommand style: util git push [BRANCH]
+    parser.add_argument(
+        "subcommand",
+        nargs="*",
+        help=argparse.SUPPRESS
+    )
+
+    return parser.parse_args()
+
+
+def main() -> int:
+    """Main entrypoint."""
+    args = parse_args()
+
+    action_taken = False
+
+    # Handle subcommands like: util git push
+    if args.subcommand:
+        cmd0 = args.subcommand[0].lower()
+        if cmd0 == "git" and len(args.subcommand) > 1 and args.subcommand[1].lower() == "push":
+            target_branch = args.subcommand[2] if len(args.subcommand) > 2 else None
+            cmd_git_push(branch=target_branch, message=args.message)
+            return 0
+        elif cmd0 in ("branch", "branches"):
+            target_branch = args.subcommand[1] if len(args.subcommand) > 1 else None
+            cmd_change_branch(target_branch)
+            return 0
+
+    if args.show_version:
+        print(read_version())
+        action_taken = True
+
+    if args.version is not None:
+        cmd_version(args.version)
+        action_taken = True
+
+    if args.release:
+        cmd_release()
+        action_taken = True
+
+    if args.change_branch is not None:
+        cmd_change_branch(args.change_branch if args.change_branch != "" else None)
+        action_taken = True
+
+    if args.git_push:
+        cmd_git_push(branch=None, message=args.message)
+        action_taken = True
+
+    if args.status:
+        cmd_status()
+        action_taken = True
+
+    if not action_taken:
+        print(f"{PROJECT_NAME} Utility (v{read_version()})")
+        print("Run with --help to view available commands.")
+
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
