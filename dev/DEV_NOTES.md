@@ -77,6 +77,63 @@ Notes
 
 ---
 
+## 2026-09-11 19:25:00 IST
+
+Prompt / Request
+- Add a Review History table in the white space under the status badges on referee cards:
+  - 3 columns: `Suggested`, `Accepted`, `Submitted`.
+  - 4 rows: `Overall`, `Cycle A to B` (where last D is cycle in cycle.txt, C is previous no, A to B are last 5 cycles up to C), `Cycle C`, `Cycle D`.
+  - Color code cells (Yellow, Orange, Red) for different engagement cases (e.g. red for few or no acceptance or submission or suggestion).
+  - Handle cases where this review history is not available.
+- Store referee cycle review metrics as a list in the referee database (`Referee_database_A.csv`).
+- Make operational screenshots available in the sidebar always for the wiki and embed a screenshot of the newly updated referee card directly in the sidebar.
+- Bump version to `01.00.14`, update HTML documentation, and commit/push all changes to GitHub and the Wiki.
+
+Changes Made
+- `database/` & Data Schema:
+  - Added `cycle_stats` column to `Referee_database_A.csv` containing semicolon-delimited historical cycle review records (`cycle:suggested/accepted/submitted`).
+  - Populated realistic review histories across verified, suggested, low-acceptance/warning (red cell), and unavailable/unrecorded cases.
+  - Updated `dev/server.py` `save_referee_entry()` to retain `cycle_stats` in CSV fieldnames.
+  - Updated `dev/db_data.js` pre-bundled dataset to include `cycle_stats` for standalone/offline support.
+- `dev/` Frontend Implementation:
+  - `dev/lookup.js`:
+    - Added `parseRefereeCycleStats()` supporting semicolon tokens (`52:3/2/2`) and JSON formats.
+    - Added `getStatCellClass()` dynamic classifier mapping metric ratios to `.cell-orange` (high), `.cell-yellow` (moderate), and `.cell-red` (zero/low acceptance or 0 submissions).
+    - Added `buildReviewHistoryTableHtml()` generating the 3-column, 4-row table (`Overall`, `Cycle A to B`, `Cycle C`, `Cycle D`) or neutral "Data Not Available" table.
+    - Updated `renderRefereeCards()`: restructured middle card row into a 2-column flex layout placing the Review History table in the open white space on the right directly under the status badges.
+    - Enhanced `demo === 'card'` to cleanly frame the referee card for automated screenshots.
+  - `dev/lookup.css`:
+    - Added responsive layout rules `.card-middle-row`, `.card-details-left`, `.card-stats-right`, `.referee-stats-box`, `.referee-stats-table`.
+    - Styled color-coded status cells: `.cell-orange`, `.cell-yellow`, `.cell-red`, and `.cell-na`.
+- Operational Screenshots (`assets/screenshots/`, `wiki/images/`, `docs/images/`, `doc/images/`):
+  - Captured `screenshot_07_referee_card.png`: Close-up of the referee card with identity, contact, affiliation, and the Review History table.
+  - Re-captured `screenshot_05_referee_directory_overview.png` and `screenshot_06_referee_directory_filtered.png` displaying the new table layout.
+- GitHub Wiki Suite (`wiki/`):
+  - `wiki/_Sidebar.md`: Added **Operational Screenshots** navigation section with direct links to all 7 visual walkthrough points and embedded `![GTAC Referee Card Preview](images/screenshot_07_referee_card.png)` directly in the sidebar so it is visible on every wiki page.
+  - `wiki/Referee-Directory.md`: Documented the Review History table, ASCII diagram, metrics, and embedded Figure 3.
+  - `wiki/Home.md`: Added item 7 with Figure 7 screenshot and description.
+  - `wiki/Database-Architecture.md`: Documented `cycle_stats` in the database schema table.
+- HTML Documentation (`doc/` & `docs/doc/`):
+  - `doc/README.html`: Added Figure 7 screenshot and bumped version badge to `v01.00.14`.
+  - `doc/database_guide.html`: Documented `cycle_stats` column in database schema and bumped version to `v01.00.14`.
+  - `doc/form_guide.html`, `doc/api_guide.html`: Bumped version badges to `v01.00.14`.
+- Version & Deployment:
+  - Bumped version to `01.00.14` in `VERSION`.
+  - Executed `./util --sync-docs` to update GitHub Pages bundle in `docs/`.
+  - Executed `./util --wiki-push` publishing 14 files (8 markdown pages + 7 screenshots) to `git@github.com:prasundutta151/GTAC_REF.wiki.git`.
+
+Verification
+- Started local server and verified `/api/database` returns `cycle_stats`.
+- Inspected headless Chrome screenshots confirming the table renders in the white space on the right under the status badges.
+- Verified cell color coding: green/orange for active cycles, yellow for moderate, red for 0 accepted/submitted, and dashed neutral for unrecorded referees.
+- Verified `./util --wiki-push` cleanly updated `GTAC_REF.wiki.git`.
+- Verified `./util --sync-docs` cleanly refreshed `docs/`.
+
+Notes
+- The referee card layout remains fully responsive, stacking cleanly on screens $< 768px$.
+
+---
+
 ## 2026-09-11 19:15:00 IST
 
 Prompt / Request

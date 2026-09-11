@@ -94,6 +94,14 @@ Reviewers can be queried instantly across Name, Email, Affiliation, Career Statu
 
 ---
 
+### 7. Referee Card with Review History Table
+Each referee card displays a compact Review History table in the white space directly below the status badges, tracking Suggested, Accepted, and Submitted metrics across Overall, Cycle A–B, Cycle C, and active Cycle D with color-coded performance cells.
+
+![Referee Card with Review History Table](images/screenshot_07_referee_card.png)
+*Figure 7: Referee card layout featuring identity typography, contact metadata, and the review history table with color-coded cells.*
+
+---
+
 ## ⚡ Quick Start for Developers
 
 ```bash

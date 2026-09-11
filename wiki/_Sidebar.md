@@ -8,6 +8,21 @@
 
 ---
 
+### 📸 Operational Screenshots
+
+* **[[Home#1-submitter-intake--profile-configuration|📋 1. Form Intake]]**
+* **[[Home#2-gemini-ai-validation--review-volunteering|🤖 2. Validation & Volunteering]]**
+* **[[Home#3-dynamic-referee-cards--sequential-add-bar|🃏 3. Referee Cards]]**
+* **[[Home#4-ordered-post-submission-summary|✅ 4. Submission Modal]]**
+* **[[Home#5-referee-directory--live-lookup|🔍 5. Referee Directory]]**
+* **[[Home#6-real-time-multi-criteria-filtering|⚡ 6. Instant Filtering]]**
+* **[[Home#7-referee-card-with-review-history-table|📊 7. Referee Card & Stats]]**
+
+#### 🃏 Live Referee Card Preview:
+![GTAC Referee Card Preview](images/screenshot_07_referee_card.png)
+
+---
+
 ### 🌐 Live Links
 
 * [🚀 **Launch Live Web Form**](https://prasundutta151.github.io/GTAC_REF/)
@@ -16,4 +31,4 @@
 * [💻 **GitHub Repository**](https://github.com/prasundutta151/GTAC_REF)
 
 ---
-*Release Version: `v01.00.13`*
+*Release Version: `v01.00.14`*

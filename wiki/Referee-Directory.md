@@ -84,17 +84,24 @@ Referees appear sequentially in horizontal rectangular row blocks. The color sty
 Information on each referee card is structured using distinct typography:
 
 ```
-┌────────────────────────────────────────────────────────────────────────┐
-│ [ACCENT BAR]                                                           │
-│                                                                        │
-│   [REF_0001]   Yashwant Gupta              [ 🟠 VERIFIED REFEREE ]     │
-│                                            [ 🟢 Available for Review ] │
-│ ────────────────────────────────────────────────────────────────────── │
-│   ✉️ Email: ygupta@ncra.tifr.res.in   [ FACULTY MEMBER ]               │
-│   🏛️ Affiliation: National Centre for Radio Astrophysics (NCRA-TIFR)  │
-│ ────────────────────────────────────────────────────────────────────── │
-│   Expertise Domains: [ Pulsars, Transients ] [ Interferometry ]        │
-└────────────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│ [ACCENT BAR]                                                                           │
+│                                                                                        │
+│   [REF_0001]   Yashwant Gupta                               [ 🟢 Available for Review ]│
+│                                                             [ 🟠 VERIFIED REFEREE ]    │
+│ ─────────────────────────────────────────────────────────┬──────────────────────────── │
+│   ✉️ Email: ygupta@ncra.tifr.res.in   [ FACULTY MEMBER ] │ 📊 REVIEW HISTORY           │
+│   🏛️ Affiliation: National Centre for Radio Astrophysics │ ┌────────────┬───┬───┬───┐ │
+│                   (NCRA-TIFR), Pune                      │ │ Period     │Sug│Acc│Sub│ │
+│                                                          │ ├────────────┼───┼───┼───┤ │
+│                                                          │ │ Overall    │33 │30 │30 │ │
+│                                                          │ │ Cycle 46–50│19 │17 │17 │ │
+│                                                          │ │ Cycle 51   │ 4 │ 4 │ 4 │ │
+│                                                          │ │ Cycle 52   │ 3 │ 2 │ 2 │ │
+│                                                          │ └────────────┴───┴───┴───┘ │
+│ ─────────────────────────────────────────────────────────┴──────────────────────────── │
+│   Expertise Domains: [🏷️ Pulsars, Transients ] [🏷️ Radio Instrumentation ]             │
+└────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 1. **Referee Name**: Rendered in **`Space Grotesk`** (bold display serif/sans, `700` weight, `1.35rem`, dark slate `#0f172a`).
@@ -102,7 +109,35 @@ Information on each referee card is structured using distinct typography:
 3. **Email Address**: Rendered in **`JetBrains Mono`** (monospace, clickable `mailto:` link in sky blue `#0284c7`).
 4. **Career Status Bubble**: Colored pill bubble beside Email (**`Inter`**, `700` uppercase tracking, e.g. `[ FACULTY MEMBER ]`, without any redundant "Status:" text).
 5. **Affiliation**: Placed directly below the email field, rendered in **`Inter`** (`600` weight, dark slate `#1e293b`) with institutional building icon `🏛️`.
-6. **Scientific Expertise**: Rendered as distinct rounded tag chips with borders (`#cbd5e1`) and scientific tag icon `🏷️`.
+6. **Review History Table**: Positioned in the open white space on the right, directly underneath the status badges.
+7. **Scientific Expertise**: Rendered as distinct rounded tag chips with borders (`#cbd5e1`) and scientific tag icon `🏷️`.
+
+---
+
+## 📊 Referee Review History Table (White Space Layout)
+
+To provide GTAC committee members with actionable referee track records, each card displays a compact **Review History** table in the open white space on the right:
+
+![Referee Card with Review History Table](images/screenshot_07_referee_card.png)
+*Figure 3: Focused view of an active referee card showing identity, contact, institutional metadata, and the review history table with color-coded status cells.*
+
+### Table Structure:
+* **Columns (3 Metrics)**:
+  * **Suggested**: Number of observing proposals where this referee was recommended or invited.
+  * **Accepted**: Number of review invitations accepted by the referee.
+  * **Submitted**: Number of final completed peer review evaluation reports submitted.
+* **Rows (4 Temporal Horizons)**:
+  * **Overall**: Cumulative total across all recorded proposal cycles.
+  * **Cycle A to B** (e.g. *Cycle 46–50*): Aggregate of the 5 cycles up to Cycle C.
+  * **Cycle C** (e.g. *Cycle 51*): Review metrics for the immediately preceding cycle.
+  * **Cycle D** (e.g. *Cycle 52*): Review metrics for the active cycle specified in `database/cycle.txt`.
+
+### Color-Coded Performance Cells:
+The table cells are dynamically styled to surface referee responsiveness at a glance:
+* 🟠 **Orange Cell (`cell-orange`)**: Strong engagement (high suggestion volume $\ge 3$, high acceptance rate $\ge 75\%$, or $100\%$ completed report submissions).
+* 🟡 **Yellow Cell (`cell-yellow`)**: Moderate engagement (1–2 suggestions, $40\%–74\%$ acceptance rate, or partial report submissions).
+* 🔴 **Red Cell (`cell-red`)**: Warning indicator (0 suggestions, low acceptance $< 40\%$, or 0 review reports submitted despite accepting review invitations).
+* ⚪ **Neutral Cell (`cell-na`)**: Displayed with dashed border and `—` when no historical review tracking data is available for a referee.
 
 ---
 

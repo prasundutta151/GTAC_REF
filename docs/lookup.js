@@ -448,6 +448,9 @@
         return `<span class="expertise-chip">🏷️ ${escapeHtml(label)}</span>`;
       }).join('');
 
+      // Build Review History Table (3 cols: suggested, accepted, submitted; rows: overall, Cycle A-B, Cycle C, Cycle D)
+      const statsTableHtml = buildReviewHistoryTableHtml(ref.cycle_stats, database.cycle);
+
       const card = document.createElement('div');
       card.className = `referee-row-card ${cardClass}`;
       card.innerHTML = `
@@ -463,21 +466,28 @@
           </div>
         </div>
 
-        <!-- Middle Details: Email with Career Status Bubble, and Affiliation below -->
-        <div class="card-details-list">
-          <div class="detail-row-email">
-            <div class="detail-item">
-              <span class="detail-icon">✉️</span>
-              <span class="detail-label">Email:</span>
-              <a href="mailto:${escapeHtml(ref.email)}" class="referee-email-link">${escapeHtml(ref.email)}</a>
+        <!-- Middle Section: Details on Left and Stats Table on Right (in white space under badges) -->
+        <div class="card-middle-row">
+          <div class="card-details-left">
+            <div class="detail-row-email">
+              <div class="detail-item">
+                <span class="detail-icon">✉️</span>
+                <span class="detail-label">Email:</span>
+                <a href="mailto:${escapeHtml(ref.email)}" class="referee-email-link">${escapeHtml(ref.email)}</a>
+              </div>
+              <span class="career-status-pill">${escapeHtml(carLabel)}</span>
             </div>
-            <span class="career-status-pill">${escapeHtml(carLabel)}</span>
+
+            <div class="detail-item detail-row-affiliation">
+              <span class="detail-icon">🏛️</span>
+              <span class="detail-label">Affiliation:</span>
+              <span class="affiliation-value">${escapeHtml(affLabel)}</span>
+            </div>
           </div>
 
-          <div class="detail-item detail-row-affiliation">
-            <span class="detail-icon">🏛️</span>
-            <span class="detail-label">Affiliation:</span>
-            <span class="affiliation-value">${escapeHtml(affLabel)}</span>
+          <!-- Review History Table in white space under badges -->
+          <div class="card-stats-right">
+            ${statsTableHtml}
           </div>
         </div>
 
@@ -492,6 +502,222 @@
 
       elRefereesList.appendChild(card);
     });
+  }
+
+  /**
+   * Parse cycle stats string from referee record
+   * Supports: "52:3/2/2;51:4/4/4;..." or "52:3:2:2;..." or JSON
+   */
+  function parseRefereeCycleStats(raw) {
+    if (!raw || typeof raw !== 'string' || !raw.trim()) {
+      return null;
+    }
+    const map = new Map();
+    const trimmed = raw.trim();
+
+    if (trimmed.startsWith('{')) {
+      try {
+        const obj = JSON.parse(trimmed);
+        for (const [k, v] of Object.entries(obj)) {
+          const cyc = parseInt(k, 10);
+          if (!isNaN(cyc) && v) {
+            map.set(cyc, {
+              suggested: Number(v.suggested ?? v[0] ?? 0),
+              accepted: Number(v.accepted ?? v[1] ?? 0),
+              submitted: Number(v.submitted ?? v[2] ?? 0)
+            });
+          }
+        }
+        return map.size > 0 ? map : null;
+      } catch (e) {}
+    }
+
+    const tokens = trimmed.split(';');
+    for (const tok of tokens) {
+      const t = tok.trim();
+      if (!t) continue;
+      const m = t.match(/^(\d+)\s*[:=]\s*(\d+)[/:](\d+)[/:](\d+)$/);
+      if (m) {
+        const cyc = parseInt(m[1], 10);
+        map.set(cyc, {
+          suggested: parseInt(m[2], 10),
+          accepted: parseInt(m[3], 10),
+          submitted: parseInt(m[4], 10)
+        });
+      }
+    }
+    return map.size > 0 ? map : null;
+  }
+
+  /**
+   * Determine cell color class: cell-red, cell-yellow, cell-orange, cell-na
+   * Cases: few or no acceptance or submission or suggestion -> red
+   */
+  function getStatCellClass(colType, val, rowStats) {
+    if (val === null || val === undefined || isNaN(val)) {
+      return 'cell-na';
+    }
+
+    const suggested = rowStats ? (rowStats.suggested || 0) : 0;
+    const accepted = rowStats ? (rowStats.accepted || 0) : 0;
+
+    if (colType === 'suggested') {
+      if (val === 0) return 'cell-red';
+      if (val >= 3) return 'cell-orange';
+      return 'cell-yellow'; // 1 or 2
+    }
+
+    if (colType === 'accepted') {
+      if (val === 0) return 'cell-red';
+      if (suggested > 0) {
+        const ratio = val / suggested;
+        if (ratio >= 0.75) return 'cell-orange';
+        if (ratio >= 0.40) return 'cell-yellow';
+        return 'cell-red';
+      }
+      return val > 0 ? 'cell-yellow' : 'cell-red';
+    }
+
+    if (colType === 'submitted') {
+      if (val === 0) return 'cell-red';
+      if (accepted > 0) {
+        const ratio = val / accepted;
+        if (ratio >= 1.0) return 'cell-orange';
+        if (ratio >= 0.50) return 'cell-yellow';
+        return 'cell-red';
+      }
+      return val > 0 ? 'cell-yellow' : 'cell-red';
+    }
+
+    return 'cell-na';
+  }
+
+  /**
+   * Build the Review History Table HTML (3 columns: suggested, accepted, submitted; 4 rows: Overall, Cycle A to B, Cycle C, Cycle D)
+   */
+  function buildReviewHistoryTableHtml(rawStats, activeCycle) {
+    const D = parseInt(activeCycle, 10) || 52;
+    const C = D - 1; // e.g. 51
+    const B = C - 1; // e.g. 50
+    const A = B - 4; // e.g. 46 (5 cycles up to C: 46, 47, 48, 49, 50)
+
+    const statsMap = parseRefereeCycleStats(rawStats);
+
+    if (!statsMap) {
+      return `
+        <div class="referee-stats-box">
+          <div class="stats-box-header">
+            <span class="stats-box-title">📊 Review History</span>
+            <span class="stats-badge-na">Data Not Available</span>
+          </div>
+          <table class="referee-stats-table">
+            <thead>
+              <tr>
+                <th class="col-period">Period</th>
+                <th class="col-stat">Suggested</th>
+                <th class="col-stat">Accepted</th>
+                <th class="col-stat">Submitted</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-period-label">Overall</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+              </tr>
+              <tr>
+                <td class="row-period-label">Cycle ${A}–${B}</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+              </tr>
+              <tr>
+                <td class="row-period-label">Cycle ${C}</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+              </tr>
+              <tr>
+                <td class="row-period-label">Cycle ${D}</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+                <td class="cell-na">—</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    // 1. Overall sum across all recorded cycles
+    const overall = { suggested: 0, accepted: 0, submitted: 0 };
+    for (const data of statsMap.values()) {
+      overall.suggested += data.suggested;
+      overall.accepted += data.accepted;
+      overall.submitted += data.submitted;
+    }
+
+    // 2. Cycle A to B sum (5 cycles up to C)
+    const sumAB = { suggested: 0, accepted: 0, submitted: 0 };
+    for (let cyc = A; cyc <= B; cyc++) {
+      const data = statsMap.get(cyc);
+      if (data) {
+        sumAB.suggested += data.suggested;
+        sumAB.accepted += data.accepted;
+        sumAB.submitted += data.submitted;
+      }
+    }
+
+    // 3. Cycle C (previous cycle)
+    const dataC = statsMap.get(C) || { suggested: 0, accepted: 0, submitted: 0 };
+
+    // 4. Cycle D (current cycle from cycle.txt)
+    const dataD = statsMap.get(D) || { suggested: 0, accepted: 0, submitted: 0 };
+
+    return `
+      <div class="referee-stats-box">
+        <div class="stats-box-header">
+          <span class="stats-box-title">📊 Review History</span>
+        </div>
+        <table class="referee-stats-table">
+          <thead>
+            <tr>
+              <th class="col-period">Period</th>
+              <th class="col-stat" title="Proposals where referee was suggested">Suggested</th>
+              <th class="col-stat" title="Review invitations accepted by referee">Accepted</th>
+              <th class="col-stat" title="Completed review reports submitted">Submitted</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="row-period-label">Overall</td>
+              <td class="${getStatCellClass('suggested', overall.suggested, overall)}">${overall.suggested}</td>
+              <td class="${getStatCellClass('accepted', overall.accepted, overall)}">${overall.accepted}</td>
+              <td class="${getStatCellClass('submitted', overall.submitted, overall)}">${overall.submitted}</td>
+            </tr>
+            <tr>
+              <td class="row-period-label">Cycle ${A}–${B}</td>
+              <td class="${getStatCellClass('suggested', sumAB.suggested, sumAB)}">${sumAB.suggested}</td>
+              <td class="${getStatCellClass('accepted', sumAB.accepted, sumAB)}">${sumAB.accepted}</td>
+              <td class="${getStatCellClass('submitted', sumAB.submitted, sumAB)}">${sumAB.submitted}</td>
+            </tr>
+            <tr>
+              <td class="row-period-label">Cycle ${C}</td>
+              <td class="${getStatCellClass('suggested', dataC.suggested, dataC)}">${dataC.suggested}</td>
+              <td class="${getStatCellClass('accepted', dataC.accepted, dataC)}">${dataC.accepted}</td>
+              <td class="${getStatCellClass('submitted', dataC.submitted, dataC)}">${dataC.submitted}</td>
+            </tr>
+            <tr>
+              <td class="row-period-label">Cycle ${D}</td>
+              <td class="${getStatCellClass('suggested', dataD.suggested, dataD)}">${dataD.suggested}</td>
+              <td class="${getStatCellClass('accepted', dataD.accepted, dataD)}">${dataD.accepted}</td>
+              <td class="${getStatCellClass('submitted', dataD.submitted, dataD)}">${dataD.submitted}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    `;
   }
 
   /**
@@ -531,6 +757,26 @@
         renderSelectedExpertiseTags();
         applyFilters();
       }, 400);
+    } else if (demo === 'card') {
+      setTimeout(() => {
+        if (elFilterName) {
+          elFilterName.value = 'Gupta';
+          activeFilters.name = 'Gupta';
+        }
+        applyFilters();
+        const topNav = document.querySelector('.top-nav');
+        const appHeader = document.querySelector('.app-header');
+        const filterCard = document.querySelector('.filter-card');
+        const count = document.querySelector('.results-summary-bar');
+        if (topNav) topNav.style.display = 'none';
+        if (appHeader) appHeader.style.display = 'none';
+        if (filterCard) filterCard.style.display = 'none';
+        if (count) count.style.display = 'none';
+        const appContainer = document.querySelector('.app-container');
+        if (appContainer) appContainer.style.maxWidth = '1100px';
+        document.body.style.padding = '24px';
+        document.body.style.background = '#f8fafc';
+      }, 300);
     }
   }
 

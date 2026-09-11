@@ -260,7 +260,7 @@ def save_referee_entry(entry: Dict[str, Any], is_self: bool = False) -> str:
 
     fieldnames = [
         "unique_id", "referee_name", "email", "affiliation",
-        "expertise", "career_status", "referee_status", "available"
+        "expertise", "career_status", "referee_status", "available", "cycle_stats"
     ]
     with open(REFEREE_DB_FILE, mode="w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)

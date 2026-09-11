@@ -88,6 +88,7 @@ Authoritative table of all verified and suggested referees:
 | `career_status` | String | Career status ID | `CAR_04` |
 | `referee_status` | Enum | `verified` or `suggested` | `verified` |
 | `available` | Boolean | `true` or `false` | `true` |
+| `cycle_stats` | Semicolon List | Historical review performance (`cycle:suggested/accepted/submitted`) | `52:3/2/2;51:4/4/4` |
 
 ### Title Stripping Protocol:
 All honorific prefixes (`Dr`, `Dr.`, `Prof`, `Prof.`, `Professor`, `Mr`, `Ms`, `Mrs`, `Shri`, `Smt`) are stripped prior to writing to this file.
