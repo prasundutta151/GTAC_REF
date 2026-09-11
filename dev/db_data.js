@@ -326,6 +326,16 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_04",
       "referee_status": "suggested",
       "available": "true"
+    },
+    {
+      "unique_id": "REF_0011",
+      "referee_name": "Prasun Dutta",
+      "email": "pd@aa",
+      "affiliation": "AFF_002",
+      "expertise": "EXP_02;EXP_07",
+      "career_status": "CAR_06",
+      "referee_status": "suggested",
+      "available": "true"
     }
   ]
 };

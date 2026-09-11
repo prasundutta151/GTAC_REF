@@ -55,6 +55,44 @@ Notes
 
 ---
 
+## 2026-09-11 18:25:00 IST
+
+Prompt / Request
+- Transform the "Add Referee Suggestion" interaction into a full-length dark background bar.
+- Ensure it always comes after the ongoing referee blocks (either own entry or subsequent referee suggestions).
+- Sequential behavior: First click adds own entry (auto-populated with submitter profile); subsequent clicks add others entry (blank cards for peer reviewer suggestions).
+
+Changes Made
+- `dev/index.html`:
+  - Removed small secondary button from Section 2 header.
+  - Added `.add-referee-bar-container` with full-length dark background bar button `#btn-add-referee` directly below `#referee-list`.
+  - Added `#referee-empty-hint` inside `#referee-list` to gracefully guide users when no blocks are currently added.
+  - Updated initial button label to `Add Referee Suggestion (Own Entry)`.
+- `dev/style.css`:
+  - Styled `.btn-add-referee-bar` with full width (`100%`), deep dark gradient background (`linear-gradient(135deg, #0f172a 0%, #1e293b 100%)`), circular icon with rotate hover animation, and interactive elevation states.
+  - Styled `.referee-empty-hint` with dashed border and subdued icon.
+- `dev/app.js`:
+  - Added `updateRefereeBarText()`: dynamically updates dark bar label between `Add Referee Suggestion (Own Entry)` (when 0 cards) and `Add Referee Suggestion (Others Entry)` (when >= 1 cards), and toggles `#referee-empty-hint`.
+  - Updated `#btn-add-referee` click handler: if 0 cards present, creates Block 1 as Own Entry; if cards already exist, creates subsequent blocks as Others Entry.
+  - Added `populateCardWithOwnEntry()`: populates Block 1 with submitter profile details and badge `Own Entry (Submitter)`; if review willingness in item 6 is marked "Yes", locks block as `Self - Review Volunteer (Locked)`.
+  - Added `syncCardWithUserProfile()`: keeps submitter profile edits in Section 1 synchronized in real time with Block 1.
+  - Updated `handleReviewWillingnessChange()`: selecting "Yes" creates/locks Block 1 as own entry; selecting "No" unlocks it.
+  - Form validation: enforces that at least one referee suggestion is added before submitting.
+- `util`:
+  - Bumped version to `01.00.05`.
+
+Verification
+- Verified server starts cleanly via `./util --serve 8085` and serves updated `index.html`, `style.css`, and `app.js`.
+- Verified layout positioning: `#btn-add-referee` is full-length and always positioned beneath all ongoing referee blocks.
+- Verified initial load displays empty hint and dark bar reads `Add Referee Suggestion (Own Entry)`.
+- Verified subsequent clicks add blank "Others Entry" peer referee suggestions with real-time database lookup.
+- Verified removal of cards restores empty hint and resets bar text when 0 blocks remain.
+
+Notes
+- The bar dynamically adapts to user state while maintaining strict compliance with the GTAC volunteer locking rules.
+
+---
+
 ## 2026-09-11 18:15:00 IST
 
 Prompt / Request

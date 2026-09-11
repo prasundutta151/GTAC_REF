@@ -24,7 +24,9 @@ const userAffOtherBox = document.getElementById('user_affiliation_other_box');
 const userAffOtherInput = document.getElementById('user_affiliation_other');
 const userCareerSelect = document.getElementById('user_career_status');
 const refereeContainer = document.getElementById('referee-list');
+const refereeEmptyHint = document.getElementById('referee-empty-hint');
 const btnAddReferee = document.getElementById('btn-add-referee');
+const btnAddRefereeText = document.getElementById('btn-add-referee-text');
 const modalSuccess = document.getElementById('modal-success');
 const btnCloseModal = document.getElementById('btn-close-modal');
 const statusBadge = document.getElementById('connection-status-badge');
@@ -160,8 +162,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   initSubmitterExpertisePicker();
   await loadDatabase();
   setupEventListeners();
-  // Initially add at least 1 referee block
-  addRefereeBlock();
+  updateRefereeBarText();
 });
 
 function initSubmitterExpertisePicker() {
@@ -355,9 +356,10 @@ function setupEventListeners() {
     radio.addEventListener('change', handleReviewWillingnessChange);
   });
 
-  // Add referee button
+  // Add referee button: first click adds own entry, subsequent clicks add others entry
   btnAddReferee.addEventListener('click', () => {
-    addRefereeBlock();
+    const isOwn = (state.refereeBlocks.length === 0);
+    addRefereeBlock(isOwn);
   });
 
   // Modal close
@@ -373,12 +375,27 @@ function setupEventListeners() {
     setTimeout(() => {
       userAffOtherBox.classList.add('hidden');
       if (userExpPicker) userExpPicker.clear();
-      refereeContainer.innerHTML = '';
+      const cards = refereeContainer.querySelectorAll('.referee-card');
+      cards.forEach(c => c.remove());
       state.refereeBlocks = [];
       state.refereeCount = 0;
-      addRefereeBlock();
+      updateRefereeBarText();
     }, 50);
   });
+}
+
+/**
+ * Update the Add Referee button text and empty state hint
+ */
+function updateRefereeBarText() {
+  if (!btnAddRefereeText) return;
+  if (state.refereeBlocks.length === 0) {
+    btnAddRefereeText.textContent = 'Add Referee Suggestion (Own Entry)';
+    if (refereeEmptyHint) refereeEmptyHint.classList.remove('hidden');
+  } else {
+    btnAddRefereeText.textContent = 'Add Referee Suggestion (Others Entry)';
+    if (refereeEmptyHint) refereeEmptyHint.classList.add('hidden');
+  }
 }
 
 /**
@@ -390,19 +407,27 @@ function handleReviewWillingnessChange() {
 
   const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
 
-  // Ensure block 1 exists
-  if (state.refereeBlocks.length === 0) {
-    addRefereeBlock();
-  }
-
-  const firstBlockId = state.refereeBlocks[0];
-  const firstBlockEl = document.getElementById(firstBlockId);
-
   if (isWilling) {
-    lockBlockAsSelf(firstBlockEl);
+    // If no blocks exist, create block 1 as own entry
+    if (state.refereeBlocks.length === 0) {
+      addRefereeBlock(true);
+    } else {
+      const firstBlockId = state.refereeBlocks[0];
+      const firstBlockEl = document.getElementById(firstBlockId);
+      lockBlockAsSelf(firstBlockEl);
+    }
   } else {
-    unlockBlockFromSelf(firstBlockEl);
+    // If user switched to No, unlock block 1 if it was marked self
+    if (state.refereeBlocks.length > 0) {
+      const firstBlockId = state.refereeBlocks[0];
+      const firstBlockEl = document.getElementById(firstBlockId);
+      if (firstBlockEl && firstBlockEl.dataset.isSelf === 'true') {
+        unlockBlockFromSelf(firstBlockEl);
+      }
+    }
   }
+  updateRefereeBarText();
+  updateRemoveButtonsVisibility();
 }
 
 /**
@@ -415,14 +440,107 @@ function lockBlockAsSelf(cardEl) {
 
   // Badge & Banner
   const badge = cardEl.querySelector('.status-badge');
-  badge.className = 'status-badge badge-self';
-  badge.textContent = 'Self - Review Volunteer (Locked)';
+  if (badge) {
+    badge.className = 'status-badge badge-self';
+    badge.textContent = 'Self - Review Volunteer (Locked)';
+  }
 
   const banner = cardEl.querySelector('.referee-alert-banner');
-  banner.className = 'referee-alert-banner alert-self';
-  banner.innerHTML = '<span>🔒 <strong>Review Volunteer (Self):</strong> Automatically populated from your personal profile and locked.</span>';
+  if (banner) {
+    banner.className = 'referee-alert-banner alert-self';
+    banner.innerHTML = '<span>🔒 <strong>Review Volunteer (Self):</strong> Automatically populated from your personal profile and locked.</span>';
+  }
 
   // Populate data from user fields
+  syncCardWithUserProfile(cardEl);
+
+  // Lock text & select inputs inside card
+  setCardInputsDisabled(cardEl, true);
+  if (cardEl.expPicker) {
+    cardEl.expPicker.setDisabled(true);
+  }
+
+  // Hide AI button and delete button
+  const btnRemove = cardEl.querySelector('.btn-remove-referee');
+  if (btnRemove) btnRemove.classList.add('hidden');
+  const btnAi = cardEl.querySelector('.btn-ai-suggest');
+  if (btnAi) btnAi.classList.add('hidden');
+}
+
+/**
+ * Populate Card as Submitter's Own Entry (unlocked)
+ */
+function populateCardWithOwnEntry(cardEl) {
+  if (!cardEl) return;
+  cardEl.dataset.isSelf = 'true';
+  cardEl.className = 'referee-card is-self';
+
+  // Badge & Banner
+  const badge = cardEl.querySelector('.status-badge');
+  if (badge) {
+    badge.className = 'status-badge badge-self';
+    badge.textContent = 'Own Entry (Submitter)';
+  }
+
+  const banner = cardEl.querySelector('.referee-alert-banner');
+  if (banner) {
+    banner.className = 'referee-alert-banner alert-self';
+    banner.innerHTML = '<span>👤 <strong>Your Entry (Submitter):</strong> Auto-populated with your details. Select "Yes" in question 6 above to formally volunteer.</span>';
+  }
+
+  // Populate data from user fields
+  syncCardWithUserProfile(cardEl);
+
+  // Allow inputs to be editable
+  setCardInputsDisabled(cardEl, false);
+  if (cardEl.expPicker) {
+    cardEl.expPicker.setDisabled(false);
+  }
+
+  // Hide AI button for own entry
+  const btnAi = cardEl.querySelector('.btn-ai-suggest');
+  if (btnAi) btnAi.classList.add('hidden');
+
+  // Show delete button
+  const btnRemove = cardEl.querySelector('.btn-remove-referee');
+  if (btnRemove) btnRemove.classList.remove('hidden');
+}
+
+/**
+ * Unlock Referee Block 1 if user switches back to No
+ */
+function unlockBlockFromSelf(cardEl) {
+  if (!cardEl) return;
+  if (cardEl.dataset.isSelf !== 'true') return;
+
+  populateCardWithOwnEntry(cardEl);
+  updateRemoveButtonsVisibility();
+}
+
+/**
+ * Synchronize user profile fields to Block 1 if self entry is active
+ */
+function syncSelfRefereeIfApplicable() {
+  if (state.refereeBlocks.length > 0) {
+    const firstBlockEl = document.getElementById(state.refereeBlocks[0]);
+    if (firstBlockEl && firstBlockEl.dataset.isSelf === 'true') {
+      const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
+      const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
+      const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
+      if (isWilling) {
+        lockBlockAsSelf(firstBlockEl);
+      } else {
+        syncCardWithUserProfile(firstBlockEl);
+      }
+    }
+  }
+}
+
+/**
+ * Synchronize user profile fields into a referee card
+ */
+function syncCardWithUserProfile(cardEl) {
+  if (!cardEl) return;
   const userName = document.getElementById('user_name').value.trim();
   const userEmail = document.getElementById('user_email').value.trim();
   const userAff = userAffiliationSelect.value;
@@ -436,77 +554,21 @@ function lockBlockAsSelf(cardEl) {
   const affOtherInput = cardEl.querySelector('.ref-aff-other');
   const careerSelect = cardEl.querySelector('.ref-career');
 
-  nameInput.value = userName;
-  emailInput.value = userEmail;
-  affSelect.value = userAff;
-  if (userAff === 'OTHERS') {
-    affOtherBox.classList.remove('hidden');
-    affOtherInput.value = userAffOther;
-  } else {
-    affOtherBox.classList.add('hidden');
+  if (nameInput) nameInput.value = userName;
+  if (emailInput) emailInput.value = userEmail;
+  if (affSelect) {
+    affSelect.value = userAff;
+    if (userAff === 'OTHERS') {
+      if (affOtherBox) affOtherBox.classList.remove('hidden');
+      if (affOtherInput) affOtherInput.value = userAffOther;
+    } else {
+      if (affOtherBox) affOtherBox.classList.add('hidden');
+    }
   }
-  careerSelect.value = userCareer;
+  if (careerSelect) careerSelect.value = userCareer;
 
-  // Sync selected expertise via ExpertisePicker
   if (cardEl.expPicker && userExpPicker) {
     cardEl.expPicker.setSelected(userExpPicker.getSelected(), userExpPicker.getOtherText());
-    cardEl.expPicker.setDisabled(true);
-  }
-
-  // Lock text & select inputs inside card
-  setCardInputsDisabled(cardEl, true);
-
-  // Hide AI button and delete button
-  const btnRemove = cardEl.querySelector('.btn-remove-referee');
-  if (btnRemove) btnRemove.classList.add('hidden');
-  const btnAi = cardEl.querySelector('.btn-ai-suggest');
-  if (btnAi) btnAi.classList.add('hidden');
-}
-
-/**
- * Unlock Referee Block 1 if user switches back to No
- */
-function unlockBlockFromSelf(cardEl) {
-  if (!cardEl) return;
-  if (cardEl.dataset.isSelf !== 'true') return;
-
-  cardEl.dataset.isSelf = 'false';
-  cardEl.className = 'referee-card';
-
-  // Reset badge and banner
-  const badge = cardEl.querySelector('.status-badge');
-  badge.className = 'status-badge badge-new';
-  badge.textContent = 'New Suggestion';
-
-  const banner = cardEl.querySelector('.referee-alert-banner');
-  banner.className = 'referee-alert-banner alert-new';
-  banner.innerHTML = '<span>✨ Suggest peer reviewer. System checks <code>Referee_database_A</code> automatically.</span>';
-
-  // Unlock inputs & expertise picker
-  setCardInputsDisabled(cardEl, false);
-  if (cardEl.expPicker) {
-    cardEl.expPicker.setDisabled(false);
-  }
-
-  // Show AI button
-  const btnAi = cardEl.querySelector('.btn-ai-suggest');
-  if (btnAi) btnAi.classList.remove('hidden');
-
-  // Show delete button if more than 1 referee exists
-  updateRemoveButtonsVisibility();
-}
-
-/**
- * Synchronize user profile fields to Block 1 if self-volunteer is active
- */
-function syncSelfRefereeIfApplicable() {
-  const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
-  const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
-  if (thisCycle === 'yes' || futureCycles === 'yes') {
-    if (state.refereeBlocks.length > 0) {
-      const firstBlockEl = document.getElementById(state.refereeBlocks[0]);
-      lockBlockAsSelf(firstBlockEl);
-    }
   }
 }
 
@@ -521,10 +583,11 @@ function setCardInputsDisabled(cardEl, disabled) {
 
 /**
  * Add a new Referee Block
+ * @param {boolean} isOwnEntry - True if adding submitter's own entry, false for others entry
  */
-function addRefereeBlock() {
+function addRefereeBlock(isOwnEntry = false) {
   state.refereeCount += 1;
-  const blockIndex = state.refereeCount;
+  const blockIndex = state.refereeBlocks.length + 1;
   const blockId = `referee-card-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
   state.refereeBlocks.push(blockId);
 
@@ -532,7 +595,7 @@ function addRefereeBlock() {
   card.id = blockId;
   card.className = 'referee-card';
   card.dataset.blockIndex = blockIndex;
-  card.dataset.isSelf = 'false';
+  card.dataset.isSelf = isOwnEntry ? 'true' : 'false';
 
   card.innerHTML = `
     <div class="referee-header">
@@ -619,17 +682,22 @@ function addRefereeBlock() {
   // Setup listeners for this card
   setupRefereeCardListeners(card, blockIndex);
 
-  // If this is block 1 and user is willing to review, lock immediately
-  if (state.refereeBlocks.length === 1) {
+  // If this card is designated as Own Entry
+  if (isOwnEntry) {
     const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
     const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
-    if (thisCycle === 'yes' || futureCycles === 'yes') {
+    const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
+
+    if (isWilling) {
       lockBlockAsSelf(card);
+    } else {
+      populateCardWithOwnEntry(card);
     }
   }
 
   updateRefereeCardNumbers();
   updateRemoveButtonsVisibility();
+  updateRefereeBarText();
 }
 
 /**
@@ -744,14 +812,21 @@ function clientHeuristicSuggest(cleanName) {
 function removeRefereeBlock(blockId) {
   const card = document.getElementById(blockId);
   if (!card) return;
-  if (card.dataset.isSelf === 'true') {
+
+  const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
+  const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
+  const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
+
+  if (card.dataset.isSelf === 'true' && isWilling) {
     alert('Cannot remove self-reviewer block while review willingness is selected as Yes.');
     return;
   }
+
   card.remove();
   state.refereeBlocks = state.refereeBlocks.filter(id => id !== blockId);
   updateRefereeCardNumbers();
   updateRemoveButtonsVisibility();
+  updateRefereeBarText();
 }
 
 /**
@@ -773,13 +848,16 @@ function updateRefereeCardNumbers() {
  * Update visibility of Remove buttons
  */
 function updateRemoveButtonsVisibility() {
-  const total = state.refereeBlocks.length;
-  state.refereeBlocks.forEach((blockId, idx) => {
+  const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
+  const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
+  const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
+
+  state.refereeBlocks.forEach((blockId) => {
     const card = document.getElementById(blockId);
     if (card) {
       const btnRemove = card.querySelector('.btn-remove-referee');
       if (btnRemove) {
-        if (card.dataset.isSelf === 'true' || total <= 1) {
+        if (card.dataset.isSelf === 'true' && isWilling) {
           btnRemove.classList.add('hidden');
         } else {
           btnRemove.classList.remove('hidden');
@@ -1031,6 +1109,11 @@ async function handleFormSubmit(e) {
   }
 
   // Validate Referees
+  if (state.refereeBlocks.length === 0) {
+    alert('Please add at least one referee suggestion (your own entry or peer suggestions) before submitting.');
+    return;
+  }
+
   const refereesData = [];
   state.refereeBlocks.forEach((blockId, idx) => {
     const card = document.getElementById(blockId);

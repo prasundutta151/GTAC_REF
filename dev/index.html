@@ -137,21 +137,28 @@
 
         <!-- SECTION 2: Referee Suggestions -->
         <section class="card section-card">
-          <div class="card-header section-header-action">
-            <div class="header-left">
-              <span class="step-num">2</span>
-              <div>
-                <h2>Referee Suggestions</h2>
-                <p class="card-desc">Suggest suitable peer reviewers. System verifies against <code>Referee_database_A</code> in real time.</p>
-              </div>
+          <div class="card-header">
+            <span class="step-num">2</span>
+            <div>
+              <h2>Referee Suggestions</h2>
+              <p class="card-desc">Suggest suitable peer reviewers. System verifies against <code>Referee_database_A</code> in real time.</p>
             </div>
-            <button type="button" id="btn-add-referee" class="btn btn-secondary">
-              <span class="btn-icon">+</span> Add Referee Suggestion
-            </button>
           </div>
 
           <div id="referee-list" class="referee-cards-container">
             <!-- Referee blocks rendered dynamically here -->
+            <div id="referee-empty-hint" class="referee-empty-hint">
+              <span class="hint-icon">📋</span>
+              <span>No referee suggestions added yet. Click the bar below to add your own entry or suggest peer reviewers.</span>
+            </div>
+          </div>
+
+          <!-- Full Length Dark Background Bar -->
+          <div class="add-referee-bar-container">
+            <button type="button" id="btn-add-referee" class="btn-add-referee-bar">
+              <span class="bar-icon">＋</span>
+              <span id="btn-add-referee-text" class="bar-text">Add Referee Suggestion (Own Entry)</span>
+            </button>
           </div>
         </section>
 
