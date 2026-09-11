@@ -16,4 +16,4 @@
 * [💻 **GitHub Repository**](https://github.com/prasundutta151/GTAC_REF)
 
 ---
-*Release Version: `v01.00.12`*
+*Release Version: `v01.00.13`*

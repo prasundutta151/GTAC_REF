@@ -28,6 +28,9 @@ Key capabilities include:
    * 🔴 **Red**: **Not Available** (unavailable for the current observing cycle).
 5. **Purposeful Font Differentiation**: Uses distinct typefaces to distinguish between researcher identity, credentials, and institutional metadata.
 
+![Referee Directory Overview](images/screenshot_05_referee_directory_overview.png)
+*Figure 1: Full GTAC Referee Directory layout featuring the multi-criteria selection form and sequential color-coded referee blocks.*
+
 ---
 
 ## 🔎 Multi-Criteria Selection Form
@@ -43,6 +46,9 @@ Located at the top of the directory, the selection form allows users to specify 
 | **5. Scientific Expertise** | Multi-Select Tag Chips | Allows selecting **one or multiple** research disciplines from `database/expertise.txt`. Selected topics appear as removable filter tags (`🏷️ Pulsars ✕`). Referees matching any selected expertise are displayed. |
 | **Status Quick Filters** | Pill Buttons | Instant toggle buttons: `All Referees`, `🟠 Verified Only`, `🟡 Suggested Only`, `🔴 Not Available Only`. |
 | **Reset Filters** | Button | One-click button (`↺ Reset Filters`) that clears all search criteria and restores the full directory view. |
+
+![Live Filtered Search Results](images/screenshot_06_referee_directory_filtered.png)
+*Figure 2: Real-time multi-filter query demonstrating instant name matching and expertise tag filtering.*
 
 ---
 

@@ -77,6 +77,49 @@ Notes
 
 ---
 
+## 2026-09-11 19:15:00 IST
+
+Prompt / Request
+- Add operational screenshots (3 to 6) of the GTAC Referee Registration Form and Referee Directory to demonstrate functionality in the GitHub Wiki.
+- Embed and describe these screenshots clearly in the wiki documentation pages (`wiki/Home.md`, `wiki/Form-Guide.md`, `wiki/Referee-Directory.md`).
+- Synchronize all assets and documentation to the GitHub Pages bundle (`docs/`).
+- Bump release version and push everything to Git (`origin/creation` and `origin/main`, as well as the GitHub Wiki remote repository) to conclude the development session.
+
+Changes Made
+- `assets/screenshots/`, `wiki/images/`, `docs/images/`, `doc/images/`:
+  - Captured and stored 6 pixel-perfect, high-resolution operational screenshots using headless Google Chrome:
+    - `screenshot_01_form_overview.png`: Registration Form header, cycle banner, and Submitter Profile section.
+    - `screenshot_02_validation_and_volunteering.png`: Real-time Gemini email validation (`✓ Validated email`) and Question 6 review volunteering options.
+    - `screenshot_03_referee_suggestion_cards.png`: Referee cards showing Self-Entry (Block 1) and Peer Entry (Block 2) with the full-length dark add-bar.
+    - `screenshot_04_submission_summary.png`: Post-submission confirmation modal showing clean data summary, assigned IDs, zero internal file paths.
+    - `screenshot_05_referee_directory_overview.png`: Full Referee Directory layout with multi-criteria selection form and sequential color-coded referee blocks (Orange: Verified, Yellow: Suggested, Red: Unavailable).
+    - `screenshot_06_referee_directory_filtered.png`: Live filtered query demonstration with instant name matching and multi-select expertise tags.
+- `wiki/`:
+  - `wiki/Home.md`: Added "Visual Walkthrough & System Screenshots" gallery with all 6 screenshots and detailed captions.
+  - `wiki/Form-Guide.md`: Embedded Figures 1 through 4 across Submitter Profile, Question 6 Volunteering, Referee Cards & Add-Bar, and Post-Submission Confirmation.
+  - `wiki/Referee-Directory.md`: Embedded Figures 1 and 2 demonstrating Directory Layout and Live Multi-Filter Search.
+  - `wiki/_Sidebar.md`: Updated release version badge to `v01.00.13`.
+- `doc/` & `docs/`:
+  - `doc/doc_style.css`: Added responsive `.doc-screenshot-card` styles for visual gallery presentation.
+  - `doc/README.html`: Added "Application Screenshots & Visual Walkthrough" section showcasing Figures 1 to 6.
+  - Updated version badges to `v01.00.13` across `README.html`, `form_guide.html`, `database_guide.html`, and `api_guide.html`.
+  - `util`: Enhanced `cmd_sync_docs()` to recursively copy `doc/` subdirectories and synchronize `images/` into `docs/images/`.
+  - Re-synchronized `docs/` GitHub Pages bundle using `./util --sync-docs`.
+- Version & Deployment:
+  - Bumped version to `01.00.13` in `VERSION`.
+  - Pushed all wiki markdown pages and images to GitHub Wiki remote (`git@github.com:prasundutta151/GTAC_REF.wiki.git`) via `./util --wiki-push`.
+
+Verification
+- Verified all 6 screenshots render cleanly in both standalone and embedded markdown.
+- Successfully executed `./util --sync-docs` to update `docs/images/` and `docs/doc/images/`.
+- Successfully executed `./util --wiki-push` confirming 13 files (7 markdown pages + 6 images) pushed to `git@github.com:prasundutta151/GTAC_REF.wiki.git`.
+- Confirmed `git status` shows clean staging readiness.
+
+Notes
+- Both GitHub Pages site (`https://prasundutta151.github.io/GTAC_REF/`) and GitHub Wiki (`https://github.com/prasundutta151/GTAC_REF/wiki`) are fully updated with high-resolution visual documentation.
+
+---
+
 ## 2026-09-11 19:10:00 IST
 
 Prompt / Request

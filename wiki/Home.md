@@ -42,6 +42,58 @@ Anyone can access and use the form or browse the documentation via these public 
 
 ---
 
+## 📸 Visual Walkthrough & System Screenshots
+
+The following operational screenshots demonstrate the core user workflows across the Registration Form and the Referee Directory:
+
+### 1. Submitter Intake & Profile Configuration
+The intake form gathers researcher profile details, dynamically pulls institutional taxonomies, and reads the active GTAC proposal cycle.
+
+![GTAC Form Overview](images/screenshot_01_form_overview.png)
+*Figure 1: GTAC Referee Intake Form header, navigation bar, and Submitter Profile section.*
+
+---
+
+### 2. Gemini AI Validation & Review Volunteering
+Entering an institutional email triggers real-time credential validation. Selecting review willingness dynamically links the submitter's profile to Block 1.
+
+![Gemini Validation & Question 6](images/screenshot_02_validation_and_volunteering.png)
+*Figure 2: Real-time Gemini email validation badge (`✓ Validated email`) and Question 6 review volunteering options for Cycle 52.*
+
+---
+
+### 3. Dynamic Referee Cards & Sequential Add-Bar
+Reviewer suggestions are entered via distinct cards. Block 1 mirrors the submitter while subsequent cards allow peer recommendations, followed by the dark sequential add-bar.
+
+![Referee Suggestion Cards](images/screenshot_03_referee_suggestion_cards.png)
+*Figure 3: Referee suggestion cards showing Self-Entry (Block 1) and Peer Entry (Block 2) with the full-length dark add-bar.*
+
+---
+
+### 4. Ordered Post-Submission Summary
+Upon submission, a modal presents an ordered, human-readable summary of the submission metadata and assigned referee IDs without internal file paths.
+
+![Post-Submission Summary](images/screenshot_04_submission_summary.png)
+*Figure 4: Clean post-submission confirmation modal with assigned reference IDs and structured data presentation.*
+
+---
+
+### 5. Referee Directory & Live Lookup
+The public Referee Directory (`referees.html`) displays reviewers in rectangular cards color-coded by status (Orange: Verified, Yellow: Suggested, Red: Unavailable).
+
+![Referee Directory Overview](images/screenshot_05_referee_directory_overview.png)
+*Figure 5: Referee Directory with multi-criteria selection form and color-coded status row blocks.*
+
+---
+
+### 6. Real-Time Multi-Criteria Filtering
+Reviewers can be queried instantly across Name, Email, Affiliation, Career Status, and Multi-Select Expertise tags.
+
+![Referee Directory Filtered](images/screenshot_06_referee_directory_filtered.png)
+*Figure 6: Live multi-criteria search filtering for specific researchers and scientific disciplines.*
+
+---
+
 ## ⚡ Quick Start for Developers
 
 ```bash

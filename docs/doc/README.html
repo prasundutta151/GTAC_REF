@@ -24,7 +24,7 @@
       <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
       <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
       <a href="../referees.html" class="doc-nav-link cta-link" style="background: #ea580c; border-color: #ea580c;" target="_blank">Directory ↗</a>
-      <span class="version-badge">v01.00.12</span>
+      <span class="version-badge">v01.00.13</span>
     </nav>
   </header>
 
@@ -37,6 +37,7 @@
         <li class="sidebar-item"><a href="#intro" class="sidebar-link active">Introduction</a></li>
         <li class="sidebar-item"><a href="#architecture" class="sidebar-link">System Architecture</a></li>
         <li class="sidebar-item"><a href="#quickstart" class="sidebar-link">Quick Start</a></li>
+        <li class="sidebar-item"><a href="#screenshots" class="sidebar-link">📸 Operational Screenshots</a></li>
       </ul>
 
       <div class="sidebar-title">Detailed Documentation</div>
@@ -154,6 +155,55 @@
             <h4>Standalone Offline Mode (Direct Browser Double-Click)</h4>
             <p>Double-click <a href="../index.html"><code>index.html</code></a> directly in your operating system's file manager (opening under the <code>file://</code> protocol).</p>
             <p>The application automatically detects the offline environment and instantly mounts the complete embedded database from <code>dev/db_data.js</code> with local session persistence.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="screenshots" class="doc-section">
+        <h2>📸 Application Screenshots & Visual Walkthrough</h2>
+        <p>Real-time high-resolution operational captures of the GTAC Referee Registration and Suggestion platform, illustrating key user flows, auto-validation, and referee directory lookups.</p>
+
+        <div style="margin-top: 24px;">
+          <h3>1. Submitter Intake & Profile Configuration</h3>
+          <p>The primary registration interface captures submitter identity, dynamically loads institutional taxonomies, and displays the active GTAC proposal cycle.</p>
+          <div class="doc-screenshot-card">
+            <img src="images/screenshot_01_form_overview.png" alt="GTAC Form Overview and Submitter Profile">
+            <div class="doc-screenshot-caption">Figure 1: GTAC Intake Form header, navigation bar, and Submitter Profile section.</div>
+          </div>
+
+          <h3>2. Gemini AI Validation & Review Volunteering</h3>
+          <p>Entering an institutional email triggers real-time credential validation. Selecting review willingness dynamically links the submitter's profile to Block 1.</p>
+          <div class="doc-screenshot-card">
+            <img src="images/screenshot_02_validation_and_volunteering.png" alt="Gemini Validation and Question 6 Review Volunteering">
+            <div class="doc-screenshot-caption">Figure 2: Real-time Gemini email validation badge (✓ Validated email) and Question 6 cycle volunteering options.</div>
+          </div>
+
+          <h3>3. Dynamic Referee Cards & Sequential Add-Bar</h3>
+          <p>Reviewer suggestions are entered via distinct cards. Block 1 mirrors the submitter while subsequent cards allow peer recommendations, followed by the dark sequential add-bar.</p>
+          <div class="doc-screenshot-card">
+            <img src="images/screenshot_03_referee_suggestion_cards.png" alt="Referee Suggestion Cards and Add-Bar">
+            <div class="doc-screenshot-caption">Figure 3: Referee suggestion cards showing Self-Entry (Block 1) and Peer Entry (Block 2) with the full-length dark add-bar.</div>
+          </div>
+
+          <h3>4. Ordered Post-Submission Summary</h3>
+          <p>Upon submission, a clean modal presents an ordered, human-readable summary of the submission metadata and assigned referee IDs without leaking internal file storage paths.</p>
+          <div class="doc-screenshot-card">
+            <img src="images/screenshot_04_submission_summary.png" alt="Post-Submission Confirmation Modal">
+            <div class="doc-screenshot-caption">Figure 4: Clean post-submission confirmation modal with assigned reference IDs and structured data layout.</div>
+          </div>
+
+          <h3>5. Referee Directory & Live Lookup</h3>
+          <p>The public Referee Directory (<code>referees.html</code>) displays reviewers in rectangular cards color-coded by status (Orange: Verified, Yellow: Suggested, Red: Unavailable).</p>
+          <div class="doc-screenshot-card">
+            <img src="images/screenshot_05_referee_directory_overview.png" alt="Referee Directory and Lookup Overview">
+            <div class="doc-screenshot-caption">Figure 5: Referee Directory with multi-criteria selection form and color-coded status row blocks.</div>
+          </div>
+
+          <h3>6. Real-Time Multi-Criteria Filtering</h3>
+          <p>Reviewers can be queried instantly across Name, Email, Affiliation, Career Status, and Multi-Select Expertise tags.</p>
+          <div class="doc-screenshot-card">
+            <img src="images/screenshot_06_referee_directory_filtered.png" alt="Live Multi-Criteria Filtered Search">
+            <div class="doc-screenshot-caption">Figure 6: Live multi-criteria search filtering for specific researchers and scientific disciplines.</div>
           </div>
         </div>
       </section>

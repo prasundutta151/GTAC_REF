@@ -1874,3 +1874,101 @@ function showSuccessModal(result, payload) {
 
   modalSuccess.classList.remove('hidden');
 }
+
+// Automated Demo State Initializer for Screenshots and Documentation Walkthroughs
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(window.location.search);
+  const demo = params.get('demo');
+  if (!demo) return;
+
+  setTimeout(async () => {
+    const nameInput = document.getElementById('user_name');
+    const emailInput = document.getElementById('user_email');
+    const affSelect = document.getElementById('user_affiliation');
+    const carSelect = document.getElementById('user_career');
+
+    if (nameInput) nameInput.value = 'Dr. Yashwant Gupta';
+    if (emailInput) {
+      emailInput.value = 'ygupta@ncra.tifr.res.in';
+      emailInput.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+    if (affSelect) affSelect.value = 'AFF_001';
+    if (carSelect) carSelect.value = 'CAR_04';
+
+    if (userExpPicker) {
+      userExpPicker.setSelected(['EXP_01', 'EXP_14'], '');
+    }
+
+    // Turn on review willingness for Cycle 52
+    const radCycle52 = document.querySelector('input[name="review_this_cycle"][value="yes"]');
+    if (radCycle52) {
+      radCycle52.checked = true;
+      radCycle52.dispatchEvent(new Event('change', { bubbles: true }));
+    }
+
+    const radFuture = document.querySelector('input[name="review_future_cycles"][value="no"]');
+    if (radFuture) radFuture.checked = true;
+
+    if (demo === 'cards' || demo === 'summary') {
+      const addBar = document.getElementById('add-referee-bar');
+      if (addBar) {
+        addBar.click();
+        await new Promise(r => setTimeout(r, 150));
+        const cards = document.querySelectorAll('.referee-card');
+        if (cards.length >= 2) {
+          const card2 = cards[1];
+          const c2Name = card2.querySelector('.ref-name');
+          const c2Email = card2.querySelector('.ref-email');
+          const c2Aff = card2.querySelector('.ref-aff');
+          const c2Car = card2.querySelector('.ref-career');
+          if (c2Name) c2Name.value = 'Dr. Somak Raychaudhury';
+          if (c2Email) {
+            c2Email.value = 'somak@iucaa.in';
+            c2Email.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+          if (c2Aff) c2Aff.value = 'AFF_002';
+          if (c2Car) c2Car.value = 'CAR_04';
+          if (card2.expPicker) {
+            card2.expPicker.setSelected(['EXP_04', 'EXP_05'], '');
+          }
+        }
+      }
+    }
+
+    if (demo === 'summary') {
+      const fakePayload = {
+        user_name: 'Dr. Yashwant Gupta',
+        user_email: 'ygupta@ncra.tifr.res.in',
+        user_affiliation: 'AFF_001',
+        user_career_status: 'CAR_04',
+        user_expertise: ['EXP_01', 'EXP_14'],
+        review_this_cycle: 'yes',
+        review_future_cycles: 'no',
+        referees: [
+          {
+            name: 'Dr. Yashwant Gupta',
+            email: 'ygupta@ncra.tifr.res.in',
+            affiliation: 'AFF_001',
+            career_status: 'CAR_04',
+            expertise: ['EXP_01', 'EXP_14'],
+            is_self: true
+          },
+          {
+            name: 'Dr. Somak Raychaudhury',
+            email: 'somak@iucaa.in',
+            affiliation: 'AFF_002',
+            career_status: 'CAR_04',
+            expertise: ['EXP_04', 'EXP_05'],
+            is_self: false
+          }
+        ]
+      };
+      showSubmissionSummary(fakePayload, {
+        status: 'success',
+        submission_id: 'SUB_1789134000',
+        assigned_referee_ids: ['REF_0001', 'REF_0003']
+      });
+    }
+  }, 350);
+});
+

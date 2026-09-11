@@ -487,3 +487,29 @@ pre code {
     padding: 24px 20px;
   }
 }
+
+/* Screenshot Galleries */
+.doc-screenshot-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+  margin: 20px 0 28px 0;
+  box-shadow: var(--shadow-sm);
+}
+
+.doc-screenshot-card img {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-dark);
+  display: block;
+}
+
+.doc-screenshot-caption {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-top: 10px;
+  text-align: center;
+  font-style: italic;
+}

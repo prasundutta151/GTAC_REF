@@ -290,15 +290,33 @@ def cmd_sync_docs() -> None:
     docs_doc_dir.mkdir(parents=True, exist_ok=True)
     src_doc_dir = PROJECT_ROOT / "doc"
     if src_doc_dir.exists():
-        for doc_file in src_doc_dir.iterdir():
-            if doc_file.is_file() and not doc_file.name.startswith("."):
-                shutil.copy2(doc_file, docs_doc_dir / doc_file.name)
+        for item in src_doc_dir.iterdir():
+            if item.name.startswith("."):
+                continue
+            dest_item = docs_doc_dir / item.name
+            if item.is_file():
+                shutil.copy2(item, dest_item)
+            elif item.is_dir():
+                if dest_item.exists():
+                    shutil.rmtree(dest_item)
+                shutil.copytree(item, dest_item)
+
+    # 4. Sync images/ into docs/images/
+    docs_images_dir = docs_dir / "images"
+    docs_images_dir.mkdir(parents=True, exist_ok=True)
+    src_images_dir = PROJECT_ROOT / "wiki" / "images"
+    if not src_images_dir.exists():
+        src_images_dir = PROJECT_ROOT / "assets" / "screenshots"
+    if src_images_dir.exists():
+        for img in src_images_dir.glob("*.png"):
+            shutil.copy2(img, docs_images_dir / img.name)
 
     print(f"[SYNC-DOCS] Successfully synchronized GitHub Pages bundle in {docs_dir.name}/:")
     print("            - docs/index.html (Interactive web form)")
     print("            - docs/referees.html & docs/lookup.html (Referee Directory & Lookup)")
     print("            - docs/style.css, docs/lookup.css, docs/app.js, docs/lookup.js, docs/db_data.js")
     print("            - docs/doc/* (README.html, form_guide.html, database_guide.html, api_guide.html)")
+    print("            - docs/images/* (Operational UI screenshots)")
     print("            - docs/.nojekyll & root .nojekyll (Bypasses Jekyll processing)")
     print("            Live URL Form:      https://prasundutta151.github.io/GTAC_REF/")
     print("            Live URL Directory: https://prasundutta151.github.io/GTAC_REF/referees.html")

@@ -509,9 +509,29 @@
 
   // Kickoff on DOM Ready
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', () => {
+      init();
+      handleDemoParam();
+    });
   } else {
     init();
+    handleDemoParam();
+  }
+
+  function handleDemoParam() {
+    const params = new URLSearchParams(window.location.search);
+    const demo = params.get('demo');
+    if (demo === 'filter') {
+      setTimeout(() => {
+        if (elFilterName) {
+          elFilterName.value = 'Gupta';
+          activeFilters.name = 'Gupta';
+        }
+        activeFilters.expertise = ['EXP_01'];
+        renderSelectedExpertiseTags();
+        applyFilters();
+      }, 400);
+    }
   }
 
 })();
