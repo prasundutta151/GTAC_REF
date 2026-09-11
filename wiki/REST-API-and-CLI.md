@@ -158,6 +158,112 @@ Ingests form submissions, appends newly added affiliations/expertise to taxonomy
 
 ---
 
+## 🚀 Production Deployment & Central Database Setup Options
+
+When deployed on **GitHub Pages**, the application functions as a static client with client-side verification and fallback session storage (`localStorage`). To collect all referee recommendations and submissions from around the world into an authoritative central database (`database/Referee_database_A.csv` and `database/form_submissions.csv`), administrators can select from four deployment options:
+
+### 🏛️ Option 1: NCRA / Institutional Linux VM (Recommended)
+
+Deploy the zero-dependency Python REST server (`dev/server.py`) directly on an internal or public NCRA-TIFR virtual machine or server under `systemd` with an Nginx reverse proxy and Let's Encrypt SSL certificate.
+
+#### 1. Systemd Service (`/etc/systemd/system/gtac-ref.service`)
+```ini
+[Unit]
+Description=GTAC Referee Form REST Backend
+After=network.target
+
+[Service]
+Type=simple
+User=gtac
+WorkingDirectory=/var/www/GTAC_REF
+ExecStart=/usr/bin/python3 dev/server.py 8080
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=GEMINI_API_KEY=your_optional_key_here
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Enable and start:
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now gtac-ref.service
+```
+
+#### 2. Nginx Reverse Proxy (`/etc/nginx/sites-available/gtac-ref`)
+```nginx
+server {
+    server_name gtac-ref.ncra.tifr.res.in;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/gtac-ref.ncra.tifr.res.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/gtac-ref.ncra.tifr.res.in/privkey.pem;
+}
+```
+
+---
+
+### ☁️ Option 2: Cloud Container Hosting (Render / Railway / Docker)
+
+Package the application as a lightweight Docker container with a persistent volume mounted to `/app/database`:
+
+#### 1. Dockerfile
+```dockerfile
+FROM python:3.11-slim
+WORKDIR /app
+COPY . /app
+VOLUME ["/app/database"]
+EXPOSE 8080
+CMD ["python3", "dev/server.py", "8080"]
+```
+
+#### 2. Run with Volume Mount
+```bash
+docker build -t gtac-ref .
+docker run -d -p 8080:8080 -v /data/gtac_db:/app/database --name gtac-ref gtac-ref
+```
+
+---
+
+### ✉️ Option 3: GTAC Secretariat Email & JSON Dispatch
+
+A zero-maintenance option that requires no always-on server:
+* Upon submission, the client creates and downloads a structured `submission_SUB_XXXXXX.json` file.
+* The form automatically triggers a `mailto:gtac@ncra.tifr.res.in` link with the proposal summary, cycle number, and recommended referees.
+* The GTAC Secretariat reviews and ingests the JSON files directly into the repository.
+
+---
+
+### 🤖 Option 4: GitHub Actions & Webhook Automation
+
+Connect the web form to a serverless webhook or GitHub repository dispatch:
+* Form posts the JSON payload to a webhook endpoint.
+* A GitHub Actions workflow runs `scripts/ingest_submission.py` to assign sequential `REF_XXXX` IDs and append records to `database/Referee_database_A.csv`.
+* Automatically commits changes to Git or generates a Pull Request with cryptographic commit signatures.
+
+---
+
+### 🔌 Client-Side Endpoint Configuration
+
+In `dev/app.js`, configure the production backend URL:
+```javascript
+const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? '' 
+  : 'https://gtac-ref.ncra.tifr.res.in';
+```
+
+---
+
 ## 🛠️ Developer CLI Reference (`util`)
 
 The `util` command-line executable automates daily operations, release packaging, GitHub Pages synchronization, and GitHub Wiki synchronization.

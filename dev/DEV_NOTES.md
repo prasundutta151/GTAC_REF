@@ -77,6 +77,46 @@ Notes
 
 ---
 
+## 2026-09-11 19:30:00 IST
+
+Prompt / Request
+- Add comprehensive production server and central database setup options to the GitHub Pages site and documentation:
+  - Document Option 1: Dedicated NCRA-TIFR Linux VM running `dev/server.py` under systemd and Nginx reverse proxy with SSL.
+  - Document Option 2: Cloud container hosting (Docker, Render, Railway) with persistent database volume.
+  - Document Option 3: GTAC Secretariat email and JSON submission dispatch for zero-server operation.
+  - Document Option 4: GitHub Actions webhook and repository dispatch for serverless database commits.
+  - Provide instructions for configuring `API_BASE_URL` in `dev/app.js`.
+  - Update interactive HTML documentation (`doc/README.html`, `doc/api_guide.html`), root `README.md`, and GitHub Wiki (`wiki/REST-API-and-CLI.md`, `wiki/Home.md`, `wiki/_Sidebar.md`).
+  - Synchronize GitHub Pages bundle via `./util --sync-docs` and publish wiki via `./util --wiki-push`.
+  - Bump version to `01.00.15` and commit/push to both `creation` and `main` branches.
+
+Changes Made
+- HTML Documentation (`doc/` & `docs/doc/`):
+  - `doc/README.html`: Added `#deployment-options` section detailing the 4 architecture models with clean feature cards, setup steps, and client-side configuration callout. Updated sidebar and bumped version badge to `v01.00.15`.
+  - `doc/api_guide.html`: Added dedicated `#production-deployment` section with complete systemd service configuration (`gtac-ref.service`), Nginx reverse proxy configuration with SSL, Dockerfile and run commands, email dispatch details, GitHub Actions workflow overview, and frontend endpoint configuration. Updated sidebar and bumped version badge to `v01.00.15`.
+  - `doc/form_guide.html`, `doc/database_guide.html`: Bumped version badges to `v01.00.15`.
+- Root Documentation (`README.md`):
+  - Added live navigation links (Interactive Web Form, Referee Directory, HTML Docs, GitHub Wiki).
+  - Added "Production Deployment & Central Database Setup Options" section detailing Options 1 through 4 and client endpoint configuration.
+- GitHub Wiki (`wiki/`):
+  - `wiki/REST-API-and-CLI.md`: Added comprehensive Production Deployment & Central Database Setup Options section with systemd unit file, Nginx SSL proxy, Dockerfile, email dispatch, and GitHub Actions automation.
+  - `wiki/Home.md`: Updated Wiki Contents section with direct link to production setup guide.
+  - `wiki/_Sidebar.md`: Added direct navigation link to Production Setup in the main menu, and bumped release version to `v01.00.15`.
+- Version & Deployment:
+  - Bumped version to `01.00.15` in `VERSION`.
+  - Executed `./util --sync-docs` to update GitHub Pages distribution in `docs/`.
+  - Executed `./util --wiki-push` publishing updated wiki documentation to GitHub Wiki remote.
+
+Verification
+- Verified `./util --sync-docs` updated `docs/doc/README.html`, `docs/doc/api_guide.html`, `docs/doc/form_guide.html`, and `docs/doc/database_guide.html`.
+- Verified `./util --wiki-push` cleanly pushed to `git@github.com:prasundutta151/GTAC_REF.wiki.git`.
+- Checked formatting and anchors across all documentation files.
+
+Notes
+- The static GitHub Pages deployment remains 100% operational as a zero-dependency client with `localStorage` fallback. When ready to transition to a live central database, configuring `API_BASE_URL` points all clients seamlessly to the remote backend.
+
+---
+
 ## 2026-09-11 19:25:00 IST
 
 Prompt / Request

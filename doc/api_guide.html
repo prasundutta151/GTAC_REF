@@ -24,7 +24,7 @@
       <a href="api_guide.html" class="doc-nav-link active">API & CLI</a>
       <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
       <a href="../referees.html" class="doc-nav-link cta-link" style="background: #ea580c; border-color: #ea580c;" target="_blank">Directory ↗</a>
-      <span class="version-badge">v01.00.14</span>
+      <span class="version-badge">v01.00.15</span>
     </nav>
   </header>
 
@@ -48,6 +48,15 @@
         <li class="sidebar-item"><a href="#cli-version" class="sidebar-link">./util --version</a></li>
         <li class="sidebar-item"><a href="#cli-git-push" class="sidebar-link">./util --git-push</a></li>
         <li class="sidebar-item"><a href="#cli-release" class="sidebar-link">./util --release</a></li>
+      </ul>
+
+      <div class="sidebar-title">Production Setup</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#production-deployment" class="sidebar-link">🚀 Deployment Options</a></li>
+        <li class="sidebar-item"><a href="#option-ncra" class="sidebar-link">Option 1: NCRA / Institutional VM</a></li>
+        <li class="sidebar-item"><a href="#option-docker" class="sidebar-link">Option 2: Cloud Container</a></li>
+        <li class="sidebar-item"><a href="#option-email" class="sidebar-link">Option 3: Email Dispatch</a></li>
+        <li class="sidebar-item"><a href="#option-actions" class="sidebar-link">Option 4: GitHub Actions</a></li>
       </ul>
 
       <div class="sidebar-title">Other Manuals</div>
@@ -231,6 +240,122 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section id="production-deployment" class="doc-section">
+        <h2>🚀 Production Deployment & Central Database Setup Options</h2>
+        <p class="doc-lead">
+          On GitHub Pages, the GTAC Referee Form operates as an ultra-fast client application: taxonomies and referee records are read instantly, and submissions are stored in the user's browser session (<code>localStorage</code>). To collect all proposal submissions and referee registrations into an authoritative, central database (<code>database/Referee_database_A.csv</code> and <code>database/form_submissions.csv</code>), administrators can select from four production deployment models:
+        </p>
+
+        <!-- Option 1 -->
+        <div id="option-ncra" style="margin-top: 32px;">
+          <h3>Option 1: NCRA / Institutional Linux Server (Recommended)</h3>
+          <p>
+            Deploy <code>server.py</code> directly on an NCRA-TIFR virtual machine or internal server behind an Nginx reverse proxy with SSL encryption.
+          </p>
+
+          <h4 style="margin-top: 16px;">1. Systemd Service Configuration (<code>/etc/systemd/system/gtac-ref.service</code>)</h4>
+          <pre><code>[Unit]
+Description=GTAC Referee System REST API Service
+After=network.target
+
+[Service]
+Type=simple
+User=gtac
+WorkingDirectory=/var/www/GTAC_REF
+ExecStart=/usr/bin/python3 dev/server.py 8080
+Restart=always
+RestartSec=5
+Environment=PYTHONUNBUFFERED=1
+Environment=GEMINI_API_KEY=your_optional_gemini_api_key
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+
+          <p>Enable and start the service:</p>
+          <pre><code>sudo systemctl daemon-reload
+sudo systemctl enable --now gtac-ref.service
+sudo systemctl status gtac-ref.service</code></pre>
+
+          <h4 style="margin-top: 16px;">2. Nginx Reverse Proxy with SSL (<code>/etc/nginx/sites-available/gtac-ref</code>)</h4>
+          <pre><code>server {
+    server_name gtac-ref.ncra.tifr.res.in;
+
+    location / {
+        proxy_pass http://127.0.0.1:8080;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    listen 443 ssl;
+    ssl_certificate /etc/letsencrypt/live/gtac-ref.ncra.tifr.res.in/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/gtac-ref.ncra.tifr.res.in/privkey.pem;
+}</code></pre>
+        </div>
+
+        <!-- Option 2 -->
+        <div id="option-docker" style="margin-top: 36px;">
+          <h3>Option 2: Cloud Container Deployment (Render / Railway / Docker)</h3>
+          <p>
+            Package the application into a Docker container and host it on cloud platforms like Render, Railway, Fly.io, or PythonAnywhere. Ensure a persistent disk volume is mounted to <code>/app/database</code> so CSV records persist across restarts.
+          </p>
+
+          <h4 style="margin-top: 16px;">1. Dockerfile</h4>
+          <pre><code>FROM python:3.11-slim
+WORKDIR /app
+COPY . /app
+VOLUME ["/app/database"]
+EXPOSE 8080
+CMD ["python3", "dev/server.py", "8080"]</code></pre>
+
+          <h4 style="margin-top: 16px;">2. Build and Run Container</h4>
+          <pre><code>docker build -t gtac-ref-backend .
+docker run -d \
+  -p 8080:8080 \
+  -v /var/gtac_data:/app/database \
+  --name gtac-ref \
+  --restart unless-stopped \
+  gtac-ref-backend</code></pre>
+        </div>
+
+        <!-- Option 3 -->
+        <div id="option-email" style="margin-top: 36px;">
+          <h3>Option 3: Direct GTAC Secretariat Email & JSON Dispatch</h3>
+          <p>
+            For organizations that wish to avoid hosting an always-on public server, the web form can run 100% statically on GitHub Pages while dispatching submissions directly to the committee:
+          </p>
+          <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li><strong>Automated JSON Download:</strong> Upon clicking Submit, the client generates and downloads a validated file named <code>submission_SUB_XXXXXX.json</code>.</li>
+            <li><strong>Secretariat Mailto Link:</strong> The form opens the submitter's native email client with pre-filled subject <code>[GTAC Cycle 52] Proposal Referee Submission</code> addressed to <code>gtac@ncra.tifr.res.in</code>.</li>
+            <li><strong>Zero Server Maintenance:</strong> Eliminates firewall configurations, SSL renewals, and cloud hosting bills.</li>
+          </ul>
+        </div>
+
+        <!-- Option 4 -->
+        <div id="option-actions" style="margin-top: 36px;">
+          <h3>Option 4: GitHub Actions & Webhook Automation</h3>
+          <p>
+            Connect form submissions to a GitHub Actions webhook or serverless endpoint (e.g. Cloudflare Worker or AWS Lambda). When a researcher submits recommendations:
+          </p>
+          <ul style="margin-top: 10px; padding-left: 20px; line-height: 1.6;">
+            <li>The webhook receives the JSON submission payload and triggers a GitHub Actions workflow (<code>repository_dispatch</code>).</li>
+            <li>The GitHub Action runs a Python ingestion script that updates <code>Referee_database_A.csv</code> and <code>form_submissions.csv</code>.</li>
+            <li>The action creates a commit directly on a private administrative branch or opens a Pull Request for GTAC Chair review.</li>
+            <li>Maintains a cryptographically verified Git history for every referee nomination.</li>
+          </ul>
+        </div>
+
+        <!-- Client Configuration -->
+        <div class="callout callout-info" style="margin-top: 32px;">
+          <strong>Connecting the Frontend to your Production Backend:</strong><br>
+          In <code>dev/app.js</code>, configure the remote backend URL at the top of the file:
+          <pre style="margin-top: 8px;"><code>const API_BASE_URL = window.location.hostname === 'localhost' 
+  ? '' 
+  : 'https://gtac-ref.ncra.tifr.res.in'; // Your production server URL</code></pre>
         </div>
       </section>
 

@@ -24,7 +24,7 @@
       <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
       <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
       <a href="../referees.html" class="doc-nav-link cta-link" style="background: #ea580c; border-color: #ea580c;" target="_blank">Directory ↗</a>
-      <span class="version-badge">v01.00.14</span>
+      <span class="version-badge">v01.00.15</span>
     </nav>
   </header>
 
@@ -54,6 +54,7 @@
         <li class="sidebar-item"><a href="#half-initials" class="sidebar-link">Half-Initials Matching</a></li>
         <li class="sidebar-item"><a href="#self-preference" class="sidebar-link">Self-Entry Preference</a></li>
         <li class="sidebar-item"><a href="#dual-mode" class="sidebar-link">Dual-Mode Operation</a></li>
+        <li class="sidebar-item"><a href="#deployment-options" class="sidebar-link">🚀 Production Setup Options</a></li>
       </ul>
     </aside>
 
@@ -357,6 +358,65 @@
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <section id="deployment-options" class="doc-section">
+        <h2>🚀 Production Deployment & Central Database Setup Options</h2>
+        <p class="doc-lead">
+          Currently, the web form on GitHub Pages runs as a high-performance static client that securely verifies credentials and records user submissions in the visitor's local browser session (<code>localStorage</code>). To collect all proposal submissions and referee registrations into a single authoritative central database from anywhere in the world, choose from the following production setup architectures:
+        </p>
+
+        <div class="card-grid" style="margin-top: 24px;">
+          <div class="feature-card">
+            <span class="feature-icon">🏛️</span>
+            <h3>Option 1: NCRA / Institute Server (Recommended)</h3>
+            <p>Deploy the zero-dependency Python server (<code>server.py</code>) directly on an internal or public NCRA-TIFR virtual machine or Linux server.</p>
+            <ul style="margin-top: 10px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; padding-left: 18px;">
+              <li>Run <code>python3 dev/server.py 8080</code> under <code>systemd</code> or <code>supervisord</code>.</li>
+              <li>Configure Nginx reverse proxy with SSL: <code>https://gtac-ref.ncra.tifr.res.in</code>.</li>
+              <li>Submissions write directly to authoritative CSV files on institutional storage.</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">☁️</span>
+            <h3>Option 2: Cloud Container Hosting (Render / Railway)</h3>
+            <p>Deploy the backend to a cloud hosting platform running a persistent volume for the <code>database/</code> directory.</p>
+            <ul style="margin-top: 10px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; padding-left: 18px;">
+              <li>Zero config Python deployment on Render, Railway, or PythonAnywhere.</li>
+              <li>Docker support: <code>docker run -p 8080:8080 -v ./database:/app/database gtac_ref</code>.</li>
+              <li>Provides automatic HTTPS and global edge routing.</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">✉️</span>
+            <h3>Option 3: GTAC Secretariat Email & JSON Dispatch</h3>
+            <p>Enable direct email or file export for proposal submitters without hosting any public backend server.</p>
+            <ul style="margin-top: 10px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; padding-left: 18px;">
+              <li>Submitter receives a clean downloadable <code>submission_SUB_XXXX.json</code> upon form completion.</li>
+              <li>Pre-formatted "Email to GTAC Secretariat" button launches user's email client addressed to <code>gtac@ncra.tifr.res.in</code>.</li>
+              <li>Zero infrastructure costs, maximum privacy, and manual committee audit.</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <span class="feature-icon">🤖</span>
+            <h3>Option 4: GitHub Actions & Webhook Automation</h3>
+            <p>Connect form submissions to a lightweight webhook (or GitHub Repository Dispatch / Issue creation).</p>
+            <ul style="margin-top: 10px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; padding-left: 18px;">
+              <li>Form posts payload to a GitHub Actions webhook or serverless endpoint.</li>
+              <li>GitHub Action automatically commits new rows into <code>Referee_database_A.csv</code>.</li>
+              <li>Maintains full Git audit trail for every submitted recommendation.</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="callout callout-info" style="margin-top: 24px;">
+          <strong>How to point the web form to your remote backend:</strong><br>
+          In <code>dev/app.js</code>, configure the backend endpoint constant:<br>
+          <code>const API_BASE_URL = window.location.hostname === 'localhost' ? '' : 'https://gtac-ref.ncra.tifr.res.in';</code>
         </div>
       </section>
 
