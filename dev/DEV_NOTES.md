@@ -10,12 +10,24 @@ The following table summarizes all files and directories in this repository and 
 
 | Path | Type | Description |
 | :--- | :--- | :--- |
-| `dev/` | Directory | Dedicated development workspace where all project development, module creation, and experimentation take place. |
-| `dev/DEV_NOTES.md` | File | Running developer activity log, file manifest, task records, and verification history (legacy notes from prior projects removed). |
+| `dev/` | Directory | Dedicated development workspace where all active development and experimentation take place. |
+| `dev/index.html` | File | Main responsive HTML5 form for proposal submitters and referee suggestions. |
+| `dev/style.css` | File | Modern stylesheet featuring GTAC branding, card layouts, and verified/suggested status badges. |
+| `dev/app.js` | File | Client-side application logic: dynamic referee cards, self-referee auto-fill & locking, and live DB lookup. |
+| `dev/server.py` | Executable | Lightweight zero-dependency Python 3 HTTP & REST API server handling static assets, lookup, and submissions. |
+| `dev/DEV_NOTES.md` | File | Running developer activity log, file manifest, task records, and verification history (legacy notes removed). |
 | `dev/DEV_NOTES` | Symlink | Convenience link pointing to `dev/DEV_NOTES.md`. |
-| `dev/util` | Symlink | Convenience link pointing to the root `util` CLI script. |
-| `util` | Executable | Python 3 CLI management script supporting `--version`, `--git-push`, `--change-branch`, and `--release`. |
-| `VERSION` | File | Plaintext file containing the current release version in `ZZ.YY.XX` format (initialized at `01.00.00`). |
+| `dev/util` | Symlink | Convenience link pointing to root `util` CLI script. |
+| `dev/database` | Symlink | Convenience link pointing to the `database/` directory. |
+| `database/` | Directory | Data storage directory containing ASCII lists and CSV databases. |
+| `database/affiliations.txt` | File | ASCII file mapping affiliation IDs (`AFF_XXX`) to institutions/observatories; extendable via "Others". |
+| `database/expertise.txt` | File | ASCII file mapping expertise IDs (`EXP_XX`) to astronomy/instrumentation fields; extendable via "Others". |
+| `database/career_status.txt` | File | ASCII file listing career stages (`CAR_XX`) from Undergraduate to Faculty and Others. |
+| `database/Referee_database_A.csv` | File | Primary referee registry (`unique_id`, `referee_name`, `email`, `affiliation`, `expertise`, `career_status`, `referee_status`, `available`). |
+| `database/form_submissions.csv` | File | Records of all proposal submitter responses and referee recommendations. |
+| `index.html` | Symlink | Root convenience link pointing to `dev/index.html`. |
+| `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--change-branch`, and `--release`. |
+| `VERSION` | File | Plaintext file containing current release version in `ZZ.YY.XX` format. |
 | `AGENT_RULES.md` | File | Coding agent guidelines, prompt logging protocols, and multi-agent coordination standards for `GTAC_REF`. |
 | `README.md` | File | Project overview, directory layout, and developer onboarding instructions. |
 | `.gitignore` | File | Git ignore specifications for temporary files, python cache artifacts, OS files, and release archives. |
@@ -39,6 +51,55 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 16:15:00 IST
+
+Prompt / Request
+- Implement an HTML form with submitter fields: Name, Email, Affiliation (dropdown from ASCII file with "Others" extension), Career Status (Undergraduate, PhD Student, Postdoc, Faculty, Scientist, Engineer, Others), Expertise (dropdown/multi-select from ASCII file with "Others" extension), and Review Willingness (This cycle: yes/no, Future cycles: yes/no).
+- Add dynamic "Referee Suggestions" section:
+  - If review willingness is "yes" for either this or future cycle, automatically populate "Referee Suggestion - 1" with submitter's info and lock it (non-editable).
+  - Provide a `+` button to dynamically append new referee cards ("Referee Suggestion - 2", "3", etc.).
+  - Each referee card requires Name, Email, Affiliation, and Expertise.
+  - Integrate real-time verification against `Referee_database_A`:
+    - If referee exists and is verified: auto-fill all fields and lock as non-editable with verified notice.
+    - If referee exists and is suggested: auto-fill fields as suggestions, leaving them editable.
+    - If referee is new: allow manual entry or AI (Gemini) suggestion, assigning a unique ID on submission.
+- Create the `database/` folder with ASCII files (`affiliations.txt`, `expertise.txt`, `career_status.txt`), `Referee_database_A.csv`, and `form_submissions.csv`.
+- Update `util` to support `--serve` to run the application locally.
+
+Changes Made
+- `database/`:
+  - Created `database/affiliations.txt` with 30 initial observatories/universities and `AFF_XXX` IDs.
+  - Created `database/expertise.txt` with 18 radio astronomy/astrophysics domains and `EXP_XX` IDs.
+  - Created `database/career_status.txt` with career stage entries and `CAR_XX` IDs.
+  - Created `database/Referee_database_A.csv` containing columns `unique_id,referee_name,email,affiliation,expertise,career_status,referee_status,available` with sample verified and suggested referees.
+  - Created `database/form_submissions.csv` to track proposal submissions.
+  - Created symlink `dev/database -> ../database`.
+- `dev/`:
+  - Created `dev/index.html`: Complete form interface with submitter fields, willingness options, dynamic referee cards, autocomplete wrappers, and submission modal.
+  - Created `dev/style.css`: Clean, responsive UI with GTAC styling, distinct badges for verified/suggested/self/new statuses, and modal dialog.
+  - Created `dev/app.js`: Interactive logic for ASCII data loading, "Others" field toggling, self-referee locking on review willingness, dynamic `+` addition/removal of referee cards, debounced database lookup, verified locking, and form submission.
+  - Created `dev/server.py`: Python standard library HTTP/REST server providing `/api/database`, `/api/referees/lookup`, `/api/submit` (auto-incrementing unique referee IDs and appending new affiliations/expertise to ASCII files), and `/api/gemini-suggest`.
+  - Created root symlink `index.html -> dev/index.html`.
+- `util`:
+  - Added `--serve [PORT]` (alias `--run [PORT]`) to start the server with `./util --serve` (default port 8080).
+  - Bumped version to `01.00.01`.
+
+Verification
+- Started `dev/server.py` on test port 8899 in background.
+- Verified `GET /api/database` returns parsed ASCII affiliations, expertise, career statuses, and referees.
+- Verified `GET /api/referees/lookup?q=yashwant` correctly returns `REF_0001` with status `verified`.
+- Verified `GET /api/referees/lookup?q=ananda` correctly returns `REF_0008` with status `suggested`.
+- Verified `POST /api/gemini-suggest` provides affiliation, email domain, and expertise recommendations.
+- Verified `POST /api/submit` records submission in `form_submissions.csv`, assigns `REF_0011` and `REF_0012` to new referees in `Referee_database_A.csv`, and appends new affiliation `AFF_031` to `affiliations.txt`.
+- Reset test data in database files back to clean initial state.
+- Checked `./util --help` displays `--serve [PORT]`.
+
+Notes
+- Gemini live suggestions use `GEMINI_API_KEY` when present; otherwise system falls back to smart knowledge base heuristics.
+- All new referee suggestions submitted through the form receive unique sequential `REF_XXXX` IDs and status `suggested` with `available: true`.
 
 ---
 

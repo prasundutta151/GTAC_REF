@@ -1,0 +1,18 @@
+EXP_01 | Pulsars, Fast Transients & Neutron Stars
+EXP_02 | Epoch of Reionization (EoR) & 21cm Cosmology
+EXP_03 | Extragalactic Neutral Hydrogen (HI) & Galaxy Dynamics
+EXP_04 | Active Galactic Nuclei (AGN) & Relativistic Radio Jets
+EXP_05 | Galaxy Clusters, Relics, Halos & Cosmic Web
+EXP_06 | Supernovae, Supernova Remnants (SNRs) & Planetary Nebulae
+EXP_07 | Interstellar Medium (ISM), Magnetic Fields & Galactic Structure
+EXP_08 | Solar Radio Physics, Space Weather & Heliosphere
+EXP_09 | Star Formation & Molecular Clouds
+EXP_10 | Gamma-Ray Bursts (GRBs), Fast Radio Bursts (FRBs) & Transients
+EXP_11 | Low-Frequency Radio Interferometry Techniques & Algorithms
+EXP_12 | Widefield Calibration, Ionospheric Corrections & Imaging
+EXP_13 | Radio Frequency Interference (RFI) Mitigation & DSP
+EXP_14 | Radio Instrumentation, Receivers & Digital Backends
+EXP_15 | Multi-Wavelength Astronomy (Optical, X-ray, Radio Surveys)
+EXP_16 | Gravitational Waves & Multi-Messenger Astronomy
+EXP_17 | Theoretical Astrophysics & Magnetohydrodynamic (MHD) Simulations
+EXP_18 | Machine Learning & Big Data in Radio Astronomy

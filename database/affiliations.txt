@@ -1,0 +1,30 @@
+AFF_001 | National Centre for Radio Astrophysics (NCRA-TIFR), Pune
+AFF_002 | Inter-University Centre for Astronomy and Astrophysics (IUCAA), Pune
+AFF_003 | Raman Research Institute (RRI), Bengaluru
+AFF_004 | Indian Institute of Science (IISc), Bengaluru
+AFF_005 | Tata Institute of Fundamental Research (TIFR), Mumbai
+AFF_006 | Indian Institute of Astrophysics (IIA), Bengaluru
+AFF_007 | Physical Research Laboratory (PRL), Ahmedabad
+AFF_008 | Indian Institute of Technology Bombay (IIT Bombay)
+AFF_009 | Indian Institute of Technology Kanpur (IIT Kanpur)
+AFF_010 | Indian Institute of Technology Kharagpur (IIT Kharagpur)
+AFF_011 | Indian Institute of Technology Madras (IIT Madras)
+AFF_012 | Indian Institute of Technology Delhi (IIT Delhi)
+AFF_013 | Indian Institute of Technology (BHU) Varanasi
+AFF_014 | Indian Institute of Technology Indore (IIT Indore)
+AFF_015 | National Radio Astronomy Observatory (NRAO), Socorro/Charlottesville, USA
+AFF_016 | European Southern Observatory (ESO), Garching, Germany
+AFF_017 | Max Planck Institute for Radio Astronomy (MPIfR), Bonn, Germany
+AFF_018 | Jodrell Bank Centre for Astrophysics, University of Manchester, UK
+AFF_019 | University of Cambridge, Cavendish Astrophysics, UK
+AFF_020 | University of Oxford, Department of Physics, UK
+AFF_021 | California Institute of Technology (Caltech), Pasadena, USA
+AFF_022 | Harvard-Smithsonian Center for Astrophysics (CfA), Cambridge, USA
+AFF_023 | ASTRON (Netherlands Institute for Radio Astronomy), Dwingeloo, Netherlands
+AFF_024 | CSIRO Space and Astronomy, Sydney, Australia
+AFF_025 | South African Radio Astronomy Observatory (SARAO), Cape Town, South Africa
+AFF_026 | National Astronomical Observatories, Chinese Academy of Sciences (NAOC), China
+AFF_027 | University of Western Australia / ICRAR, Perth, Australia
+AFF_028 | Dunlap Institute for Astronomy & Astrophysics, University of Toronto, Canada
+AFF_029 | Inter-University Institute for Data Intensive Astronomy (IDIA), South Africa
+AFF_030 | University of California, Berkeley (Radio Astronomy Lab), USA

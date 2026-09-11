@@ -331,6 +331,15 @@ def parse_args() -> argparse.Namespace:
         help="Commit message for --git-push"
     )
     parser.add_argument(
+        "--serve",
+        "--run",
+        nargs="?",
+        const=8080,
+        type=int,
+        metavar="PORT",
+        help="Start the GTAC Referee Form local web server (default port 8080)"
+    )
+    parser.add_argument(
         "--status",
         action="store_true",
         help="Show project version and git status"
@@ -371,6 +380,15 @@ def main() -> int:
     if args.version is not None:
         cmd_version(args.version)
         action_taken = True
+
+    if args.serve is not None:
+        port = args.serve or 8080
+        server_script = PROJECT_ROOT / "dev" / "server.py"
+        try:
+            subprocess.run([sys.executable, str(server_script), str(port)])
+        except KeyboardInterrupt:
+            pass
+        return 0
 
     if args.release:
         cmd_release()

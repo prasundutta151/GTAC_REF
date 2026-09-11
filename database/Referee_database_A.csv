@@ -1,0 +1,11 @@
+unique_id,referee_name,email,affiliation,expertise,career_status,referee_status,available
+REF_0001,Prof. Yashwant Gupta,ygupta@ncra.tifr.res.in,AFF_001,EXP_01;EXP_14,CAR_04,verified,true
+REF_0002,Prof. Jayaram Chengalur,chengalur@ncra.tifr.res.in,AFF_001,EXP_03;EXP_11,CAR_04,verified,true
+REF_0003,Prof. Somak Raychaudhury,somak@iucaa.in,AFF_002,EXP_04;EXP_05,CAR_04,verified,true
+REF_0004,Dr. Bhaswati Bhattacharyya,bhaswati@ncra.tifr.res.in,AFF_001,EXP_01;EXP_10,CAR_05,verified,true
+REF_0005,Dr. Nirupam Roy,nroy@iisc.ac.in,AFF_004,EXP_03;EXP_07,CAR_04,verified,true
+REF_0006,Dr. Preeti Kharb,kharb@ncra.tifr.res.in,AFF_001,EXP_04;EXP_15,CAR_05,verified,true
+REF_0007,Dr. Ruta Kale,ruta@ncra.tifr.res.in,AFF_001,EXP_05;EXP_12,CAR_05,verified,true
+REF_0008,Dr. Ananda Hota,ananda.hota@cbs.ac.in,AFF_005,EXP_03;EXP_04,CAR_05,suggested,true
+REF_0009,Dr. Kuntal Misra,kuntal@aries.res.in,AFF_007,EXP_10;EXP_15,CAR_05,suggested,true
+REF_0010,Dr. Abhirup Datta,abhirup.datta@iiti.ac.in,AFF_014,EXP_02;EXP_12,CAR_04,suggested,true

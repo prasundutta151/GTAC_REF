@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTAC Proposal & Referee Registration Portal</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+  <div class="app-container">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-content">
+        <div class="brand-badge">NCRA • TIFR • GMRT</div>
+        <h1>GTAC Proposal & Referee Registration</h1>
+        <p class="subtitle">Giant Metrewave Radio Telescope Time Allocation Committee (GTAC) Reviewer Portal</p>
+      </div>
+    </header>
+
+    <!-- Main Form -->
+    <main class="main-content">
+      <form id="gtac-form" novalidate>
+        
+        <!-- SECTION 1: Submitter Information -->
+        <section class="card section-card">
+          <div class="card-header">
+            <span class="step-num">1</span>
+            <div>
+              <h2>Your Information</h2>
+              <p class="card-desc">Please provide your academic profile and review availability.</p>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- 1. Name -->
+            <div class="form-group">
+              <label for="user_name">1. Your Name <span class="required">*</span></label>
+              <input type="text" id="user_name" name="user_name" placeholder="e.g. Dr. Rajesh Sharma" required>
+              <span class="field-error" id="err-user_name"></span>
+            </div>
+
+            <!-- 2. Email -->
+            <div class="form-group">
+              <label for="user_email">2. Your Email ID <span class="required">*</span></label>
+              <input type="email" id="user_email" name="user_email" placeholder="e.g. rsharma@ncra.tifr.res.in" required>
+              <span class="field-error" id="err-user_email"></span>
+            </div>
+          </div>
+
+          <div class="grid-2">
+            <!-- 3. Affiliation -->
+            <div class="form-group">
+              <label for="user_affiliation">3. Your Affiliation <span class="required">*</span></label>
+              <select id="user_affiliation" name="user_affiliation" required>
+                <option value="">-- Select Affiliation from Database --</option>
+                <!-- Populated dynamically from database/affiliations.txt -->
+                <option value="OTHERS">+ Others (Enter new institution)</option>
+              </select>
+              <div id="user_affiliation_other_box" class="other-input-box hidden">
+                <input type="text" id="user_affiliation_other" placeholder="Enter new affiliation name to add to database">
+                <small class="hint">This new affiliation will be registered into database/affiliations.txt</small>
+              </div>
+              <span class="field-error" id="err-user_affiliation"></span>
+            </div>
+
+            <!-- 4. Career Status -->
+            <div class="form-group">
+              <label for="user_career_status">4. Your Career Status <span class="required">*</span></label>
+              <select id="user_career_status" name="user_career_status" required>
+                <option value="">-- Select Career Status --</option>
+                <!-- Populated dynamically from database/career_status.txt -->
+              </select>
+              <span class="field-error" id="err-user_career_status"></span>
+            </div>
+          </div>
+
+          <!-- 5. Expertise -->
+          <div class="form-group">
+            <label>5. Your Expertise <span class="required">*</span> <span class="hint-inline">(Select one or more areas)</span></label>
+            <div id="user-expertise-container" class="expertise-tag-grid">
+              <!-- Dynamically populated from database/expertise.txt -->
+            </div>
+            <div class="others-exp-row">
+              <label class="checkbox-label other-exp-toggle">
+                <input type="checkbox" id="user_expertise_other_check" value="OTHERS">
+                <span>+ Others (Add custom expertise topic)</span>
+              </label>
+              <input type="text" id="user_expertise_other_input" class="hidden" placeholder="Enter new expertise area to add to database">
+            </div>
+            <span class="field-error" id="err-user_expertise"></span>
+          </div>
+
+          <!-- 6. Review Willingness -->
+          <div class="form-group review-willingness-card">
+            <label class="group-title">6. Do you wish to review a GTAC proposal? <span class="required">*</span></label>
+            <p class="section-notice">
+              <span class="info-icon">ℹ️</span> Note: Selecting "Yes" for either cycle will automatically register and lock your profile as <strong>Referee Suggestion - 1</strong>.
+            </p>
+            
+            <div class="willingness-grid">
+              <div class="willingness-item">
+                <span class="cycle-title">This cycle:</span>
+                <div class="radio-options">
+                  <label class="radio-label">
+                    <input type="radio" name="review_this_cycle" value="yes">
+                    <span class="radio-custom"></span> Yes
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="review_this_cycle" value="no" checked>
+                    <span class="radio-custom"></span> No
+                  </label>
+                </div>
+              </div>
+
+              <div class="willingness-item">
+                <span class="cycle-title">Future cycles:</span>
+                <div class="radio-options">
+                  <label class="radio-label">
+                    <input type="radio" name="review_future_cycles" value="yes">
+                    <span class="radio-custom"></span> Yes
+                  </label>
+                  <label class="radio-label">
+                    <input type="radio" name="review_future_cycles" value="no" checked>
+                    <span class="radio-custom"></span> No
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- SECTION 2: Referee Suggestions -->
+        <section class="card section-card">
+          <div class="card-header section-header-action">
+            <div class="header-left">
+              <span class="step-num">2</span>
+              <div>
+                <h2>Referee Suggestions</h2>
+                <p class="card-desc">Suggest suitable peer reviewers. System verifies against <code>Referee_database_A</code> in real time.</p>
+              </div>
+            </div>
+            <button type="button" id="btn-add-referee" class="btn btn-secondary">
+              <span class="btn-icon">+</span> Add Referee Suggestion
+            </button>
+          </div>
+
+          <div id="referee-list" class="referee-cards-container">
+            <!-- Referee blocks rendered dynamically here -->
+          </div>
+        </section>
+
+        <!-- Form Submission Footer -->
+        <div class="form-actions">
+          <button type="submit" id="btn-submit" class="btn btn-primary btn-large">
+            Submit Proposal & Referees
+          </button>
+          <button type="reset" id="btn-reset" class="btn btn-outline">
+            Reset Form
+          </button>
+        </div>
+      </form>
+    </main>
+
+    <!-- Submission Modal -->
+    <div id="modal-success" class="modal hidden">
+      <div class="modal-dialog">
+        <div class="modal-icon">🎉</div>
+        <h3 id="modal-title">Form Submitted Successfully</h3>
+        <div id="modal-body" class="modal-body"></div>
+        <div class="modal-actions">
+          <button type="button" id="btn-close-modal" class="btn btn-primary">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
