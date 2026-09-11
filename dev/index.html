@@ -79,16 +79,16 @@
 
           <!-- 5. Expertise -->
           <div class="form-group">
-            <label>5. Your Expertise <span class="required">*</span> <span class="hint-inline">(Select one or more areas)</span></label>
-            <div id="user-expertise-container" class="expertise-tag-grid">
-              <!-- Dynamically populated from database/expertise.txt -->
-            </div>
-            <div class="others-exp-row">
-              <label class="checkbox-label other-exp-toggle">
-                <input type="checkbox" id="user_expertise_other_check" value="OTHERS">
-                <span>+ Others (Add custom expertise topic)</span>
-              </label>
-              <input type="text" id="user_expertise_other_input" class="hidden" placeholder="Enter new expertise area to add to database">
+            <label for="user_expertise">5. Your Expertise <span class="required">*</span> <span class="hint-inline">(Select one or more from dropdown list)</span></label>
+            <select id="user_expertise" name="user_expertise">
+              <option value="">-- Select Expertise from list --</option>
+              <!-- Populated dynamically from database/expertise.txt -->
+              <option value="OTHERS">+ Others (Enter new expertise topic)</option>
+            </select>
+            <div id="user_expertise_selected" class="selected-tags-container"></div>
+            <div id="user_expertise_other_box" class="other-input-box hidden">
+              <input type="text" id="user_expertise_other" placeholder="Enter new expertise area to add to database">
+              <small class="hint">This new expertise will be registered into database/expertise.txt</small>
             </div>
             <span class="field-error" id="err-user_expertise"></span>
           </div>

@@ -52,6 +52,33 @@ Notes
 - Relevant context, edge cases, or next steps.
 ```
 
+## 2026-09-11 16:20:00 IST
+
+Prompt / Request
+- Update the expertise area to be a select-from-list dropdown menu, similar to the affiliation selector.
+
+Changes Made
+- `dev/index.html`:
+  - Replaced checkbox tag grid with `<select id="user_expertise">` dropdown loaded dynamically from `database/expertise.txt`.
+  - Added `#user_expertise_selected` container for selected expertise chips with individual remove buttons.
+  - Retained dynamic `+ Others` text box for entering custom expertise topics into the database.
+- `dev/style.css`:
+  - Added modern styling for `.tag-chip` with hover delete controls, locked states for verified/self reviewers, and `.selected-tags-container`.
+- `dev/app.js`:
+  - Implemented modular `ExpertisePicker` class managing dropdown selection, dynamic badge creation, removal, and "Others" expansion.
+  - Updated referee cards to use `ExpertisePicker` for both submitter and referee blocks.
+  - Linked self-referee synchronization and verified referee locking with `expPicker.setDisabled(true)` and locked tags.
+- `util`:
+  - Bumped version to `01.00.03`.
+
+Verification
+- Verified HTML rendering with `<select id="user_expertise">` and referee `<select class="ref-exp-select">`.
+- Confirmed CSS chip and remove button styling.
+- Bumped version to `01.00.03`.
+
+Notes
+- Allows clean, intuitive selection of multiple expertise areas from a dropdown list while maintaining the ability to add new entries via "Others".
+
 ---
 
 ## 2026-09-11 16:18:00 IST

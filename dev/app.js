@@ -12,27 +12,164 @@ const state = {
   refereeBlocks: [] // list of block IDs
 };
 
+// Submitter Expertise Picker Instance
+let userExpPicker = null;
+
 // DOM References
 const form = document.getElementById('gtac-form');
 const userAffiliationSelect = document.getElementById('user_affiliation');
 const userAffOtherBox = document.getElementById('user_affiliation_other_box');
 const userAffOtherInput = document.getElementById('user_affiliation_other');
 const userCareerSelect = document.getElementById('user_career_status');
-const userExpertiseContainer = document.getElementById('user-expertise-container');
-const userExpOtherCheck = document.getElementById('user_expertise_other_check');
-const userExpOtherInput = document.getElementById('user_expertise_other_input');
 const refereeContainer = document.getElementById('referee-list');
 const btnAddReferee = document.getElementById('btn-add-referee');
 const modalSuccess = document.getElementById('modal-success');
 const btnCloseModal = document.getElementById('btn-close-modal');
 
+/**
+ * Reusable Expertise Selector Class (Select from Dropdown List + Chips)
+ */
+class ExpertisePicker {
+  constructor(selectEl, selectedContainerEl, otherBoxEl, otherInputEl, onChangeCallback) {
+    this.selectEl = selectEl;
+    this.selectedContainerEl = selectedContainerEl;
+    this.otherBoxEl = otherBoxEl;
+    this.otherInputEl = otherInputEl;
+    this.onChangeCallback = onChangeCallback || (() => {});
+    this.selectedIds = [];
+    this.disabled = false;
+
+    this.init();
+  }
+
+  init() {
+    this.populate();
+    this.selectEl.addEventListener('change', () => {
+      const val = this.selectEl.value;
+      if (!val) return;
+
+      if (val === 'OTHERS') {
+        this.otherBoxEl.classList.remove('hidden');
+        if (this.otherInputEl) this.otherInputEl.focus();
+        if (!this.selectedIds.includes('OTHERS')) {
+          this.selectedIds.push('OTHERS');
+        }
+      } else {
+        if (!this.selectedIds.includes(val)) {
+          this.selectedIds.push(val);
+          this.renderTags();
+        }
+      }
+      this.selectEl.value = '';
+      this.onChangeCallback();
+    });
+
+    if (this.otherInputEl) {
+      this.otherInputEl.addEventListener('input', () => {
+        this.onChangeCallback();
+      });
+    }
+  }
+
+  populate() {
+    populateSelect(this.selectEl, state.expertise, true);
+  }
+
+  renderTags() {
+    this.selectedContainerEl.innerHTML = '';
+    this.selectedIds.forEach(id => {
+      if (id === 'OTHERS') return; // 'OTHERS' is handled via otherBoxEl
+      const item = state.expertise.find(e => e.id === id);
+
+      const chip = document.createElement('span');
+      chip.className = `tag-chip ${this.disabled ? 'locked' : ''}`;
+      chip.innerHTML = `
+        <strong>${id}</strong>
+        <span>${item ? item.label : id}</span>
+        ${!this.disabled ? '<button type="button" class="chip-remove" title="Remove">&times;</button>' : ''}
+      `;
+
+      if (!this.disabled) {
+        const removeBtn = chip.querySelector('.chip-remove');
+        if (removeBtn) {
+          removeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.remove(id);
+          });
+        }
+      }
+
+      this.selectedContainerEl.appendChild(chip);
+    });
+  }
+
+  remove(id) {
+    this.selectedIds = this.selectedIds.filter(x => x !== id);
+    this.renderTags();
+    this.onChangeCallback();
+  }
+
+  getSelected() {
+    const list = this.selectedIds.filter(x => x !== 'OTHERS');
+    if (this.selectedIds.includes('OTHERS') && this.otherInputEl && this.otherInputEl.value.trim()) {
+      list.push('OTHERS');
+    }
+    return list;
+  }
+
+  getOtherText() {
+    return this.otherInputEl ? this.otherInputEl.value.trim() : '';
+  }
+
+  setSelected(ids, otherText = '') {
+    this.selectedIds = Array.isArray(ids) ? [...ids] : (ids ? ids.split(';').map(s => s.trim()).filter(Boolean) : []);
+    if (otherText) {
+      if (!this.selectedIds.includes('OTHERS')) this.selectedIds.push('OTHERS');
+      this.otherBoxEl.classList.remove('hidden');
+      if (this.otherInputEl) this.otherInputEl.value = otherText;
+    } else if (this.selectedIds.includes('OTHERS')) {
+      this.otherBoxEl.classList.remove('hidden');
+    } else {
+      this.otherBoxEl.classList.add('hidden');
+      if (this.otherInputEl) this.otherInputEl.value = '';
+    }
+    this.renderTags();
+  }
+
+  setDisabled(disabled) {
+    this.disabled = disabled;
+    this.selectEl.disabled = disabled;
+    if (this.otherInputEl) this.otherInputEl.disabled = disabled;
+    this.renderTags();
+  }
+
+  clear() {
+    this.selectedIds = [];
+    if (this.otherInputEl) this.otherInputEl.value = '';
+    this.otherBoxEl.classList.add('hidden');
+    this.selectEl.value = '';
+    this.renderTags();
+  }
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async () => {
+  initSubmitterExpertisePicker();
   await loadDatabase();
   setupEventListeners();
   // Initially add at least 1 referee block
   addRefereeBlock();
 });
+
+function initSubmitterExpertisePicker() {
+  userExpPicker = new ExpertisePicker(
+    document.getElementById('user_expertise'),
+    document.getElementById('user_expertise_selected'),
+    document.getElementById('user_expertise_other_box'),
+    document.getElementById('user_expertise_other'),
+    syncSelfRefereeIfApplicable
+  );
+}
 
 /**
  * Fetch database items from backend API
@@ -49,7 +186,15 @@ async function loadDatabase() {
 
     populateSelect(userAffiliationSelect, state.affiliations, true);
     populateSelect(userCareerSelect, state.career_status, false);
-    renderExpertiseTags(userExpertiseContainer, state.expertise, 'user_exp');
+    userExpPicker.populate();
+
+    // Re-populate all active referee cards
+    state.refereeBlocks.forEach(blockId => {
+      const card = document.getElementById(blockId);
+      if (card && card.expPicker) {
+        card.expPicker.populate();
+      }
+    });
   } catch (err) {
     console.error('Failed to load database from API, using offline fallback:', err);
     loadOfflineFallback();
@@ -91,7 +236,7 @@ function loadOfflineFallback() {
   ];
   populateSelect(userAffiliationSelect, state.affiliations, true);
   populateSelect(userCareerSelect, state.career_status, false);
-  renderExpertiseTags(userExpertiseContainer, state.expertise, 'user_exp');
+  userExpPicker.populate();
 }
 
 /**
@@ -122,22 +267,6 @@ function populateSelect(selectEl, items, includeOthers = false) {
 }
 
 /**
- * Render expertise checkboxes
- */
-function renderExpertiseTags(containerEl, items, prefix) {
-  containerEl.innerHTML = '';
-  items.forEach(item => {
-    const label = document.createElement('label');
-    label.className = 'checkbox-label';
-    label.innerHTML = `
-      <input type="checkbox" name="${prefix}" value="${item.id}">
-      <span><strong>${item.id}</strong>: ${item.label}</span>
-    `;
-    containerEl.appendChild(label);
-  });
-}
-
-/**
  * Setup Event Listeners
  */
 function setupEventListeners() {
@@ -155,25 +284,10 @@ function setupEventListeners() {
 
   userAffOtherInput.addEventListener('input', syncSelfRefereeIfApplicable);
 
-  // Expertise "Others" toggle
-  userExpOtherCheck.addEventListener('change', () => {
-    if (userExpOtherCheck.checked) {
-      userExpOtherInput.classList.remove('hidden');
-      userExpOtherInput.required = true;
-    } else {
-      userExpOtherInput.classList.add('hidden');
-      userExpOtherInput.required = false;
-    }
-    syncSelfRefereeIfApplicable();
-  });
-
-  userExpOtherInput.addEventListener('input', syncSelfRefereeIfApplicable);
-
   // Sync profile changes to Block 1 if self-volunteer is active
   document.getElementById('user_name').addEventListener('input', syncSelfRefereeIfApplicable);
   document.getElementById('user_email').addEventListener('input', syncSelfRefereeIfApplicable);
   userCareerSelect.addEventListener('change', syncSelfRefereeIfApplicable);
-  userExpertiseContainer.addEventListener('change', syncSelfRefereeIfApplicable);
 
   // Review willingness radio buttons
   document.querySelectorAll('input[name="review_this_cycle"], input[name="review_future_cycles"]').forEach(radio => {
@@ -197,7 +311,7 @@ function setupEventListeners() {
   form.addEventListener('reset', () => {
     setTimeout(() => {
       userAffOtherBox.classList.add('hidden');
-      userExpOtherInput.classList.add('hidden');
+      userExpPicker.clear();
       refereeContainer.innerHTML = '';
       state.refereeBlocks = [];
       state.refereeCount = 0;
@@ -272,25 +386,13 @@ function lockBlockAsSelf(cardEl) {
   }
   careerSelect.value = userCareer;
 
-  // Sync selected expertise checkboxes
-  const userSelectedExps = Array.from(userExpertiseContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-  const refExpContainer = cardEl.querySelector('.ref-expertise-grid');
-  refExpContainer.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.checked = userSelectedExps.includes(cb.value);
-  });
-
-  // Others in expertise
-  const refExpOtherCheck = cardEl.querySelector('.ref-exp-other-check');
-  const refExpOtherInput = cardEl.querySelector('.ref-exp-other-input');
-  refExpOtherCheck.checked = userExpOtherCheck.checked;
-  if (userExpOtherCheck.checked) {
-    refExpOtherInput.classList.remove('hidden');
-    refExpOtherInput.value = userExpOtherInput.value.trim();
-  } else {
-    refExpOtherInput.classList.add('hidden');
+  // Sync selected expertise via ExpertisePicker
+  if (cardEl.expPicker && userExpPicker) {
+    cardEl.expPicker.setSelected(userExpPicker.getSelected(), userExpPicker.getOtherText());
+    cardEl.expPicker.setDisabled(true);
   }
 
-  // Lock all inputs inside card
+  // Lock text & select inputs inside card
   setCardInputsDisabled(cardEl, true);
 
   // Hide AI button and delete button
@@ -319,8 +421,11 @@ function unlockBlockFromSelf(cardEl) {
   banner.className = 'referee-alert-banner alert-new';
   banner.innerHTML = '<span>✨ Suggest peer reviewer. System checks <code>Referee_database_A</code> automatically.</span>';
 
-  // Unlock inputs
+  // Unlock inputs & expertise picker
   setCardInputsDisabled(cardEl, false);
+  if (cardEl.expPicker) {
+    cardEl.expPicker.setDisabled(false);
+  }
 
   // Show AI button
   const btnAi = cardEl.querySelector('.btn-ai-suggest');
@@ -420,16 +525,16 @@ function addRefereeBlock() {
       </div>
     </div>
 
-    <!-- Expertise -->
+    <!-- Expertise Dropdown Menu & Selected Chips -->
     <div class="form-group">
-      <label>4. Referee Expertise <span class="required">*</span> <span class="hint-inline">(Select one or more areas)</span></label>
-      <div class="expertise-tag-grid ref-expertise-grid"></div>
-      <div class="others-exp-row">
-        <label class="checkbox-label">
-          <input type="checkbox" class="ref-exp-other-check" value="OTHERS">
-          <span>+ Others (Add custom expertise topic)</span>
-        </label>
-        <input type="text" class="ref-exp-other-input hidden" placeholder="Enter new expertise area to add to database">
+      <label>4. Referee Expertise <span class="required">*</span> <span class="hint-inline">(Select one or more from dropdown list)</span></label>
+      <select class="ref-exp-select">
+        <option value="">-- Select Expertise from list --</option>
+        <option value="OTHERS">+ Others (Enter new expertise topic)</option>
+      </select>
+      <div class="ref-exp-selected selected-tags-container"></div>
+      <div class="ref-exp-other-box other-input-box hidden">
+        <input type="text" class="ref-exp-other" placeholder="Enter new expertise area to add to database">
       </div>
       <span class="field-error err-ref-exp"></span>
     </div>
@@ -437,14 +542,18 @@ function addRefereeBlock() {
 
   refereeContainer.appendChild(card);
 
-  // Initialize dropdowns and expertise tags in this card
+  // Initialize dropdowns and ExpertisePicker in this card
   const affSelect = card.querySelector('.ref-aff');
   const careerSelect = card.querySelector('.ref-career');
-  const expGrid = card.querySelector('.ref-expertise-grid');
+  const expSelect = card.querySelector('.ref-exp-select');
+  const expSelected = card.querySelector('.ref-exp-selected');
+  const expOtherBox = card.querySelector('.ref-exp-other-box');
+  const expOtherInput = card.querySelector('.ref-exp-other');
 
   populateSelect(affSelect, state.affiliations, true);
   populateSelect(careerSelect, state.career_status, false);
-  renderExpertiseTags(expGrid, state.expertise, `ref_exp_${blockIndex}`);
+
+  card.expPicker = new ExpertisePicker(expSelect, expSelected, expOtherBox, expOtherInput, () => {});
 
   // Setup listeners for this card
   setupRefereeCardListeners(card, blockIndex);
@@ -471,8 +580,6 @@ function setupRefereeCardListeners(card, blockIndex) {
   const affSelect = card.querySelector('.ref-aff');
   const affOtherBox = card.querySelector('.ref-aff-other-box');
   const affOtherInput = card.querySelector('.ref-aff-other');
-  const expOtherCheck = card.querySelector('.ref-exp-other-check');
-  const expOtherInput = card.querySelector('.ref-exp-other-input');
   const btnRemove = card.querySelector('.btn-remove-referee');
   const btnAi = card.querySelector('.btn-ai-suggest');
 
@@ -484,17 +591,6 @@ function setupRefereeCardListeners(card, blockIndex) {
     } else {
       affOtherBox.classList.add('hidden');
       affOtherInput.required = false;
-    }
-  });
-
-  // Expertise Others
-  expOtherCheck.addEventListener('change', () => {
-    if (expOtherCheck.checked) {
-      expOtherInput.classList.remove('hidden');
-      expOtherInput.required = true;
-    } else {
-      expOtherInput.classList.add('hidden');
-      expOtherInput.required = false;
     }
   });
 
@@ -551,7 +647,7 @@ function removeRefereeBlock(blockId) {
 }
 
 /**
- * Re-index card numbers sequentially: "Referee Suggestion - 1", "2", etc.
+ * Re-index card numbers sequentially
  */
 function updateRefereeCardNumbers() {
   state.refereeBlocks.forEach((blockId, idx) => {
@@ -681,7 +777,6 @@ function populateCardWithReferee(card, ref) {
   const emailInput = card.querySelector('.ref-email');
   const affSelect = card.querySelector('.ref-aff');
   const careerSelect = card.querySelector('.ref-career');
-  const expGrid = card.querySelector('.ref-expertise-grid');
   const badge = card.querySelector('.status-badge');
   const banner = card.querySelector('.referee-alert-banner');
   const btnAi = card.querySelector('.btn-ai-suggest');
@@ -691,16 +786,15 @@ function populateCardWithReferee(card, ref) {
   if (ref.affiliation) affSelect.value = ref.affiliation;
   if (ref.career_status) careerSelect.value = ref.career_status;
 
-  // Expertise
-  const exps = (ref.expertise || '').split(';').map(s => s.trim());
-  expGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-    cb.checked = exps.includes(cb.value);
-  });
+  // Expertise populated via card.expPicker
+  if (card.expPicker) {
+    card.expPicker.setSelected(ref.expertise || '');
+  }
 
   const isVerified = (ref.referee_status === 'verified');
 
   if (isVerified) {
-    // Verified rule: "In case the referee status is verified, the form will be filled up, and not editable, mentioned referee exists and verified."
+    // Verified rule: non-editable
     card.className = 'referee-card is-verified';
     badge.className = 'status-badge badge-verified';
     badge.textContent = 'Verified (Locked)';
@@ -711,9 +805,10 @@ function populateCardWithReferee(card, ref) {
     `;
 
     setCardInputsDisabled(card, true);
+    if (card.expPicker) card.expPicker.setDisabled(true);
     if (btnAi) btnAi.classList.add('hidden');
   } else {
-    // Suggested rule: "IF a referee is identified to be already in the referee data base A, then the form for the referee will be filled up as suggession."
+    // Suggested rule: editable suggestion
     card.className = 'referee-card is-suggested';
     badge.className = 'status-badge badge-suggested';
     badge.textContent = 'Suggested in DB';
@@ -724,6 +819,7 @@ function populateCardWithReferee(card, ref) {
     `;
 
     setCardInputsDisabled(card, false);
+    if (card.expPicker) card.expPicker.setDisabled(false);
     if (btnAi) btnAi.classList.remove('hidden');
   }
 }
@@ -734,7 +830,6 @@ function populateCardWithReferee(card, ref) {
 function applyAiSuggestions(card, suggestions) {
   const emailInput = card.querySelector('.ref-email');
   const affSelect = card.querySelector('.ref-aff');
-  const expGrid = card.querySelector('.ref-expertise-grid');
   const banner = card.querySelector('.referee-alert-banner');
 
   if (suggestions.email_domain && !emailInput.value.includes('@')) {
@@ -748,12 +843,8 @@ function applyAiSuggestions(card, suggestions) {
     affSelect.value = suggestions.affiliation;
   }
 
-  if (suggestions.expertise && Array.isArray(suggestions.expertise)) {
-    expGrid.querySelectorAll('input[type="checkbox"]').forEach(cb => {
-      if (suggestions.expertise.includes(cb.value)) {
-        cb.checked = true;
-      }
-    });
+  if (suggestions.expertise && Array.isArray(suggestions.expertise) && card.expPicker) {
+    card.expPicker.setSelected(suggestions.expertise);
   }
 
   banner.className = 'referee-alert-banner alert-suggested';
@@ -777,6 +868,9 @@ function resetCardToNewIfNotSelf(card) {
   banner.innerHTML = '<span>✨ Suggest peer reviewer. System checks <code>Referee_database_A</code> automatically.</span>';
 
   setCardInputsDisabled(card, false);
+  if (card.expPicker) {
+    card.expPicker.setDisabled(false);
+  }
 }
 
 /**
@@ -794,10 +888,8 @@ async function handleFormSubmit(e) {
   const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value || 'no';
   const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value || 'no';
 
-  const userExpChecks = Array.from(userExpertiseContainer.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-  if (userExpOtherCheck.checked && userExpOtherInput.value.trim()) {
-    userExpChecks.push('OTHERS');
-  }
+  const userExpChecks = userExpPicker ? userExpPicker.getSelected() : [];
+  const userExpOtherText = userExpPicker ? userExpPicker.getOtherText() : '';
 
   let hasError = false;
 
@@ -824,7 +916,7 @@ async function handleFormSubmit(e) {
     hasError = true;
   }
   if (userExpChecks.length === 0) {
-    document.getElementById('err-user_expertise').textContent = 'Please select at least one area of expertise.';
+    document.getElementById('err-user_expertise').textContent = 'Please select at least one area of expertise from the list.';
     hasError = true;
   }
 
@@ -840,12 +932,8 @@ async function handleFormSubmit(e) {
     const rAffOther = card.querySelector('.ref-aff-other').value.trim();
     const rCareer = card.querySelector('.ref-career').value;
 
-    const rExp = Array.from(card.querySelector('.ref-expertise-grid').querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value);
-    const rExpOther = card.querySelector('.ref-exp-other-check').checked;
-    const rExpOtherText = card.querySelector('.ref-exp-other-input').value.trim();
-    if (rExpOther && rExpOtherText) {
-      rExp.push('OTHERS');
-    }
+    const rExp = card.expPicker ? card.expPicker.getSelected() : [];
+    const rExpOtherText = card.expPicker ? card.expPicker.getOtherText() : '';
 
     if (!rName) {
       card.querySelector('.err-ref-name').textContent = 'Referee name is mandatory.';
@@ -860,7 +948,7 @@ async function handleFormSubmit(e) {
       hasError = true;
     }
     if (rExp.length === 0) {
-      card.querySelector('.err-ref-exp').textContent = 'Select at least one expertise.';
+      card.querySelector('.err-ref-exp').textContent = 'Select at least one expertise from the list.';
       hasError = true;
     }
 
@@ -888,7 +976,7 @@ async function handleFormSubmit(e) {
     user_affiliation_other: userAffOther,
     user_career_status: userCareer,
     user_expertise: userExpChecks,
-    user_expertise_other: userExpOtherInput.value.trim(),
+    user_expertise_other: userExpOtherText,
     review_this_cycle: thisCycle,
     review_future_cycles: futureCycles,
     referees: refereesData
