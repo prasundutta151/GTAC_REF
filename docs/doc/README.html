@@ -23,7 +23,8 @@
       <a href="database_guide.html" class="doc-nav-link">Database Guide</a>
       <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
       <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
-      <span class="version-badge">v01.00.10</span>
+      <a href="../referees.html" class="doc-nav-link cta-link" style="background: #ea580c; border-color: #ea580c;" target="_blank">Directory ↗</a>
+      <span class="version-badge">v01.00.11</span>
     </nav>
   </header>
 
@@ -154,6 +155,45 @@
             <p>Double-click <a href="../index.html"><code>index.html</code></a> directly in your operating system's file manager (opening under the <code>file://</code> protocol).</p>
             <p>The application automatically detects the offline environment and instantly mounts the complete embedded database from <code>dev/db_data.js</code> with local session persistence.</p>
           </div>
+        </div>
+      </section>
+
+      <section id="referee-directory" class="doc-section">
+        <h2>Referee Directory & Lookup System</h2>
+        <p>
+          The platform includes a dedicated, responsive directory page at <a href="../referees.html" target="_blank"><code>referees.html</code></a> (alias <code>/lookup</code>) designed for committee members, administrators, and researchers to browse, filter, and inspect the referee registry.
+        </p>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>Specification</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Interactive Selection Form</strong></td>
+                <td>Top-mounted filter card supporting Name search (substring + half-initials), Email domain filter, Affiliation dropdown, Career Status dropdown, and scientific Expertise multi-select tags.</td>
+              </tr>
+              <tr>
+                <td><strong>Human-Readable Values</strong></td>
+                <td>All database IDs (<code>AFF_001</code>, <code>CAR_04</code>, <code>EXP_01;EXP_14</code>) are automatically mapped to full institutional titles, career stages, and scientific discipline chips.</td>
+              </tr>
+              <tr>
+                <td><strong>Rectangular Row Blocks</strong></td>
+                <td>Referees are displayed as clean rectangular cards in sequential row order with distinct typography for Name (Space Grotesk), ID & Email (JetBrains Mono), and Affiliation (Inter).</td>
+              </tr>
+              <tr>
+                <td><strong>Status Color Coding</strong></td>
+                <td>
+                  <span style="color: #ea580c; font-weight: bold;">🟠 Orange</span> for Verified Referees (available)<br>
+                  <span style="color: #ca8a04; font-weight: bold;">🟡 Yellow</span> for Suggested Referees (available)<br>
+                  <span style="color: #dc2626; font-weight: bold;">🔴 Red</span> for Not Available Referees (unavailable this cycle)
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </section>
 

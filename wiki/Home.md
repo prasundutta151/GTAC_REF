@@ -14,6 +14,7 @@ Anyone can access and use the form or browse the documentation via these public 
 | Resource | Public URL | Description |
 | :--- | :--- | :--- |
 | **Live Interactive Form** | [https://prasundutta151.github.io/GTAC_REF/](https://prasundutta151.github.io/GTAC_REF/) | The full, live, interactive HTML5 referee registration & suggestion form. |
+| **Referee Directory & Lookup** | [https://prasundutta151.github.io/GTAC_REF/referees.html](https://prasundutta151.github.io/GTAC_REF/referees.html) | Live searchable registry with human-readable values and color-coded status blocks (Orange, Yellow, Red). |
 | **Interactive HTML Docs** | [https://prasundutta151.github.io/GTAC_REF/doc/README.html](https://prasundutta151.github.io/GTAC_REF/doc/README.html) | Rich multi-page documentation with search, responsive sidebar, and guides. |
 | **GitHub Repository** | [https://github.com/prasundutta151/GTAC_REF](https://github.com/prasundutta151/GTAC_REF) | Main source code repository. |
 

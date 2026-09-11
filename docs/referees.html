@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTAC Referee Directory & Lookup — NCRA-TIFR</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="lookup.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="app-container">
+
+    <!-- Top Navigation Bar -->
+    <nav class="top-nav">
+      <a href="index.html" class="nav-brand">
+        <span style="font-size: 1.3rem;">📡</span>
+        <span>GTAC Referee Portal</span>
+      </a>
+      <div class="nav-links">
+        <a href="index.html" class="nav-link">📝 Registration Form</a>
+        <a href="referees.html" class="nav-link active">🔍 Referee Directory</a>
+        <a href="doc/README.html" class="nav-link">📖 Documentation</a>
+        <a href="https://github.com/prasundutta151/GTAC_REF" class="nav-link" target="_blank" rel="noopener">💻 GitHub ↗</a>
+      </div>
+    </nav>
+
+    <!-- Header Section -->
+    <header class="app-header" style="margin-bottom: 20px;">
+      <div class="header-content">
+        <div class="header-badges">
+          <div class="brand-badge">NCRA • TIFR • GMRT</div>
+          <div id="connection-status-badge" class="connection-badge status-checking">Checking database...</div>
+        </div>
+        <h1>GTAC Referee Directory & Lookup</h1>
+        <p class="subtitle">
+          Giant Metrewave Radio Telescope Time Allocation Committee (GTAC) — Comprehensive Reviewer Registry
+        </p>
+      </div>
+    </header>
+
+    <!-- Filter & Selection Card -->
+    <section class="filter-card">
+      <div class="filter-header">
+        <div class="filter-title-group">
+          <h2><span>🔎</span> Filter & Search Referees</h2>
+          <p>Select any single criterion or combine multiple filters. Results update in real time.</p>
+        </div>
+        <div class="filter-actions">
+          <button type="button" id="btn-reset-filters" class="btn-reset" title="Clear all filters">
+            <span>↺</span> Reset Filters
+          </button>
+        </div>
+      </div>
+
+      <!-- Filter Controls Grid -->
+      <div class="filter-grid">
+        <!-- 1. Search by Name -->
+        <div class="filter-group">
+          <label for="filter-name">1. Referee Name</label>
+          <input type="text" id="filter-name" class="filter-control" placeholder="Search full name or initials (e.g. Y. Gupta)..." autocomplete="off">
+        </div>
+
+        <!-- 2. Search by Email -->
+        <div class="filter-group">
+          <label for="filter-email">2. Email Address / Domain</label>
+          <input type="text" id="filter-email" class="filter-control" placeholder="Filter by email or domain (e.g. @ncra)..." autocomplete="off">
+        </div>
+
+        <!-- 3. Affiliation Dropdown -->
+        <div class="filter-group">
+          <label for="filter-affiliation">3. Affiliation / Institution</label>
+          <select id="filter-affiliation" class="filter-control">
+            <option value="">All Affiliations / Institutions</option>
+          </select>
+        </div>
+
+        <!-- 4. Career Status Dropdown -->
+        <div class="filter-group">
+          <label for="filter-career">4. Present Career Status</label>
+          <select id="filter-career" class="filter-control">
+            <option value="">All Career Statuses</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- 5. Expertise Area Dropdown & Chips Container -->
+      <div class="filter-group" style="margin-bottom: 14px;">
+        <label for="filter-expertise-select">5. Scientific Expertise (Select One or Multiple)</label>
+        <select id="filter-expertise-select" class="filter-control">
+          <option value="">+ Add Expertise Filter Area...</option>
+        </select>
+        <div id="selected-expertise-tags" class="selected-tags-container"></div>
+      </div>
+
+      <!-- Status & Availability Pill Quick Filters -->
+      <div class="status-pill-bar">
+        <span class="status-pill-label">Status Filter:</span>
+        <button type="button" class="status-pill active" data-status="all">All Referees</button>
+        <button type="button" class="status-pill" data-status="verified">🟠 Verified Only</button>
+        <button type="button" class="status-pill" data-status="suggested">🟡 Suggested Only</button>
+        <button type="button" class="status-pill" data-status="unavailable">🔴 Not Available Only</button>
+      </div>
+    </section>
+
+    <!-- Results Count Bar -->
+    <div class="results-summary-bar">
+      <div id="results-count" class="results-count-text">
+        Loading referee records...
+      </div>
+      <div style="font-size: 0.8rem; display: flex; gap: 12px; align-items: center;">
+        <span><span style="color: #ea580c; font-weight: bold;">■</span> Orange = Verified</span>
+        <span><span style="color: #ca8a04; font-weight: bold;">■</span> Yellow = Suggested</span>
+        <span><span style="color: #dc2626; font-weight: bold;">■</span> Red = Not Available</span>
+      </div>
+    </div>
+
+    <!-- Referees List Container (Rendered by lookup.js) -->
+    <main id="referees-list" class="referees-list">
+      <!-- Dynamically populated rectangular cards -->
+    </main>
+
+    <!-- Footer -->
+    <footer style="text-align: center; padding: 24px 0 16px; color: #94a3b8; font-size: 0.85rem; border-top: 1px solid #e2e8f0;">
+      <p>Giant Metrewave Radio Telescope Time Allocation Committee (GTAC)</p>
+      <p style="margin-top: 4px;">National Centre for Radio Astrophysics (NCRA-TIFR), Pune, India</p>
+      <p style="margin-top: 8px;">
+        <a href="index.html" style="color: #64748b; text-decoration: none; margin: 0 6px;">Registration Form</a> •
+        <a href="referees.html" style="color: #1e40af; font-weight: 600; text-decoration: none; margin: 0 6px;">Referee Directory</a> •
+        <a href="doc/README.html" style="color: #64748b; text-decoration: none; margin: 0 6px;">Documentation</a>
+      </p>
+    </footer>
+
+  </div>
+
+  <!-- Pre-bundled database for instant offline / file:// / GitHub Pages execution -->
+  <script src="db_data.js"></script>
+  <!-- Application logic -->
+  <script src="lookup.js"></script>
+</body>
+</html>

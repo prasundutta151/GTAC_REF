@@ -270,15 +270,20 @@ def cmd_sync_docs() -> None:
     docs_dir = PROJECT_ROOT / "docs"
     docs_dir.mkdir(parents=True, exist_ok=True)
 
-    # 1. Sync web form files
+    # 1. Sync web form files and referee directory
     shutil.copy2(PROJECT_ROOT / "index.html", docs_dir / "index.html")
     shutil.copy2(PROJECT_ROOT / "dev" / "style.css", docs_dir / "style.css")
     shutil.copy2(PROJECT_ROOT / "dev" / "app.js", docs_dir / "app.js")
     shutil.copy2(PROJECT_ROOT / "dev" / "db_data.js", docs_dir / "db_data.js")
     shutil.copy2(PROJECT_ROOT / "database" / "cycle.txt", docs_dir / "cycle.txt")
+    shutil.copy2(PROJECT_ROOT / "dev" / "referees.html", docs_dir / "referees.html")
+    shutil.copy2(PROJECT_ROOT / "dev" / "referees.html", docs_dir / "lookup.html")
+    shutil.copy2(PROJECT_ROOT / "dev" / "lookup.js", docs_dir / "lookup.js")
+    shutil.copy2(PROJECT_ROOT / "dev" / "lookup.css", docs_dir / "lookup.css")
 
     # 2. Touch .nojekyll so GitHub Pages does not run Jekyll transformations
     (docs_dir / ".nojekyll").touch()
+    (PROJECT_ROOT / ".nojekyll").touch()
 
     # 3. Sync doc/ into docs/doc/
     docs_doc_dir = docs_dir / "doc"
@@ -291,10 +296,12 @@ def cmd_sync_docs() -> None:
 
     print(f"[SYNC-DOCS] Successfully synchronized GitHub Pages bundle in {docs_dir.name}/:")
     print("            - docs/index.html (Interactive web form)")
-    print("            - docs/style.css, docs/app.js, docs/db_data.js, docs/cycle.txt")
+    print("            - docs/referees.html & docs/lookup.html (Referee Directory & Lookup)")
+    print("            - docs/style.css, docs/lookup.css, docs/app.js, docs/lookup.js, docs/db_data.js")
     print("            - docs/doc/* (README.html, form_guide.html, database_guide.html, api_guide.html)")
-    print("            - docs/.nojekyll (Bypasses Jekyll processing)")
-    print("            Live URL: https://prasundutta151.github.io/GTAC_REF/")
+    print("            - docs/.nojekyll & root .nojekyll (Bypasses Jekyll processing)")
+    print("            Live URL Form:      https://prasundutta151.github.io/GTAC_REF/")
+    print("            Live URL Directory: https://prasundutta151.github.io/GTAC_REF/referees.html")
 
 
 def cmd_wiki_push(wiki_url: str | None = None) -> None:

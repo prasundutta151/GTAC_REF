@@ -41,7 +41,14 @@ The following table summarizes all files and directories in this repository and 
 | `index.html` | Symlink | Root convenience link pointing to `dev/index.html`. |
 | `style.css` | Symlink | Root convenience link pointing to `dev/style.css`. |
 | `app.js` | Symlink | Root convenience link pointing to `dev/app.js`. |
-| `db_data.js` | Symlink | Root convenience link pointing to `dev/db_data.js`. |
+| `dev/referees.html` | File | Interactive referee directory & lookup page with multi-criteria filtering and color-coded cards. |
+| `dev/lookup.js` | File | Client-side search, filtering, human-readable data mapping, and rendering logic for referee directory. |
+| `dev/lookup.css` | File | Stylesheet for referee directory filter form, font typography, and color-coded status blocks. |
+| `dev/lookup.html` | Symlink | Dev convenience link pointing to `dev/referees.html`. |
+| `referees.html` | Symlink | Root convenience link pointing to `dev/referees.html`. |
+| `lookup.html` | Symlink | Root convenience link pointing to `dev/referees.html`. |
+| `lookup.js` | Symlink | Root convenience link pointing to `dev/lookup.js`. |
+| `lookup.css` | Symlink | Root convenience link pointing to `dev/lookup.css`. |
 | `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--sync-docs`, `--wiki-push`, `--change-branch`, and `--release`. |
 | `VERSION` | File | Plaintext file containing current release version in `ZZ.YY.XX` format. |
 | `AGENT_RULES.md` | File | Coding agent guidelines, prompt logging protocols, and multi-agent coordination standards for `GTAC_REF`. |
@@ -67,6 +74,55 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 19:00:00 IST
+
+Prompt / Request
+- Create a referee lookup file / page (`referees.html` / `lookup.html`) displaying all referees with human-readable database values.
+- Every referee must be a rectangular block with information written in distinct typography/fonts.
+- Color code the blocks:
+  - Orange: Verified (and available)
+  - Yellow: Suggested (and available)
+  - Red: Not Available (unavailable)
+- Display all blocks sequentially in rows.
+- Include a top selection/filter form with Name, Email, Affiliation, Expertise, and Career Status, supporting selection of one or multiple criteria to dynamically filter the referee list blocks.
+- Make it a separate page, push to Git, and make available on GitHub Pages.
+
+Changes Made
+- `database/Referee_database_A.csv`:
+  - Added sample record `REF_0012` with `available: false` to showcase the red "Not Available" state.
+- `dev/`:
+  - Created `dev/referees.html`: Dedicated referee directory page featuring top navigation, interactive selection/filter card, results summary bar, and container for referee blocks.
+  - Created `dev/lookup.css`: Modern stylesheet with font imports (`Space Grotesk`, `JetBrains Mono`, `Inter`), responsive filter layout, and distinct color schemes:
+    - Orange (`card-verified`): Verified referee accent and badge.
+    - Yellow (`card-suggested`): Suggested referee accent and badge.
+    - Red (`card-unavailable`): Unavailable referee accent and badge.
+    - Typography rules: Name (`Space Grotesk`), Unique ID and Email (`JetBrains Mono`), Affiliation (`Inter`), Career Status (capsule badge), Expertise (scientific tag chips).
+  - Created `dev/lookup.js`: Dynamic client logic loading database from REST API `/api/database` (or falling back to `db_data.js`), translating IDs to full human-readable titles, debounced text search (substring and half-initials), dropdown filtering, expertise multi-select chip filter, status pill filters, and DOM rendering.
+  - Added top navigation bar to `dev/index.html` and `dev/style.css` for instant switching between Registration Form and Referee Directory.
+  - Created symlink `dev/lookup.html -> referees.html`.
+  - Updated `dev/server.py` to route `/referees`, `/lookup`, `/referee-lookup` directly to `referees.html` for both GET and HEAD requests.
+- Root Symlinks:
+  - Created `referees.html -> dev/referees.html`, `lookup.html -> dev/referees.html`, `lookup.js -> dev/lookup.js`, and `lookup.css -> dev/lookup.css`.
+- `docs/` (GitHub Pages Bundle):
+  - Updated `cmd_sync_docs()` in `util` to include `referees.html`, `lookup.html`, `lookup.js`, and `lookup.css`.
+  - Re-synchronized `docs/` bundle via `./util --sync-docs`.
+- HTML Documentation & Wiki:
+  - Updated `doc/README.html`, `doc/form_guide.html`, `doc/database_guide.html`, and `doc/api_guide.html` with Directory nav link and documented the lookup page.
+  - Updated `wiki/_Sidebar.md` and `wiki/Home.md` with links and documentation for the Referee Directory.
+  - Bumped version to `01.00.11` via `./util --version`.
+
+Verification
+- Tested server on test port 8899:
+  - Verified `HEAD /referees` and `GET /referees.html` return `200 OK`.
+  - Verified `HEAD /lookup` and `GET /lookup.html` return `200 OK`.
+  - Verified `GET /api/database` returns all 12 referees including `REF_0012`.
+- Tested `./util --sync-docs` ran cleanly and confirmed files in `docs/`.
+
+Notes
+- Both `/referees.html` and `/lookup.html` are accessible locally and live on GitHub Pages.
 
 ---
 

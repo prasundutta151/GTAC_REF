@@ -337,6 +337,16 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_06",
       "referee_status": "suggested",
       "available": "true"
+    },
+    {
+      "unique_id": "REF_0012",
+      "referee_name": "Dilip G. Kulkarni",
+      "email": "kulkarni@tifr.res.in",
+      "affiliation": "AFF_003",
+      "expertise": "EXP_06;EXP_08",
+      "career_status": "CAR_05",
+      "referee_status": "verified",
+      "available": "false"
     }
   ]
 };

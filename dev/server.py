@@ -489,7 +489,19 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
         # Serve dev/ files
         if path == "/" or path == "":
             self.path = "/index.html"
+        elif path in ("/referees", "/referee-lookup", "/lookup"):
+            self.path = "/referees.html"
         super().do_GET()
+
+    def do_HEAD(self) -> None:
+        """Handle HEAD requests."""
+        parsed_url = urllib.parse.urlparse(self.path)
+        path = parsed_url.path
+        if path == "/" or path == "":
+            self.path = "/index.html"
+        elif path in ("/referees", "/referee-lookup", "/lookup"):
+            self.path = "/referees.html"
+        super().do_HEAD()
 
     def do_POST(self) -> None:
         """Handle POST requests."""

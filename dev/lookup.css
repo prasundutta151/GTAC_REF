@@ -1,0 +1,643 @@
+/* GTAC Referee Directory & Lookup Stylesheet */
+
+/* Google Fonts Import for distinct typography */
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Space+Grotesk:wght@500;600;700&display=swap');
+
+/* Top Navigation Bar */
+.top-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #ffffff;
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 20px;
+  border: 1px solid var(--border-color);
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 700;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 1.05rem;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+  background: #f1f5f9;
+  color: var(--primary);
+}
+
+.nav-link.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+
+/* Filter Card */
+.filter-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  margin-bottom: 24px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+}
+
+.filter-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 18px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 14px;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.filter-title-group h2 {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-title-group p {
+  color: var(--text-muted);
+  font-size: 0.88rem;
+  margin-top: 4px;
+}
+
+.filter-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.btn-reset {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  color: #475569;
+  padding: 8px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-reset:hover {
+  background: #e2e8f0;
+  color: #0f172a;
+}
+
+/* Filter Form Grid */
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filter-group label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #475569;
+}
+
+.filter-control {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: var(--radius-sm);
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.92rem;
+  background-color: #ffffff;
+  color: var(--text-main);
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.filter-control:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.15);
+}
+
+/* Status Filter Pill Bar */
+.status-pill-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding-top: 10px;
+  border-top: 1px dashed #e2e8f0;
+}
+
+.status-pill-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  margin-right: 4px;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.status-pill:hover {
+  background: #e2e8f0;
+}
+
+.status-pill.active {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  font-weight: 700;
+}
+
+.status-pill[data-status="all"].active {
+  background: #0f172a;
+  color: #ffffff;
+}
+
+.status-pill[data-status="verified"].active {
+  background: #ea580c;
+  color: #ffffff;
+}
+
+.status-pill[data-status="suggested"].active {
+  background: #ca8a04;
+  color: #ffffff;
+}
+
+.status-pill[data-status="unavailable"].active {
+  background: #dc2626;
+  color: #ffffff;
+}
+
+/* Multi-select Expertise Tag Chips in Filter */
+.selected-tags-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+  min-height: 24px;
+}
+
+.filter-tag-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  color: #1e40af;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.filter-tag-chip button {
+  background: none;
+  border: none;
+  color: #1e40af;
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 0.85rem;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.filter-tag-chip button:hover {
+  color: #b91c1c;
+}
+
+/* Results Count Bar */
+.results-summary-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding: 0 4px;
+  font-size: 0.9rem;
+  color: #64748b;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.results-count-text {
+  font-weight: 500;
+}
+
+.results-count-text strong {
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* ==========================================================================
+   REFEREE LIST CARDS (Rectangular Rows with Status Color Coding)
+   - Orange: verified
+   - Yellow: suggested
+   - Red: not available
+   ========================================================================== */
+
+.referees-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-bottom: 40px;
+}
+
+/* Base Card Container */
+.referee-row-card {
+  position: relative;
+  background: #ffffff;
+  border-radius: var(--radius-md);
+  padding: 22px 26px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.referee-row-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px -4px rgba(0, 0, 0, 0.08), 0 3px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* Left Status Color Accent Bar */
+.referee-row-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 8px;
+  transition: width 0.2s ease;
+}
+
+.referee-row-card:hover::before {
+  width: 10px;
+}
+
+/* --------------------------------------------------------------------------
+   COLOR SCHEME 1: VERIFIED REFEREE (ORANGE)
+   -------------------------------------------------------------------------- */
+.referee-row-card.card-verified {
+  border: 2px solid #f97316;
+  background: linear-gradient(to right, #fffaf5 0%, #ffffff 80px);
+}
+
+.referee-row-card.card-verified::before {
+  background: #ea580c;
+}
+
+.referee-row-card.card-verified .badge-status {
+  background: #fff7ed;
+  color: #c2410c;
+  border: 1px solid #fdba74;
+}
+
+.referee-row-card.card-verified .referee-id-pill {
+  background: #fed7aa;
+  color: #9a3412;
+  border: 1px solid #fdba74;
+}
+
+/* --------------------------------------------------------------------------
+   COLOR SCHEME 2: SUGGESTED REFEREE (YELLOW)
+   -------------------------------------------------------------------------- */
+.referee-row-card.card-suggested {
+  border: 2px solid #eab308;
+  background: linear-gradient(to right, #fefef2 0%, #ffffff 80px);
+}
+
+.referee-row-card.card-suggested::before {
+  background: #ca8a04;
+}
+
+.referee-row-card.card-suggested .badge-status {
+  background: #fefce8;
+  color: #854d0e;
+  border: 1px solid #fde047;
+}
+
+.referee-row-card.card-suggested .referee-id-pill {
+  background: #fef08a;
+  color: #713f12;
+  border: 1px solid #fde047;
+}
+
+/* --------------------------------------------------------------------------
+   COLOR SCHEME 3: NOT AVAILABLE REFEREE (RED)
+   -------------------------------------------------------------------------- */
+.referee-row-card.card-unavailable {
+  border: 2px solid #ef4444;
+  background: linear-gradient(to right, #fff5f5 0%, #ffffff 80px);
+}
+
+.referee-row-card.card-unavailable::before {
+  background: #dc2626;
+}
+
+.referee-row-card.card-unavailable .badge-status {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fca5a5;
+}
+
+.referee-row-card.card-unavailable .referee-id-pill {
+  background: #fecaca;
+  color: #7f1d1d;
+  border: 1px solid #fca5a5;
+}
+
+/* Card Header Section */
+.card-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.referee-identity {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* FONT 1: UNIQUE ID (JetBrains Mono) */
+.referee-id-pill {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  padding: 3px 9px;
+  border-radius: 4px;
+  letter-spacing: 0.5px;
+  align-self: center;
+}
+
+/* FONT 2: REFEREE NAME (Space Grotesk, Bold Display) */
+.referee-name-text {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.2px;
+}
+
+/* Badges Group */
+.card-badges-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* FONT 3: STATUS BADGE */
+.badge-status {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 5px 12px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Availability Badge */
+.badge-availability {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.badge-availability.available-yes {
+  background: #dcfce7;
+  color: #15803d;
+  border: 1px solid #86efac;
+}
+
+.badge-availability.available-no {
+  background: #fee2e2;
+  color: #b91c1c;
+  border: 1px solid #fca5a5;
+}
+
+/* Card Body Information Grid */
+.card-details-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px 20px;
+  padding: 10px 0;
+  border-top: 1px solid #f1f5f9;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.detail-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.92rem;
+}
+
+.detail-icon {
+  font-size: 1.1rem;
+  opacity: 0.85;
+}
+
+.detail-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  min-width: 80px;
+}
+
+/* FONT 4: EMAIL (JetBrains Mono) */
+.referee-email-link {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #0284c7;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.referee-email-link:hover {
+  color: #0369a1;
+  text-decoration: underline;
+}
+
+/* FONT 5: AFFILIATION (Inter, Medium Sans) */
+.affiliation-value {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* FONT 6: CAREER STATUS (Pill Badge) */
+.career-status-pill {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  background: #ede9fe;
+  color: #5b21b6;
+  border: 1px solid #ddd6fe;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+/* Card Expertise Row */
+.card-expertise-section {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.expertise-heading {
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #64748b;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.expertise-chips-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* FONT 7: EXPERTISE CHIPS (Scientific Tag Styling) */
+.expertise-chip {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: #f8fafc;
+  border: 1px solid #cbd5e1;
+  color: #1e293b;
+  padding: 4px 11px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: all 0.15s;
+}
+
+.expertise-chip:hover {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #1d4ed8;
+}
+
+/* Empty State */
+.empty-state-card {
+  background: #ffffff;
+  border: 2px dashed #cbd5e1;
+  border-radius: var(--radius-lg);
+  padding: 48px 24px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 12px;
+}
+
+.empty-state-card h3 {
+  font-family: 'Space Grotesk', system-ui, sans-serif;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 8px;
+}
+
+.empty-state-card p {
+  font-size: 0.95rem;
+  max-width: 480px;
+  margin: 0 auto 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .card-top-row {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .card-details-grid {
+    grid-template-columns: 1fr;
+  }
+}
