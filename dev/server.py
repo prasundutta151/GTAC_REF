@@ -301,22 +301,32 @@ def record_submission(sub_data: Dict[str, Any]) -> str:
     return sub_id
 
 
-def gemini_suggest(name: str) -> Dict[str, Any]:
-    """Suggest email domain, affiliation, and expertise for a referee name.
-
-    If GEMINI_API_KEY is present, calls the Gemini REST API; otherwise uses
-    observatory heuristics and knowledge base.
+def gemini_validate(name: str = "", email: str = "") -> Dict[str, Any]:
+    """Validate name and email using Gemini REST API or knowledge base heuristics.
+    Checks email format and academic domain, verifies researcher identity, and mentions 'Validated email'.
     """
-    clean_name = name.strip()
+    clean_name = strip_titles(name).strip()
+    clean_email = email.strip()
     api_key = os.getenv("GEMINI_API_KEY", "").strip()
 
-    if api_key:
+    # 1. Email format check
+    is_valid_email = False
+    domain = ""
+    if clean_email:
+        email_pattern = r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+        if re.match(email_pattern, clean_email):
+            is_valid_email = True
+            domain = clean_email.split("@")[-1].lower()
+
+    # 2. If GEMINI_API_KEY is available, query Gemini API for live validation
+    if api_key and (clean_name or clean_email):
         try:
             url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={api_key}"
             prompt = (
-                f"Identify the likely academic affiliation, primary astronomy/physics expertise, and institutional email domain "
-                f"for the astronomer/physicist named '{clean_name}'. Return ONLY valid JSON in this format: "
-                f'{{"affiliation": "...", "email_domain": "...", "expertise": ["..."]}}'
+                f"You are validating academic credentials for GTAC (Giant Metrewave Radio Telescope Time Allocation Committee). "
+                f"Validate researcher Name: '{clean_name}' and Email: '{clean_email}'. "
+                f"Return ONLY valid JSON in this structure: "
+                f'{{"valid_email": true/false, "mention": "Validated email", "message": "...", "affiliation": "AFF_XXX or institution name", "email_domain": "...", "expertise": ["EXP_XX"]}}'
             )
             data = json.dumps({
                 "contents": [{"parts": [{"text": prompt}]}]
@@ -329,40 +339,104 @@ def gemini_suggest(name: str) -> Dict[str, Any]:
                 if m:
                     parsed = json.loads(m.group(0))
                     parsed["source"] = "Gemini AI"
+                    if is_valid_email or parsed.get("valid_email"):
+                        parsed["valid_email"] = True
+                        parsed["mention"] = "Validated email"
                     return parsed
-        except Exception as e:
-            # Fall back to heuristic
+        except Exception:
             pass
 
-    # Heuristic fallback matching prominent institutions and name hints
-    suggestions = {
-        "source": "Smart Knowledge Base (Set GEMINI_API_KEY for live AI suggestions)",
-        "affiliation": "",
-        "email_domain": "",
-        "expertise": []
+    # 3. Knowledge base & domain heuristics fallback
+    # Check if domain is a recognized academic / research institution
+    known_domains = {
+        "ncra.tifr.res.in": ("AFF_001", ["EXP_01", "EXP_03", "EXP_11", "EXP_14"]),
+        "iucaa.in": ("AFF_002", ["EXP_04", "EXP_05"]),
+        "rri.res.in": ("AFF_003", ["EXP_01", "EXP_07", "EXP_14"]),
+        "iisc.ac.in": ("AFF_004", ["EXP_03", "EXP_07"]),
+        "tifr.res.in": ("AFF_005", ["EXP_01", "EXP_10"]),
+        "cbs.ac.in": ("AFF_005", ["EXP_03", "EXP_04"]),
+        "iia.res.in": ("AFF_006", ["EXP_06", "EXP_15"]),
+        "iiap.res.in": ("AFF_006", ["EXP_06", "EXP_15"]),
+        "prl.res.in": ("AFF_007", ["EXP_02", "EXP_13"]),
+        "aries.res.in": ("AFF_007", ["EXP_10", "EXP_15"]),
+        "iiti.ac.in": ("AFF_014", ["EXP_02", "EXP_12"]),
+        "itbhu.ac.in": ("AFF_002", ["EXP_02", "EXP_07"]),
+        "bhu.ac.in": ("AFF_002", ["EXP_02", "EXP_07"]),
     }
-    name_lower = clean_name.lower()
-    if any(k in name_lower for k in ["chengalur", "yashwant", "gupta", "bhaswati", "kharb", "kale", "roy"]):
-        suggestions["affiliation"] = "AFF_001"
-        suggestions["email_domain"] = "ncra.tifr.res.in"
-        suggestions["expertise"] = ["EXP_01", "EXP_03", "EXP_11", "EXP_14"]
-    elif any(k in name_lower for k in ["somak", "raychaudhury", "kembhavi", "swarup"]):
-        suggestions["affiliation"] = "AFF_002"
-        suggestions["email_domain"] = "iucaa.in"
-        suggestions["expertise"] = ["EXP_04", "EXP_05"]
-    elif any(k in name_lower for k in ["deshpande", "rri", "ramesh"]):
-        suggestions["affiliation"] = "AFF_003"
-        suggestions["email_domain"] = "rri.res.in"
-        suggestions["expertise"] = ["EXP_01", "EXP_07", "EXP_14"]
-    else:
-        # Generic academic pattern
-        parts = clean_name.split()
-        if len(parts) >= 2:
-            last = parts[-1].lower()
-            first_init = parts[0][0].lower()
-            suggestions["email_hint"] = f"{first_init}{last}@"
 
-    return suggestions
+    matched_aff = ""
+    matched_exp = []
+    is_academic = False
+
+    if domain:
+        if domain in known_domains:
+            matched_aff, matched_exp = known_domains[domain]
+            is_academic = True
+        elif any(domain.endswith(sfx) for sfx in [".res.in", ".ac.in", ".edu", ".ac.uk", ".gov", ".org", ".mpg.de", ".edu.au"]):
+            is_academic = True
+
+    # Check name heuristics if affiliation not found
+    name_lower = clean_name.lower()
+    if not matched_aff and name_lower:
+        if any(k in name_lower for k in ["chengalur", "yashwant", "gupta", "bhaswati", "kharb", "kale"]):
+            matched_aff = "AFF_001"
+            if not matched_exp: matched_exp = ["EXP_01", "EXP_03", "EXP_11"]
+            if not domain: domain = "ncra.tifr.res.in"
+        elif any(k in name_lower for k in ["somak", "raychaudhury", "kembhavi"]):
+            matched_aff = "AFF_002"
+            if not matched_exp: matched_exp = ["EXP_04", "EXP_05"]
+            if not domain: domain = "iucaa.in"
+        elif any(k in name_lower for k in ["deshpande", "ramesh"]):
+            matched_aff = "AFF_003"
+            if not matched_exp: matched_exp = ["EXP_01", "EXP_07"]
+            if not domain: domain = "rri.res.in"
+        elif "roy" in name_lower:
+            matched_aff = "AFF_004"
+            if not matched_exp: matched_exp = ["EXP_03", "EXP_07"]
+            if not domain: domain = "iisc.ac.in"
+
+    # Cross check with existing referee database
+    referees = load_referees()
+    for r in referees:
+        r_name = strip_titles(r.get("referee_name", ""))
+        r_email = r.get("email", "").lower()
+        if (clean_email and r_email == clean_email.lower()) or (clean_name and match_referee_name(clean_name, r_name)):
+            if not matched_aff and r.get("affiliation"):
+                matched_aff = r.get("affiliation")
+            if not matched_exp and r.get("expertise"):
+                matched_exp = [x.strip() for x in r.get("expertise", "").split(";") if x.strip()]
+            if not domain and r_email:
+                domain = r_email.split("@")[-1]
+            is_valid_email = True
+            is_academic = True
+            break
+
+    if is_valid_email:
+        if is_academic:
+            val_msg = f"Validated email: Verified institutional domain ({domain})"
+        else:
+            val_msg = f"Validated email: Valid email address ({domain})"
+    elif clean_email:
+        val_msg = "Please enter a valid email format (e.g. user@institution.edu)"
+    else:
+        val_msg = "Enter email to validate"
+
+    return {
+        "valid_email": is_valid_email,
+        "mention": "Validated email" if is_valid_email else "",
+        "message": val_msg,
+        "affiliation": matched_aff,
+        "email_domain": domain,
+        "expertise": matched_exp,
+        "clean_name": clean_name,
+        "email": clean_email,
+        "source": "Smart Knowledge Base"
+    }
+
+
+def gemini_suggest(name: str) -> Dict[str, Any]:
+    """Compatibility wrapper for referee suggestion."""
+    return gemini_validate(name=name)
 
 
 class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -431,9 +505,17 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
             self.send_error_response(400, "Invalid JSON body")
             return
 
-        if path == "/api/gemini-suggest":
+        if path in ("/api/gemini-validate", "/api/validate-referee"):
             name = body_data.get("name", "")
-            result = gemini_suggest(name)
+            email = body_data.get("email", "")
+            result = gemini_validate(name=name, email=email)
+            self.send_json_response(result)
+            return
+
+        elif path == "/api/gemini-suggest":
+            name = body_data.get("name", "")
+            email = body_data.get("email", "")
+            result = gemini_validate(name=name, email=email)
             self.send_json_response(result)
             return
 

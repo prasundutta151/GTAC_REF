@@ -57,6 +57,44 @@ Notes
 
 ---
 
+## 2026-09-11 18:40:00 IST
+
+Prompt / Request
+- Check the email and Name fields in Gemini by default and validate, mentioning "Validated email" while keeping all inputs editable.
+- After submission, show the given information in a much nicer, organized order, and do not show which file it is saved to.
+
+Changes Made
+- `dev/server.py`:
+  - Implemented `gemini_validate(name, email)` supporting live Gemini REST API when `GEMINI_API_KEY` is present, backed by extensive academic institutional domain verification heuristics (NCRA, IUCAA, RRI, IISc, TIFR, IIA, PRL, ARIES, etc.).
+  - Added endpoints `/api/gemini-validate` and `/api/validate-referee` in `do_POST`.
+  - Updated `gemini_suggest` to wrap `gemini_validate`.
+- `dev/index.html`:
+  - Added `#user_email_validation` container under submitter email input.
+- `dev/style.css`:
+  - Styled `.email-validation-notice` with `.valid` (`✓ Validated email` pill), `.checking`, and `.invalid` states.
+  - Expanded `.modal-dialog` width to `720px` with vertical scroll capability.
+  - Added structured summary layout classes (`.summary-card`, `.summary-grid`, `.summary-item`, `.summary-referee-card`, `.summary-chips`, `.badge-valid-pill`, `.summary-footer-note`).
+- `dev/app.js`:
+  - Added `.ref-email-validation` element to referee cards.
+  - Wired real-time automatic Gemini validation on `input` (debounced) and `blur` for both referee and submitter Name/Email fields.
+  - Explicitly guaranteed that all referee card fields remain completely editable (`setCardInputsDisabled(card, false)`) regardless of verified database status or validation results.
+  - Completely redesigned `showSuccessModal()` to present submission details in a clean, elegant order:
+    1. Submission Reference & Timestamp badge.
+    2. Submitter Profile with resolved Affiliation, Career Status, and Expertise tags + `✓ Validated email` pill.
+    3. GTAC Review Volunteering for Cycle 52 & future cycles.
+    4. Ordered Referee Suggestions list with individual clean cards displaying Name, Validated Email, Affiliation, Career Status, and Expertise.
+    5. Clean reassurance note.
+  - Removed all mentions of internal file paths (`database/Referee_database_A.csv`, `form_submissions.csv`, ASCII files, `./util --serve`).
+- `util`:
+  - Bumped version to `01.00.08`.
+
+Verification
+- Verified `gemini_validate` via curl with known academic domains (`ncra.tifr.res.in`, `iucaa.in`), title-stripped names, and invalid email formats.
+- Verified that referee card inputs remain editable upon database match or Gemini validation.
+- Verified that submission modal displays full structured data in logical order without displaying file storage paths.
+
+---
+
 ## 2026-09-11 18:35:00 IST
 
 Prompt / Request

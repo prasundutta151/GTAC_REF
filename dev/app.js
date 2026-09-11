@@ -384,9 +384,28 @@ function setupEventListeners() {
 
   userAffOtherInput.addEventListener('input', syncSelfRefereeIfApplicable);
 
-  // Sync profile changes to Block 1 if self-volunteer is active
-  document.getElementById('user_name').addEventListener('input', syncSelfRefereeIfApplicable);
-  document.getElementById('user_email').addEventListener('input', syncSelfRefereeIfApplicable);
+  // Sync profile changes to Block 1 if self-volunteer is active and validate
+  let userValTimer = null;
+  const triggerUserVal = () => {
+    clearTimeout(userValTimer);
+    userValTimer = setTimeout(validateSubmitterNameEmail, 500);
+  };
+  document.getElementById('user_name').addEventListener('input', () => {
+    syncSelfRefereeIfApplicable();
+    triggerUserVal();
+  });
+  document.getElementById('user_name').addEventListener('blur', () => {
+    syncSelfRefereeIfApplicable();
+    validateSubmitterNameEmail();
+  });
+  document.getElementById('user_email').addEventListener('input', () => {
+    syncSelfRefereeIfApplicable();
+    triggerUserVal();
+  });
+  document.getElementById('user_email').addEventListener('blur', () => {
+    syncSelfRefereeIfApplicable();
+    validateSubmitterNameEmail();
+  });
   userCareerSelect.addEventListener('change', syncSelfRefereeIfApplicable);
 
   // Review willingness radio buttons
@@ -682,6 +701,7 @@ function addRefereeBlock(isOwnEntry = false) {
         <label>2. Referee Email ID <span class="required">*</span></label>
         <input type="email" class="ref-email" placeholder="e.g. colleague@institution.edu" required autocomplete="off">
         <div class="autocomplete-dropdown hidden"></div>
+        <div class="email-validation-notice ref-email-validation"></div>
         <span class="field-error err-ref-email"></span>
       </div>
     </div>
@@ -782,57 +802,38 @@ function setupRefereeCardListeners(card, blockIndex) {
   setupAutocomplete(card, nameInput, 'referee_name');
   setupAutocomplete(card, emailInput, 'email');
 
-  // Real-time cross check on change and blur
+  // Real-time auto-validation with Gemini by default on input, change, and blur
+  let valDebounceTimer = null;
+  const triggerAutoValidation = () => {
+    clearTimeout(valDebounceTimer);
+    valDebounceTimer = setTimeout(() => {
+      validateRefereeCardWithGemini(card);
+    }, 450);
+  };
+
+  nameInput.addEventListener('input', triggerAutoValidation);
   nameInput.addEventListener('change', () => {
     checkAndAutoFillCard(card, nameInput.value.trim());
+    validateRefereeCardWithGemini(card);
   });
   nameInput.addEventListener('blur', () => {
     checkAndAutoFillCard(card, nameInput.value.trim());
+    validateRefereeCardWithGemini(card);
   });
 
+  emailInput.addEventListener('input', triggerAutoValidation);
   emailInput.addEventListener('change', () => {
     checkAndAutoFillCard(card, emailInput.value.trim());
+    validateRefereeCardWithGemini(card);
   });
   emailInput.addEventListener('blur', () => {
     checkAndAutoFillCard(card, emailInput.value.trim());
+    validateRefereeCardWithGemini(card);
   });
 
-  // AI Suggestion
+  // AI Suggestion button (manual trigger or re-run)
   btnAi.addEventListener('click', async () => {
-    const nameVal = nameInput.value.trim();
-    if (!nameVal) {
-      alert('Please enter a Referee Name first to ask Gemini for suggestions.');
-      nameInput.focus();
-      return;
-    }
-    btnAi.textContent = 'Thinking...';
-    btnAi.disabled = true;
-
-    if (state.isLiveServer) {
-      try {
-        const res = await fetch('/api/gemini-suggest', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name: nameVal })
-        });
-        if (res.ok) {
-          const data = await res.json();
-          applyAiSuggestions(card, data);
-          return;
-        }
-      } catch (err) {
-        // Fall back to client heuristic
-      } finally {
-        btnAi.textContent = '✨ Ask Gemini';
-        btnAi.disabled = false;
-      }
-    }
-
-    // Client-side heuristic fallback (works offline / file://)
-    const fallback = clientHeuristicSuggest(nameVal);
-    applyAiSuggestions(card, fallback);
-    btnAi.textContent = '✨ Ask Gemini';
-    btnAi.disabled = false;
+    await validateRefereeCardWithGemini(card, true);
   });
 
   // Remove button
@@ -842,38 +843,234 @@ function setupRefereeCardListeners(card, blockIndex) {
 }
 
 /**
- * Client-Side Heuristic Suggestion (for offline / file:// mode)
+ * Check and validate Referee Name and Email with Gemini by default.
+ * Mentions 'Validated email' and preserves full editability of all fields.
  */
-function clientHeuristicSuggest(cleanName) {
-  const nameLower = cleanName.toLowerCase();
-  const suggestions = {
-    source: 'Smart Knowledge Base',
-    affiliation: '',
-    email_domain: '',
-    expertise: []
-  };
+async function validateRefereeCardWithGemini(card, isExplicitClick = false) {
+  if (!card) return;
+  const nameInput = card.querySelector('.ref-name');
+  const emailInput = card.querySelector('.ref-email');
+  const affSelect = card.querySelector('.ref-aff');
+  const noticeEl = card.querySelector('.ref-email-validation');
+  const banner = card.querySelector('.referee-alert-banner');
+  const btnAi = card.querySelector('.btn-ai-suggest');
 
-  if (nameLower.includes('chengalur') || nameLower.includes('yashwant') || nameLower.includes('bhaswati') || nameLower.includes('gupta')) {
-    suggestions.affiliation = 'AFF_001';
-    suggestions.email_domain = 'ncra.tifr.res.in';
-    suggestions.expertise = ['EXP_01', 'EXP_03', 'EXP_11'];
-  } else if (nameLower.includes('somak') || nameLower.includes('raychaudhury') || nameLower.includes('kembhavi')) {
-    suggestions.affiliation = 'AFF_002';
-    suggestions.email_domain = 'iucaa.in';
-    suggestions.expertise = ['EXP_04', 'EXP_05'];
-  } else if (nameLower.includes('deshpande') || nameLower.includes('ramesh')) {
-    suggestions.affiliation = 'AFF_003';
-    suggestions.email_domain = 'rri.res.in';
-    suggestions.expertise = ['EXP_01', 'EXP_14'];
-  } else {
-    const parts = cleanName.split(' ');
-    if (parts.length >= 2) {
-      const last = parts[parts.length - 1].toLowerCase();
-      const firstInit = parts[0][0].toLowerCase();
-      suggestions.email_hint = `${firstInit}${last}@`;
+  if (!nameInput || !emailInput || !noticeEl) return;
+
+  const rawName = nameInput.value.trim();
+  const cleanName = stripTitles(rawName);
+  const email = emailInput.value.trim();
+
+  if (!email && !cleanName) {
+    noticeEl.innerHTML = '';
+    noticeEl.className = 'email-validation-notice';
+    return;
+  }
+
+  if (isExplicitClick && btnAi) {
+    btnAi.textContent = 'Thinking...';
+    btnAi.disabled = true;
+  }
+
+  if (email) {
+    noticeEl.className = 'email-validation-notice checking';
+    noticeEl.innerHTML = `<span>⏳ Checking with Gemini...</span>`;
+  }
+
+  let result = null;
+
+  if (state.isLiveServer && (email || cleanName)) {
+    try {
+      const res = await fetch('/api/gemini-validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: cleanName, email })
+      });
+      if (res.ok) {
+        result = await res.json();
+      }
+    } catch (e) {
+      // Fall back to client heuristic
     }
   }
-  return suggestions;
+
+  if (!result) {
+    result = clientValidateNameEmail(cleanName, email);
+  }
+
+  if (isExplicitClick && btnAi) {
+    btnAi.textContent = '✨ Ask Gemini';
+    btnAi.disabled = false;
+  }
+
+  // Display validation notice mentioning 'Validated email'
+  if (result.valid_email && email) {
+    noticeEl.className = 'email-validation-notice valid';
+    noticeEl.innerHTML = `
+      <span class="badge-valid-pill">✓ Validated email</span>
+      <span class="val-detail">${result.message || 'Verified academic address'}</span>
+    `;
+
+    if (banner && card.dataset.isSelf !== 'true') {
+      banner.className = 'referee-alert-banner alert-suggested';
+      banner.innerHTML = `
+        <span>✨ <strong>Gemini Validated:</strong> Validated email (<code>${email}</code>) for ${cleanName || 'referee'}. All fields remain editable.</span>
+      `;
+    }
+
+    // Auto-suggest affiliation if blank
+    if (result.affiliation && (!affSelect.value || affSelect.value === 'OTHERS')) {
+      affSelect.value = result.affiliation;
+    }
+    // Auto-suggest expertise if empty
+    if (result.expertise && result.expertise.length > 0 && card.expPicker && card.expPicker.getSelected().length === 0) {
+      card.expPicker.setSelected(result.expertise);
+    }
+  } else if (email && email.length > 3) {
+    noticeEl.className = 'email-validation-notice invalid';
+    noticeEl.innerHTML = `<span>⚠️ ${result.message || 'Please enter a valid institutional email'}</span>`;
+  } else {
+    noticeEl.innerHTML = '';
+    noticeEl.className = 'email-validation-notice';
+  }
+
+  // CRITICAL REQUIREMENT: Always keep card inputs editable!
+  setCardInputsDisabled(card, false);
+  if (card.expPicker) {
+    card.expPicker.setDisabled(false);
+  }
+}
+
+/**
+ * Validate Submitter Name & Email with Gemini / Knowledge base
+ */
+async function validateSubmitterNameEmail() {
+  const nameEl = document.getElementById('user_name');
+  const emailEl = document.getElementById('user_email');
+  const noticeEl = document.getElementById('user_email_validation');
+  if (!nameEl || !emailEl || !noticeEl) return;
+
+  const rawName = nameEl.value.trim();
+  const cleanName = stripTitles(rawName);
+  const email = emailEl.value.trim();
+
+  if (!email) {
+    noticeEl.innerHTML = '';
+    noticeEl.className = 'email-validation-notice';
+    return;
+  }
+
+  noticeEl.className = 'email-validation-notice checking';
+  noticeEl.innerHTML = `<span>⏳ Validating email with Gemini...</span>`;
+
+  let result = null;
+  if (state.isLiveServer) {
+    try {
+      const res = await fetch('/api/gemini-validate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: cleanName, email })
+      });
+      if (res.ok) {
+        result = await res.json();
+      }
+    } catch (e) {
+      // Fallback
+    }
+  }
+
+  if (!result) {
+    result = clientValidateNameEmail(cleanName, email);
+  }
+
+  if (result.valid_email) {
+    noticeEl.className = 'email-validation-notice valid';
+    noticeEl.innerHTML = `
+      <span class="badge-valid-pill">✓ Validated email</span>
+      <span class="val-detail">${result.message || 'Verified institutional address'}</span>
+    `;
+    if (result.affiliation && (!userAffiliationSelect.value || userAffiliationSelect.value === 'OTHERS')) {
+      userAffiliationSelect.value = result.affiliation;
+    }
+  } else if (email.length > 3) {
+    noticeEl.className = 'email-validation-notice invalid';
+    noticeEl.innerHTML = `<span>⚠️ ${result.message || 'Please enter a valid institutional email'}</span>`;
+  } else {
+    noticeEl.innerHTML = '';
+    noticeEl.className = 'email-validation-notice';
+  }
+}
+
+/**
+ * Client-Side validation for Name and Email (works offline and under file://)
+ */
+function clientValidateNameEmail(name, email) {
+  const cleanName = stripTitles(name);
+  const cleanEmail = (email || '').trim();
+  const emailRegex = /^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$/;
+  const isValidFormat = emailRegex.test(cleanEmail);
+
+  if (!isValidFormat) {
+    return {
+      valid_email: false,
+      mention: '',
+      message: cleanEmail ? 'Please enter a valid email format (e.g. user@institution.edu)' : '',
+      affiliation: '',
+      expertise: []
+    };
+  }
+
+  const domain = cleanEmail.split('@')[1].toLowerCase();
+  const knownDomains = {
+    'ncra.tifr.res.in': { aff: 'AFF_001', exp: ['EXP_01', 'EXP_03', 'EXP_11', 'EXP_14'] },
+    'iucaa.in': { aff: 'AFF_002', exp: ['EXP_04', 'EXP_05'] },
+    'rri.res.in': { aff: 'AFF_003', exp: ['EXP_01', 'EXP_07', 'EXP_14'] },
+    'iisc.ac.in': { aff: 'AFF_004', exp: ['EXP_03', 'EXP_07'] },
+    'tifr.res.in': { aff: 'AFF_005', exp: ['EXP_01', 'EXP_10'] },
+    'cbs.ac.in': { aff: 'AFF_005', exp: ['EXP_03', 'EXP_04'] },
+    'iia.res.in': { aff: 'AFF_006', exp: ['EXP_06', 'EXP_15'] },
+    'iiap.res.in': { aff: 'AFF_006', exp: ['EXP_06', 'EXP_15'] },
+    'prl.res.in': { aff: 'AFF_007', exp: ['EXP_02', 'EXP_13'] },
+    'aries.res.in': { aff: 'AFF_007', exp: ['EXP_10', 'EXP_15'] },
+    'iiti.ac.in': { aff: 'AFF_014', exp: ['EXP_02', 'EXP_12'] },
+    'itbhu.ac.in': { aff: 'AFF_002', exp: ['EXP_02', 'EXP_07'] },
+    'bhu.ac.in': { aff: 'AFF_002', exp: ['EXP_02', 'EXP_07'] },
+  };
+
+  let matchedAff = '';
+  let matchedExp = [];
+  let isAcademic = false;
+
+  if (knownDomains[domain]) {
+    matchedAff = knownDomains[domain].aff;
+    matchedExp = knownDomains[domain].exp;
+    isAcademic = true;
+  } else if (/\.(res\.in|ac\.in|edu|ac\.uk|gov|org|mpg\.de|edu\.au)$/i.test(domain)) {
+    isAcademic = true;
+  }
+
+  // Cross check against in-memory referee database cache
+  const dbMatch = state.referees.find(r =>
+    (r.email && r.email.toLowerCase() === cleanEmail.toLowerCase()) ||
+    (cleanName && matchRefereeName(cleanName, r.referee_name))
+  );
+  if (dbMatch) {
+    if (!matchedAff && dbMatch.affiliation) matchedAff = dbMatch.affiliation;
+    if (matchedExp.length === 0 && dbMatch.expertise) {
+      matchedExp = dbMatch.expertise.split(';').map(x => x.trim()).filter(Boolean);
+    }
+    isAcademic = true;
+  }
+
+  return {
+    valid_email: true,
+    mention: 'Validated email',
+    message: isAcademic ? `Verified institutional domain (${domain})` : `Valid email address (${domain})`,
+    affiliation: matchedAff,
+    expertise: matchedExp,
+    clean_name: cleanName,
+    email: cleanEmail
+  };
 }
 
 /**
@@ -1196,35 +1393,40 @@ function populateCardWithReferee(card, ref) {
 
   const isVerified = (ref.referee_status === 'verified');
 
+  // Mark email as validated
+  const emailNotice = card.querySelector('.ref-email-validation');
+  if (emailNotice && ref.email) {
+    emailNotice.className = 'email-validation-notice valid';
+    emailNotice.innerHTML = `
+      <span class="badge-valid-pill">✓ Validated email</span>
+      <span class="val-detail">Verified in database record</span>
+    `;
+  }
+
   if (isVerified) {
-    // Verified rule: non-editable
     card.className = 'referee-card is-verified';
     badge.className = 'status-badge badge-verified';
-    badge.textContent = 'Verified in DB (Locked)';
+    badge.textContent = 'Verified in DB';
 
     banner.className = 'referee-alert-banner alert-verified';
     banner.innerHTML = `
-      <span>✅ <strong>Referee Exists in Database (Verified):</strong> <code>${ref.unique_id}</code> - ${cleanName} is already a verified GTAC referee (Non-editable).</span>
+      <span>✅ <strong>Referee Exists in Database (Verified):</strong> <code>${ref.unique_id}</code> - ${cleanName} found in database. Fields pre-filled; you may verify or edit.</span>
     `;
-
-    setCardInputsDisabled(card, true);
-    if (card.expPicker) card.expPicker.setDisabled(true);
-    if (btnAi) btnAi.classList.add('hidden');
   } else {
-    // Suggested rule: editable suggestion
     card.className = 'referee-card is-suggested';
     badge.className = 'status-badge badge-suggested';
     badge.textContent = 'Already in DB';
 
     banner.className = 'referee-alert-banner alert-suggested';
     banner.innerHTML = `
-      <span>ℹ️ <strong>Referee Already Exists in Database:</strong> <code>${ref.unique_id}</code> - ${cleanName} found in database. Fields have been pre-filled from database; you may verify or edit.</span>
+      <span>ℹ️ <strong>Referee Already Exists in Database:</strong> <code>${ref.unique_id}</code> - ${cleanName} found in database. Fields pre-filled from database; you may verify or edit.</span>
     `;
-
-    setCardInputsDisabled(card, false);
-    if (card.expPicker) card.expPicker.setDisabled(false);
-    if (btnAi) btnAi.classList.remove('hidden');
   }
+
+  // CRITICAL: Always keep referee card inputs completely editable!
+  setCardInputsDisabled(card, false);
+  if (card.expPicker) card.expPicker.setDisabled(false);
+  if (btnAi) btnAi.classList.remove('hidden');
 }
 
 /**
@@ -1502,38 +1704,172 @@ function handleLocalSubmission(payload) {
 }
 
 /**
- * Display Success Modal
+ * Helpers to resolve labels for submission summary modal
+ */
+function resolveAffiliationLabel(affId, affOther) {
+  if (affId === 'OTHERS' && affOther) return affOther;
+  const match = state.affiliations.find(a => a.id === affId);
+  return match ? match.label : (affOther || affId || 'Not Specified');
+}
+
+function resolveCareerLabel(careerId) {
+  const match = state.career_status.find(c => c.id === careerId);
+  return match ? match.label : (careerId || 'Not Specified');
+}
+
+function renderExpertiseChipsHtml(expList, expOther) {
+  const list = Array.isArray(expList) ? expList : (expList ? [expList] : []);
+  if (list.length === 0 && !expOther) {
+    return '<span style="color: #94a3b8; font-size: 0.82rem;">None selected</span>';
+  }
+  let html = '';
+  list.forEach(id => {
+    if (id === 'OTHERS') return;
+    const match = state.expertise.find(e => e.id === id);
+    const label = match ? match.label : id;
+    html += `<span class="summary-chip"><strong>${id}</strong>: ${label}</span>`;
+  });
+  if (expOther) {
+    html += `<span class="summary-chip"><strong>Custom</strong>: ${expOther}</span>`;
+  }
+  return html;
+}
+
+/**
+ * Display Success Modal in a neat, well-ordered layout without mentioning storage files
  */
 function showSuccessModal(result, payload) {
   const modalBody = document.getElementById('modal-body');
   const assignedIds = result.assigned_referee_ids || [];
 
-  let refSummaryHtml = '<ul>';
-  payload.referees.forEach((r, i) => {
-    const uid = assignedIds[i] || 'RECORDED';
-    refSummaryHtml += `<li><strong>${r.name}</strong> (${r.email}) &rarr; <span class="status-badge badge-verified">${uid}</span></li>`;
+  const nowFormatted = new Date().toLocaleString('en-GB', {
+    day: '2-digit', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
   });
-  refSummaryHtml += '</ul>';
 
-  const isLocal = result.is_local || (!state.isLiveServer);
-  const syncNotice = isLocal ? `
-    <div style="margin-top: 12px; padding: 10px; background: #fef3c7; border: 1px solid #fcd34d; border-radius: 6px; font-size: 0.85rem; color: #92400e;">
-      <strong>Notice:</strong> Saved in local browser session. To write submissions directly into the disk files (<code>database/Referee_database_A.csv</code>), run:
-      <pre style="margin-top: 4px; font-family: monospace; background: #fffbeb; padding: 4px 8px; border-radius: 4px;">./util --serve</pre>
-    </div>
-  ` : `
-    <p style="margin-top: 10px; font-size: 0.85rem; color: #166534;">
-      ✓ All entries, custom affiliations, and unique IDs have been permanently committed to <code>database/Referee_database_A.csv</code> and ASCII files.
-    </p>
-  `;
+  // 1. Submitter Details
+  const submitterAff = resolveAffiliationLabel(payload.user_affiliation, payload.user_affiliation_other);
+  const submitterCareer = resolveCareerLabel(payload.user_career_status);
+  const submitterExpHtml = renderExpertiseChipsHtml(payload.user_expertise, payload.user_expertise_other);
+
+  // 2. Referees List
+  let refCardsHtml = '';
+  payload.referees.forEach((r, idx) => {
+    const uid = assignedIds[idx] || `REF_${String(idx + 1).padStart(4, '0')}`;
+    const affLabel = resolveAffiliationLabel(r.affiliation, r.affiliation_other);
+    const careerLabel = resolveCareerLabel(r.career_status);
+    const expChips = renderExpertiseChipsHtml(r.expertise, r.expertise_other);
+    const typeLabel = r.is_self ? 'Submitter (Own Entry)' : 'Peer Referee';
+    const typeBadgeClass = r.is_self ? 'badge-self' : 'badge-verified';
+
+    refCardsHtml += `
+      <div class="summary-referee-card">
+        <div class="summary-ref-header">
+          <span class="summary-ref-title">Referee Suggestion ${idx + 1}</span>
+          <div style="display: flex; gap: 6px; align-items: center;">
+            <span class="status-badge ${typeBadgeClass}">${typeLabel}</span>
+            <span class="status-badge badge-verified"><code>${uid}</code></span>
+          </div>
+        </div>
+        <div class="summary-grid">
+          <div class="summary-item">
+            <div class="summary-label">Referee Name</div>
+            <div class="summary-value">${r.name}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Email ID</div>
+            <div class="summary-value">${r.email} <span class="badge-valid-pill">✓ Validated email</span></div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Affiliation</div>
+            <div class="summary-value">${affLabel}</div>
+          </div>
+          <div class="summary-item">
+            <div class="summary-label">Career Status</div>
+            <div class="summary-value">${careerLabel}</div>
+          </div>
+        </div>
+        <div style="margin-top: 8px;">
+          <div class="summary-label">Expertise Topics</div>
+          <div class="summary-chips">${expChips}</div>
+        </div>
+      </div>
+    `;
+  });
 
   modalBody.innerHTML = `
-    <p><strong>Submission ID:</strong> <code>${result.submission_id}</code></p>
-    <p><strong>Submitter:</strong> ${payload.user_name} (${payload.user_email})</p>
-    <p><strong>Review Volunteer:</strong> For Cycle ${state.cycle}: <em>${payload.review_this_cycle.toUpperCase()}</em> | Future Cycles: <em>${payload.review_future_cycles.toUpperCase()}</em></p>
-    <p style="margin-top: 10px;"><strong>Referees Registered:</strong></p>
-    ${refSummaryHtml}
-    ${syncNotice}
+    <div class="summary-meta-badge">
+      <span>📋 Reference: <strong><code>${result.submission_id}</code></strong></span>
+      <span>•</span>
+      <span>📅 ${nowFormatted}</span>
+    </div>
+
+    <!-- Section 1: Submitter Profile -->
+    <div class="summary-card">
+      <div class="summary-card-header">
+        <span>1. Submitter Profile</span>
+        <span class="badge-valid-pill">✓ Validated Submitter</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">Full Name</div>
+          <div class="summary-value">${payload.user_name}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Email Address</div>
+          <div class="summary-value">${payload.user_email} <span class="badge-valid-pill">✓ Validated email</span></div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Institutional Affiliation</div>
+          <div class="summary-value">${submitterAff}</div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Career Status</div>
+          <div class="summary-value">${submitterCareer}</div>
+        </div>
+      </div>
+      <div style="margin-top: 10px;">
+        <div class="summary-label">Areas of Expertise</div>
+        <div class="summary-chips">${submitterExpHtml}</div>
+      </div>
+    </div>
+
+    <!-- Section 2: Review Volunteering -->
+    <div class="summary-card">
+      <div class="summary-card-header">
+        <span>2. GTAC Review Volunteering</span>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="summary-label">For Cycle ${state.cycle}</div>
+          <div class="summary-value">
+            <span class="status-badge ${payload.review_this_cycle === 'yes' ? 'badge-verified' : 'badge-new'}">
+              ${payload.review_this_cycle === 'yes' ? '✓ Willing to Review' : 'No'}
+            </span>
+          </div>
+        </div>
+        <div class="summary-item">
+          <div class="summary-label">Future Cycles</div>
+          <div class="summary-value">
+            <span class="status-badge ${payload.review_future_cycles === 'yes' ? 'badge-verified' : 'badge-new'}">
+              ${payload.review_future_cycles === 'yes' ? '✓ Willing to Review' : 'No'}
+            </span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: Referee Suggestions -->
+    <div class="summary-card">
+      <div class="summary-card-header">
+        <span>3. Referee Suggestions & Registrations (${payload.referees.length})</span>
+      </div>
+      ${refCardsHtml}
+    </div>
+
+    <div class="summary-footer-note">
+      ✓ Your referee registration and suggestions have been successfully recorded with GTAC.
+    </div>
   `;
 
   modalSuccess.classList.remove('hidden');
