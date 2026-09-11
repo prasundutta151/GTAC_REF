@@ -28,6 +28,14 @@ The following table summarizes all files and directories in this repository and 
 | `database/form_submissions.csv` | File | Audit log of all referee registration and suggestion submissions. |
 | `database/cycle.txt` | File | ASCII file storing current GTAC cycle number (e.g. `52`). |
 | `cycle.txt` | Symlink | Root convenience link pointing to `database/cycle.txt`. |
+| `doc/` | Directory | Dedicated documentation suite with multi-page HTML manuals. |
+| `doc/README.html` | File | Master documentation portal and system overview. |
+| `doc/form_guide.html` | File | Detailed documentation of the referee intake form, validation, and rules. |
+| `doc/database_guide.html` | File | Detailed documentation of ASCII taxonomies, CSV registries, and schemas. |
+| `doc/api_guide.html` | File | Comprehensive REST API endpoints and `util` CLI command reference. |
+| `doc/doc_style.css` | File | Responsive GTAC-themed stylesheet for documentation pages. |
+| `README.html` | Symlink | Root convenience link pointing to `doc/README.html`. |
+| `dev/doc` | Symlink | Convenience link pointing to `doc/` directory. |
 | `index.html` | Symlink | Root convenience link pointing to `dev/index.html`. |
 | `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--change-branch`, and `--release`. |
 | `VERSION` | File | Plaintext file containing current release version in `ZZ.YY.XX` format. |
@@ -54,6 +62,32 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 18:45:00 IST
+
+Prompt / Request
+- Create a comprehensive `README.html` file explaining the form and the database in detail using multiple pages if needed, situated in a dedicated `doc/` folder.
+
+Changes Made
+- `doc/`:
+  - Created dedicated documentation directory containing a multi-page documentation website.
+  - `doc/README.html`: Master documentation portal, system overview, architecture diagram, feature matrix, quick start guide, and navigation hub.
+  - `doc/form_guide.html`: In-depth breakdown of all form fields, Question 6 dynamic cycle reading, dark add-bar sequential logic, real-time Gemini validation, title stripping, half-initials matching, and ordered submission confirmation.
+  - `doc/database_guide.html`: Comprehensive documentation of the database files (`affiliations.txt`, `expertise.txt`, `career_status.txt`, `cycle.txt`, `Referee_database_A.csv`, `form_submissions.csv`), schemas, ID allocation schemes, and offline export bundle (`db_data.js`).
+  - `doc/api_guide.html`: Full reference for REST API endpoints (`/api/database`, `/api/cycle`, `/api/referees/lookup`, `/api/gemini-validate`, `/api/submit`) and `util` CLI command options (`--serve`, `--version`, `--git-push`, `--change-branch`, `--release`, `--status`).
+  - `doc/doc_style.css`: Responsive GTAC-themed stylesheet with sticky sidebar navigation, callout boxes, feature cards, tables, and badge styling.
+- Symlinks:
+  - Created root symlink `README.html -> doc/README.html`.
+  - Created dev convenience symlink `dev/doc -> ../doc`.
+- `util`:
+  - Bumped version to `01.00.09`.
+
+Verification
+- Verified all documentation files serve cleanly over HTTP via `./util --serve 8089` returning HTTP 200 for `doc/README.html`, `doc/form_guide.html`, `doc/database_guide.html`, `doc/api_guide.html`, and `doc/doc_style.css`.
+- Verified inter-page navigation links work across all sub-pages.
+- Verified standalone local file viewing under `file://`.
 
 ---
 

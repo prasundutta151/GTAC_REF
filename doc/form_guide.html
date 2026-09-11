@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTAC Referee System — Form System Guide</title>
+  <link rel="stylesheet" href="doc_style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="doc-header">
+    <a href="README.html" class="doc-brand">
+      <span class="doc-brand-logo">📡</span>
+      <div>
+        <span class="doc-brand-title">GTAC Referee System</span>
+        <span class="doc-brand-subtitle">Form System Guide</span>
+      </div>
+    </a>
+    <nav class="doc-nav">
+      <a href="README.html" class="doc-nav-link">Overview</a>
+      <a href="form_guide.html" class="doc-nav-link active">Form Guide</a>
+      <a href="database_guide.html" class="doc-nav-link">Database Guide</a>
+      <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
+      <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
+      <span class="version-badge">v01.00.08</span>
+    </nav>
+  </header>
+
+  <div class="doc-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-title">Form Guide Navigation</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#section-1" class="sidebar-link active">1. Submitter Information</a></li>
+        <li class="sidebar-item"><a href="#question-6" class="sidebar-link">2. Review Volunteering (Cycle)</a></li>
+        <li class="sidebar-item"><a href="#add-bar" class="sidebar-link">3. Dark Add-Referee Bar</a></li>
+        <li class="sidebar-item"><a href="#referee-cards" class="sidebar-link">4. Referee Cards & Matching</a></li>
+        <li class="sidebar-item"><a href="#gemini-features" class="sidebar-link">5. Gemini Auto-Validation</a></li>
+        <li class="sidebar-item"><a href="#submission-summary" class="sidebar-link">6. Ordered Summary Modal</a></li>
+      </ul>
+
+      <div class="sidebar-title">Other Manuals</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="README.html" class="sidebar-link">🏠 Overview</a></li>
+        <li class="sidebar-item"><a href="database_guide.html" class="sidebar-link">🗄️ Database Architecture</a></li>
+        <li class="sidebar-item"><a href="api_guide.html" class="sidebar-link">⚡ REST API & CLI Reference</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="doc-content">
+      
+      <section id="section-1" class="doc-section">
+        <h1>Section 1: Submitter Profile</h1>
+        <p class="doc-lead">
+          The submitter profile establishes the identity of the researcher completing the form. It captures contact details, institutional affiliation, career stage, and academic expertise.
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Field Name</th>
+                <th>Type & Source</th>
+                <th>Behavior & Validation Rules</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>1. Your Name</strong></td>
+                <td>Text Input</td>
+                <td>
+                  Required. Honorific titles (<code>Dr</code>, <code>Prof</code>, etc.) are automatically stripped. If review volunteering is active, changes synchronize in real time to Referee Block 1.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>2. Your Email ID</strong></td>
+                <td>Email Input</td>
+                <td>
+                  Required. Automatically validated in real time via Gemini AI / domain heuristics. Renders a green <span class="badge badge-valid">✓ Validated email</span> pill showing verified institutional status.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>3. Your Affiliation</strong></td>
+                <td>Dynamic Dropdown</td>
+                <td>
+                  Populated from <code>database/affiliations.txt</code>. Includes <code>+ Others</code> option. When selected, expands an additional text box allowing registration of new institutions into the database.
+                </td>
+              </tr>
+              <tr>
+                <td><strong>4. Your Career Status</strong></td>
+                <td>Dropdown</td>
+                <td>
+                  Populated from <code>database/career_status.txt</code> (Undergraduate, PhD Student, Postdoctoral Fellow, Faculty Member, Scientist, Engineer, Others).
+                </td>
+              </tr>
+              <tr>
+                <td><strong>5. Your Expertise</strong></td>
+                <td>Interactive Multi-Select Dropdown</td>
+                <td>
+                  Powered by <code>ExpertisePicker</code>. Selecting an astronomy/physics topic from the list adds an interactive tag chip with a remove button. Includes <code>+ Others</code> to register new sub-fields.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="question-6" class="doc-section">
+        <h2>Question 6: GTAC Review Volunteering</h2>
+        <p>
+          Determines whether the submitter wishes to volunteer as a peer referee for proposal cycles.
+        </p>
+        
+        <div class="callout callout-info">
+          <strong>Dynamic Cycle Loading:</strong> Instead of static text ("This cycle:"), the label dynamically displays <code>For Cycle: 52</code> loaded directly from <code>database/cycle.txt</code> at runtime.
+        </div>
+
+        <h3>Volunteering Options:</h3>
+        <ul>
+          <li><strong>For Cycle: [Cycle Number]</strong> (Yes / No radio)</li>
+          <li><strong>Future cycles</strong> (Yes / No radio)</li>
+        </ul>
+
+        <h3>Automated Synchronization Rule:</h3>
+        <p>
+          If the submitter selects <strong>"Yes"</strong> for either the current cycle or future cycles:
+        </p>
+        <ol>
+          <li>The system automatically creates or designates <strong>Referee Suggestion - 1</strong> as the submitter's own entry.</li>
+          <li>The card is tagged with badge <span class="badge badge-self">Self - Review Volunteer (Locked)</span>.</li>
+          <li>Submitter fields from Section 1 are mirrored into the card.</li>
+          <li>If the user switches both back to <strong>"No"</strong>, the block is unlocked and converted back to an editable entry.</li>
+        </ol>
+      </section>
+
+      <section id="add-bar" class="doc-section">
+        <h2>Full-Length Dark Background Bar</h2>
+        <p>
+          The interface features a full-width dark gradient button positioned directly beneath the list of referee cards, guaranteeing it <strong>always follows the last ongoing referee block</strong>.
+        </p>
+
+        <div class="card-grid">
+          <div class="feature-card">
+            <h3>State 1: Initial Click (Own Entry)</h3>
+            <p>When zero referee cards are present, the bar displays:</p>
+            <p><code>＋ Add Referee Suggestion (Own Entry)</code></p>
+            <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              Clicking creates Block 1 pre-populated with the submitter's profile details.
+            </p>
+          </div>
+
+          <div class="feature-card">
+            <h3>State 2: Subsequent Clicks (Others Entry)</h3>
+            <p>When one or more cards already exist, the bar adapts to:</p>
+            <p><code>＋ Add Referee Suggestion (Others Entry)</code></p>
+            <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
+              Clicking appends blank referee cards for suggesting external peer reviewers.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="referee-cards" class="doc-section">
+        <h2>Referee Suggestion Cards & Real-Time Lookup</h2>
+        <p>
+          Each referee card requires Name, Email, Affiliation, Career Status, and Expertise. As the user enters details, intelligent cross-checking against <code>Referee_database_A</code> occurs:
+        </p>
+
+        <h3>1. Title Stripping</h3>
+        <p>
+          When entering a referee name like <code>Prof. Jayaram Chengalur</code> or <code>Dr. Nirupam Roy</code>, the system strips the honorific prefix in real time and normalizes the name to <code>Jayaram Chengalur</code> or <code>Nirupam Roy</code>.
+        </p>
+
+        <h3>2. Half-Initials Matching</h3>
+        <p>
+          Names entered with initials (e.g. <code>Y. Gupta</code>, <code>J. Chengalur</code>, <code>P. Dutta</code>, or <code>Gupta, Y.</code>) are matched against full database records where the surname matches and given initials correspond.
+        </p>
+
+        <h3>3. Real-Time Pre-Filling & Badges</h3>
+        <ul>
+          <li><strong>Verified Referee in DB:</strong> Displays <span class="badge badge-verified">Verified in DB</span> and pre-fills email, affiliation, and expertise tags from the database record.</li>
+          <li><strong>Suggested Referee in DB:</strong> Displays <span class="badge badge-suggested">Already in DB</span> with pre-filled fields.</li>
+          <li><strong>New Referee Suggestion:</strong> Displays <span class="badge" style="background:#f1f5f9; color:#475569;">New Suggestion</span>. On submission, a new unique <code>REF_XXXX</code> ID is sequentially assigned.</li>
+        </ul>
+
+        <h3>4. Input Editability Guarantee</h3>
+        <div class="callout callout-success">
+          <strong>Always Editable:</strong> Even when a referee is verified in the database or validated by Gemini, <strong>all inputs remain completely editable</strong>. Reviewers' names, emails, and institutions are never locked into a disabled state, allowing users to make adjustments whenever necessary.
+        </div>
+      </section>
+
+      <section id="gemini-features" class="doc-section">
+        <h2>Gemini AI Auto-Validation</h2>
+        <p>
+          By default, entering a referee's name or email automatically triggers validation:
+        </p>
+        <ul>
+          <li><strong>Live Verification:</strong> If <code>GEMINI_API_KEY</code> is set, calls Gemini 1.5 Flash to verify academic standing and institutional affiliation.</li>
+          <li><strong>Offline Heuristics:</strong> If offline or without an API key, verifies against recognized Indian and international astronomy institutions (NCRA-TIFR, IUCAA, RRI, IISc, TIFR, IIA, PRL, ARIES, IITs, etc.) and academic top-level domains.</li>
+          <li><strong>Visual Feedback:</strong> Displays <span class="badge badge-valid">✓ Validated email</span> with verified domain confirmation underneath the input field.</li>
+        </ul>
+      </section>
+
+      <section id="submission-summary" class="doc-section">
+        <h2>Post-Submission Summary Modal</h2>
+        <p>
+          Upon submission, the system presents a clean, beautifully organized dialog summarizing all provided information:
+        </p>
+        <ol>
+          <li><strong>Header:</strong> Submission Reference ID (e.g. <code>SUB_1789130888</code>) and formatted submission date/time.</li>
+          <li><strong>Submitter Profile:</strong> Full name, validated email, institutional affiliation, career level, and expertise tags.</li>
+          <li><strong>Review Volunteering:</strong> Availability for Cycle 52 and Future Cycles.</li>
+          <li><strong>Referee Suggestions:</strong> Individual cards for each suggested referee with unique ID (<code>REF_XXXX</code>), type tag (Own Entry / Peer Referee), Name, Validated Email, Affiliation, Career Status, and Expertise.</li>
+          <li><strong>Zero File Path Leaks:</strong> Internal server storage details (e.g. <code>database/Referee_database_A.csv</code>) are hidden to maintain a clean user experience.</li>
+        </ol>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>GTAC Referee System Documentation • Giant Metrewave Radio Telescope (NCRA-TIFR)</p>
+    <p style="margin-top: 4px;"><a href="README.html">Overview</a> | <a href="database_guide.html">Database Architecture</a> | <a href="api_guide.html">REST API & CLI Reference</a></p>
+  </footer>
+
+</body>
+</html>

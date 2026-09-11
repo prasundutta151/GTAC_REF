@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GTAC Referee System — REST API & CLI Reference</title>
+  <link rel="stylesheet" href="doc_style.css">
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header class="doc-header">
+    <a href="README.html" class="doc-brand">
+      <span class="doc-brand-logo">📡</span>
+      <div>
+        <span class="doc-brand-title">GTAC Referee System</span>
+        <span class="doc-brand-subtitle">REST API & CLI Reference</span>
+      </div>
+    </a>
+    <nav class="doc-nav">
+      <a href="README.html" class="doc-nav-link">Overview</a>
+      <a href="form_guide.html" class="doc-nav-link">Form Guide</a>
+      <a href="database_guide.html" class="doc-nav-link">Database Guide</a>
+      <a href="api_guide.html" class="doc-nav-link active">API & CLI</a>
+      <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
+      <span class="version-badge">v01.00.08</span>
+    </nav>
+  </header>
+
+  <div class="doc-container">
+    
+    <!-- Sidebar Navigation -->
+    <aside class="doc-sidebar">
+      <div class="sidebar-title">REST API Reference</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#api-database" class="sidebar-link active">GET /api/database</a></li>
+        <li class="sidebar-item"><a href="#api-cycle" class="sidebar-link">GET /api/cycle</a></li>
+        <li class="sidebar-item"><a href="#api-lookup" class="sidebar-link">GET /api/referees/lookup</a></li>
+        <li class="sidebar-item"><a href="#api-validate" class="sidebar-link">POST /api/gemini-validate</a></li>
+        <li class="sidebar-item"><a href="#api-submit" class="sidebar-link">POST /api/submit</a></li>
+      </ul>
+
+      <div class="sidebar-title">CLI Reference</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="#cli-overview" class="sidebar-link">util CLI Tool Overview</a></li>
+        <li class="sidebar-item"><a href="#cli-serve" class="sidebar-link">./util --serve</a></li>
+        <li class="sidebar-item"><a href="#cli-version" class="sidebar-link">./util --version</a></li>
+        <li class="sidebar-item"><a href="#cli-git-push" class="sidebar-link">./util --git-push</a></li>
+        <li class="sidebar-item"><a href="#cli-release" class="sidebar-link">./util --release</a></li>
+      </ul>
+
+      <div class="sidebar-title">Other Manuals</div>
+      <ul class="sidebar-menu">
+        <li class="sidebar-item"><a href="README.html" class="sidebar-link">🏠 Overview</a></li>
+        <li class="sidebar-item"><a href="form_guide.html" class="sidebar-link">📋 Form System Guide</a></li>
+        <li class="sidebar-item"><a href="database_guide.html" class="sidebar-link">🗄️ Database Architecture</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="doc-content">
+      
+      <section id="api-database" class="doc-section">
+        <h1>Backend REST API Reference</h1>
+        <p class="doc-lead">
+          The backend API is implemented in <code>dev/server.py</code> using Python 3's built-in standard library. It requires zero external dependencies and handles all database queries and submissions.
+        </p>
+
+        <h2>GET /api/database</h2>
+        <p>Retrieves a complete snapshot of the system taxonomies and current referee database.</p>
+        <pre><code>curl -s http://localhost:8080/api/database</code></pre>
+        <h3>Response (200 OK):</h3>
+        <pre><code>{
+  "cycle": "52",
+  "affiliations": [
+    { "id": "AFF_001", "label": "National Centre for Radio Astrophysics (NCRA-TIFR), Pune" },
+    ...
+  ],
+  "expertise": [
+    { "id": "EXP_01", "label": "Pulsars, Transients and Fast Radio Bursts" },
+    ...
+  ],
+  "career_status": [
+    { "id": "CAR_01", "label": "Undergraduate Student" },
+    ...
+  ],
+  "referees": [
+    {
+      "unique_id": "REF_0001",
+      "referee_name": "Yashwant Gupta",
+      "email": "ygupta@ncra.tifr.res.in",
+      "affiliation": "AFF_001",
+      "expertise": "EXP_01;EXP_14",
+      "career_status": "CAR_04",
+      "referee_status": "verified",
+      "available": "true"
+    },
+    ...
+  ]
+}</code></pre>
+      </section>
+
+      <section id="api-cycle" class="doc-section">
+        <h2>GET /api/cycle (and /cycle.txt)</h2>
+        <p>Returns the current GTAC proposal cycle number as plain text.</p>
+        <pre><code>curl -s http://localhost:8080/api/cycle</code></pre>
+        <h3>Response:</h3>
+        <pre><code>52</code></pre>
+      </section>
+
+      <section id="api-lookup" class="doc-section">
+        <h2>GET /api/referees/lookup</h2>
+        <p>Cross-checks names and emails against <code>Referee_database_A</code> using both substring matching and fuzzy half-initials matching with full surname.</p>
+        <pre><code>curl -s "http://localhost:8080/api/referees/lookup?q=Y.+Gupta"</code></pre>
+        <h3>Response:</h3>
+        <pre><code>{
+  "matches": [
+    {
+      "unique_id": "REF_0001",
+      "referee_name": "Yashwant Gupta",
+      "email": "ygupta@ncra.tifr.res.in",
+      "affiliation": "AFF_001",
+      "expertise": "EXP_01;EXP_14",
+      "career_status": "CAR_04",
+      "referee_status": "verified",
+      "available": "true"
+    }
+  ]
+}</code></pre>
+      </section>
+
+      <section id="api-validate" class="doc-section">
+        <h2>POST /api/gemini-validate</h2>
+        <p>Validates a researcher's Name and Email address using Gemini AI or academic institutional domain heuristics.</p>
+        <pre><code>curl -s -X POST http://localhost:8080/api/gemini-validate \
+  -H "Content-Type: application/json" \
+  -d '{"name": "Jayaram Chengalur", "email": "chengalur@ncra.tifr.res.in"}'</code></pre>
+        <h3>Response:</h3>
+        <pre><code>{
+  "valid_email": true,
+  "mention": "Validated email",
+  "message": "Validated email: Verified institutional domain (ncra.tifr.res.in)",
+  "affiliation": "AFF_001",
+  "email_domain": "ncra.tifr.res.in",
+  "expertise": ["EXP_01", "EXP_03", "EXP_11", "EXP_14"],
+  "clean_name": "Jayaram Chengalur",
+  "email": "chengalur@ncra.tifr.res.in",
+  "source": "Smart Knowledge Base"
+}</code></pre>
+      </section>
+
+      <section id="api-submit" class="doc-section">
+        <h2>POST /api/submit</h2>
+        <p>Processes a complete form submission, dynamically registering new institutions and assigning sequential <code>REF_XXXX</code> identifiers.</p>
+        <pre><code>curl -s -X POST http://localhost:8080/api/submit \
+  -H "Content-Type: application/json" \
+  -d '{
+    "user_name": "Prasun Dutta",
+    "user_email": "pdutta@iucaa.in",
+    "user_affiliation": "AFF_002",
+    "user_career_status": "CAR_04",
+    "user_expertise": ["EXP_02", "EXP_07"],
+    "review_this_cycle": "yes",
+    "review_future_cycles": "no",
+    "referees": [
+      {
+        "name": "Prasun Dutta",
+        "email": "pdutta@iucaa.in",
+        "affiliation": "AFF_002",
+        "career_status": "CAR_04",
+        "expertise": ["EXP_02", "EXP_07"],
+        "is_self": true
+      }
+    ]
+  }'</code></pre>
+        <h3>Response:</h3>
+        <pre><code>{
+  "status": "success",
+  "submission_id": "SUB_1789131000",
+  "assigned_referee_ids": ["REF_0011"]
+}</code></pre>
+      </section>
+
+      <section id="cli-overview" class="doc-section">
+        <h2>Developer CLI Reference (util)</h2>
+        <p>
+          The repository includes an executable Python CLI script <code>util</code> in the project root to automate project maintenance, deployment, and version management.
+        </p>
+
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Command & Flags</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>./util --serve [PORT]</code></td>
+                <td>Starts the local HTTP REST server (default: port <code>8080</code>).</td>
+              </tr>
+              <tr>
+                <td><code>./util --version [VER]</code></td>
+                <td>Increments minor patch version (<code>01.00.XX</code>) or sets explicit version.</td>
+              </tr>
+              <tr>
+                <td><code>./util --git-push [-m MSG]</code></td>
+                <td>Stages all project files, commits with structured message, and pushes to remote.</td>
+              </tr>
+              <tr>
+                <td><code>./util --change-branch [BR]</code></td>
+                <td>Lists existing git branches or switches to a target branch.</td>
+              </tr>
+              <tr>
+                <td><code>./util --release</code></td>
+                <td>Builds a standalone release tarball in <code>versions/</code> excluding dev/git files.</td>
+              </tr>
+              <tr>
+                <td><code>./util --status</code></td>
+                <td>Displays the current active version, git branch, and working tree health.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <footer class="doc-footer">
+    <p>GTAC Referee System Documentation • Giant Metrewave Radio Telescope (NCRA-TIFR)</p>
+    <p style="margin-top: 4px;"><a href="README.html">Overview</a> | <a href="form_guide.html">Form Guide</a> | <a href="database_guide.html">Database Architecture</a></p>
+  </footer>
+
+</body>
+</html>
