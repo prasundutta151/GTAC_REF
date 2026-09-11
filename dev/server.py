@@ -29,13 +29,28 @@ EXPERTISE_FILE = DB_DIR / "expertise.txt"
 CAREER_STATUS_FILE = DB_DIR / "career_status.txt"
 REFEREE_DB_FILE = DB_DIR / "Referee_database_A.csv"
 SUBMISSIONS_FILE = DB_DIR / "form_submissions.csv"
+CYCLE_FILE = DB_DIR / "cycle.txt"
 DB_DATA_JS = DEV_DIR / "db_data.js"
+
+
+def load_cycle() -> str:
+    """Read current GTAC cycle from cycle.txt (defaults to '52')."""
+    for path in [CYCLE_FILE, PROJECT_ROOT / "cycle.txt", DEV_DIR / "cycle.txt"]:
+        if path.exists():
+            try:
+                val = path.read_text(encoding="utf-8").strip()
+                if val:
+                    return val
+            except Exception:
+                pass
+    return "52"
 
 
 def sync_db_data_js() -> None:
     """Generate static dev/db_data.js for standalone/offline file:// viewing."""
     try:
         data = {
+            "cycle": load_cycle(),
             "affiliations": parse_pipe_ascii(AFFILIATIONS_FILE),
             "expertise": parse_pipe_ascii(EXPERTISE_FILE),
             "career_status": parse_pipe_ascii(CAREER_STATUS_FILE),
@@ -363,11 +378,21 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         if path == "/api/database":
             self.send_json_response({
+                "cycle": load_cycle(),
                 "affiliations": parse_pipe_ascii(AFFILIATIONS_FILE),
                 "expertise": parse_pipe_ascii(EXPERTISE_FILE),
                 "career_status": parse_pipe_ascii(CAREER_STATUS_FILE),
                 "referees": load_referees()
             })
+            return
+
+        elif path in ("/api/cycle", "/cycle.txt"):
+            cycle_val = load_cycle()
+            self.send_response(200)
+            self.send_header("Content-Type", "text/plain; charset=utf-8")
+            self.send_header("Access-Control-Allow-Origin", "*")
+            self.end_headers()
+            self.wfile.write(cycle_val.encode("utf-8"))
             return
 
         elif path == "/api/referees/lookup":

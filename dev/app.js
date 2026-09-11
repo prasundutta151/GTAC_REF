@@ -5,6 +5,7 @@
 
 // Global State
 const state = {
+  cycle: '52',
   affiliations: [],
   expertise: [],
   career_status: [],
@@ -161,9 +162,40 @@ class ExpertisePicker {
 document.addEventListener('DOMContentLoaded', async () => {
   initSubmitterExpertisePicker();
   await loadDatabase();
+  await fetchCycleFile();
   setupEventListeners();
   updateRefereeBarText();
 });
+
+/**
+ * Update the cycle display on Question 6
+ */
+function updateCycleDisplay(cycleVal) {
+  const current = (cycleVal || state.cycle || '52').trim();
+  state.cycle = current;
+  const cycleValEl = document.getElementById('current-cycle-display');
+  if (cycleValEl) {
+    cycleValEl.textContent = current;
+  }
+}
+
+/**
+ * Fetch cycle.txt file directly if accessible
+ */
+async function fetchCycleFile() {
+  try {
+    const res = await fetch('cycle.txt');
+    if (res.ok) {
+      const text = await res.text();
+      const val = text.trim();
+      if (val) {
+        updateCycleDisplay(val);
+      }
+    }
+  } catch (err) {
+    // If running under file:// or fetch fails, cycle from database/db_data.js remains active
+  }
+}
 
 function initSubmitterExpertisePicker() {
   userExpPicker = new ExpertisePicker(
@@ -215,6 +247,9 @@ async function loadDatabase() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
 
+    if (data.cycle) {
+      updateCycleDisplay(data.cycle);
+    }
     state.affiliations = data.affiliations || [];
     state.expertise = data.expertise || [];
     state.career_status = data.career_status || [];
@@ -234,6 +269,9 @@ async function loadDatabase() {
  */
 function useEmbeddedDatabase() {
   if (window.GTAC_DATABASE) {
+    if (window.GTAC_DATABASE.cycle) {
+      updateCycleDisplay(window.GTAC_DATABASE.cycle);
+    }
     state.affiliations = window.GTAC_DATABASE.affiliations || [];
     state.expertise = window.GTAC_DATABASE.expertise || [];
     state.career_status = window.GTAC_DATABASE.career_status || [];
@@ -1492,7 +1530,7 @@ function showSuccessModal(result, payload) {
   modalBody.innerHTML = `
     <p><strong>Submission ID:</strong> <code>${result.submission_id}</code></p>
     <p><strong>Submitter:</strong> ${payload.user_name} (${payload.user_email})</p>
-    <p><strong>Review Volunteer:</strong> This Cycle: <em>${payload.review_this_cycle.toUpperCase()}</em> | Future Cycles: <em>${payload.review_future_cycles.toUpperCase()}</em></p>
+    <p><strong>Review Volunteer:</strong> For Cycle ${state.cycle}: <em>${payload.review_this_cycle.toUpperCase()}</em> | Future Cycles: <em>${payload.review_future_cycles.toUpperCase()}</em></p>
     <p style="margin-top: 10px;"><strong>Referees Registered:</strong></p>
     ${refSummaryHtml}
     ${syncNotice}

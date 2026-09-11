@@ -26,6 +26,8 @@ The following table summarizes all files and directories in this repository and 
 | `database/career_status.txt` | File | ASCII file listing career stages (`CAR_XX`) from Undergraduate to Faculty and Others. |
 | `database/Referee_database_A.csv` | File | Primary referee registry (`unique_id`, `referee_name`, `email`, `affiliation`, `expertise`, `career_status`, `referee_status`, `available`). |
 | `database/form_submissions.csv` | File | Audit log of all referee registration and suggestion submissions. |
+| `database/cycle.txt` | File | ASCII file storing current GTAC cycle number (e.g. `52`). |
+| `cycle.txt` | Symlink | Root convenience link pointing to `database/cycle.txt`. |
 | `index.html` | Symlink | Root convenience link pointing to `dev/index.html`. |
 | `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--change-branch`, and `--release`. |
 | `VERSION` | File | Plaintext file containing current release version in `ZZ.YY.XX` format. |
@@ -52,6 +54,40 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 18:35:00 IST
+
+Prompt / Request
+- Replace "This cycle" in Question 6 with "For Cycle:" reading dynamically from `cycle.txt` (initialized to `52`).
+
+Changes Made
+- `database/cycle.txt`:
+  - Created ASCII file storing the current GTAC proposal cycle number (`52`).
+  - Added convenience symlinks `cycle.txt -> database/cycle.txt` (root) and `dev/cycle.txt -> ../database/cycle.txt` (`dev/`).
+- `dev/server.py`:
+  - Added `load_cycle()` helper dynamically reading cycle value from `cycle.txt`.
+  - Updated `sync_db_data_js()` to bundle `"cycle": "52"` into `dev/db_data.js`.
+  - Updated `/api/database` endpoint to return `"cycle": load_cycle()`.
+  - Added `/api/cycle` and `/cycle.txt` routes to serve current cycle value directly.
+- `dev/index.html`:
+  - Replaced `<span class="cycle-title">This cycle:</span>` with `<span class="cycle-title" id="cycle-title-label">For Cycle: <span id="current-cycle-display">52</span></span>`.
+- `dev/app.js`:
+  - Added `cycle: '52'` to state object.
+  - Added `updateCycleDisplay(cycleVal)` and `fetchCycleFile()`.
+  - Integrated dynamic cycle extraction in `loadDatabase()` and `useEmbeddedDatabase()`.
+  - Updated submission confirmation modal to display `For Cycle ${state.cycle}`.
+- `dev/db_data.js`:
+  - Re-synced offline bundle with `"cycle": "52"`.
+- `util`:
+  - Bumped version to `01.00.07`.
+
+Verification
+- Verified direct file content: `cat database/cycle.txt` returns `52`.
+- Tested live endpoints via curl: `/api/cycle`, `/cycle.txt`, and `/api/database` all return `52`.
+- Tested dynamic runtime modification: changing `database/cycle.txt` to `53` immediately updates `/api/cycle` without server restart.
+- Verified offline file mode: `dev/db_data.js` contains `"cycle": "52"` for standalone browser execution.
 
 ---
 

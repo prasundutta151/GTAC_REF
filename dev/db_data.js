@@ -1,5 +1,6 @@
 // Auto-generated database export for standalone file:// support
 window.GTAC_DATABASE = {
+  "cycle": "52",
   "affiliations": [
     {
       "id": "AFF_001",
