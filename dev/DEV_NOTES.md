@@ -55,6 +55,45 @@ Notes
 
 ---
 
+## 2026-09-11 18:30:00 IST
+
+Prompt / Request
+- When writing to the referee database, remove honorific titles such as Dr, Prof, Mr, etc.
+- Cross-check if a referee name exists with half-initials (surname full) as well, and fill it up in the form mentioning this referee already exists.
+- If it is self entry, self entry gets preference over existing database records.
+
+Changes Made
+- `database/Referee_database_A.csv`:
+  - Stripped honorific titles (`Prof.`, `Dr.`) from all existing records in the database.
+- `dev/server.py`:
+  - Implemented `strip_titles()` regex removing titles (`Dr`, `Prof`, `Professor`, `Mr`, `Ms`, `Mrs`, `Shri`, `Smt`).
+  - Implemented `parse_name_parts()` to extract normalized surnames and given name tokens for both `First Last` and `Last, First` formats.
+  - Implemented `match_referee_name()` to match names via exact string or half-initials with full surname (e.g. `Y. Gupta` -> `Yashwant Gupta`, `J. Chengalur` -> `Jayaram Chengalur`, `P. Dutta` -> `Prasun Dutta`).
+  - Updated `save_referee_entry(entry, is_self)` to strip titles prior to persistence, cross-check against existing records using half-initials, and give self entries preference when updating existing records.
+  - Updated `/api/referees/lookup` to support both prefix/substring and half-initials matching.
+- `dev/app.js`:
+  - Implemented client-side `stripTitles()`, `parseNameParts()`, `matchRefereeName()`, and `findMatchingReferee()` matching server-side logic for offline/file:// mode.
+  - Added real-time cross-check listeners on referee card name and email inputs (`change` and `blur` events).
+  - Updated `populateCardWithReferee()`: auto-fills matching referee details, displays clear banner stating `Referee Already Exists in Database`, and locks verified entries.
+  - Enforced self-entry preference: prevents self-entry card from being overwritten by DB lookup and ensures submitter edits update records authoritatively upon submission.
+  - Updated `setupAutocomplete()` dropdown to query both direct substrings and half-initials matches.
+  - Stripped titles in `handleFormSubmit()` and `handleLocalSubmission()`.
+- `dev/db_data.js`:
+  - Re-synced offline database bundle with title-stripped referee records via `server.sync_db_data_js()`.
+- `util`:
+  - Bumped version to `01.00.06`.
+
+Verification
+- Verified `strip_titles()` across variations: `Prof. Dr. Yashwant Gupta` -> `Yashwant Gupta`.
+- Verified half-initials matching with tests: `Y. Gupta`, `Y Gupta`, `Gupta, Y.`, `J. Chengalur`, `P. Dutta` all match their respective database entries; non-matching initials (`A. Gupta`) correctly rejected.
+- Verified `/api/referees/lookup` returns exact and half-initials matches via HTTP endpoint.
+- Verified self-entry precedence: Submitter details are preserved and not overridden when matching existing database entries.
+
+Notes
+- Titles are cleanly stripped across both server-side submissions and client-side offline storage.
+
+---
+
 ## 2026-09-11 18:25:00 IST
 
 Prompt / Request

@@ -229,7 +229,7 @@ window.GTAC_DATABASE = {
   "referees": [
     {
       "unique_id": "REF_0001",
-      "referee_name": "Prof. Yashwant Gupta",
+      "referee_name": "Yashwant Gupta",
       "email": "ygupta@ncra.tifr.res.in",
       "affiliation": "AFF_001",
       "expertise": "EXP_01;EXP_14",
@@ -239,7 +239,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0002",
-      "referee_name": "Prof. Jayaram Chengalur",
+      "referee_name": "Jayaram Chengalur",
       "email": "chengalur@ncra.tifr.res.in",
       "affiliation": "AFF_001",
       "expertise": "EXP_03;EXP_11",
@@ -249,7 +249,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0003",
-      "referee_name": "Prof. Somak Raychaudhury",
+      "referee_name": "Somak Raychaudhury",
       "email": "somak@iucaa.in",
       "affiliation": "AFF_002",
       "expertise": "EXP_04;EXP_05",
@@ -259,7 +259,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0004",
-      "referee_name": "Dr. Bhaswati Bhattacharyya",
+      "referee_name": "Bhaswati Bhattacharyya",
       "email": "bhaswati@ncra.tifr.res.in",
       "affiliation": "AFF_001",
       "expertise": "EXP_01;EXP_10",
@@ -269,7 +269,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0005",
-      "referee_name": "Dr. Nirupam Roy",
+      "referee_name": "Nirupam Roy",
       "email": "nroy@iisc.ac.in",
       "affiliation": "AFF_004",
       "expertise": "EXP_03;EXP_07",
@@ -279,7 +279,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0006",
-      "referee_name": "Dr. Preeti Kharb",
+      "referee_name": "Preeti Kharb",
       "email": "kharb@ncra.tifr.res.in",
       "affiliation": "AFF_001",
       "expertise": "EXP_04;EXP_15",
@@ -289,7 +289,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0007",
-      "referee_name": "Dr. Ruta Kale",
+      "referee_name": "Ruta Kale",
       "email": "ruta@ncra.tifr.res.in",
       "affiliation": "AFF_001",
       "expertise": "EXP_05;EXP_12",
@@ -299,7 +299,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0008",
-      "referee_name": "Dr. Ananda Hota",
+      "referee_name": "Ananda Hota",
       "email": "ananda.hota@cbs.ac.in",
       "affiliation": "AFF_005",
       "expertise": "EXP_03;EXP_04",
@@ -309,7 +309,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0009",
-      "referee_name": "Dr. Kuntal Misra",
+      "referee_name": "Kuntal Misra",
       "email": "kuntal@aries.res.in",
       "affiliation": "AFF_007",
       "expertise": "EXP_10;EXP_15",
@@ -319,7 +319,7 @@ window.GTAC_DATABASE = {
     },
     {
       "unique_id": "REF_0010",
-      "referee_name": "Dr. Abhirup Datta",
+      "referee_name": "Abhirup Datta",
       "email": "abhirup.datta@iiti.ac.in",
       "affiliation": "AFF_014",
       "expertise": "EXP_02;EXP_12",

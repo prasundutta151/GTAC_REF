@@ -101,6 +101,73 @@ def load_referees() -> List[Dict[str, str]]:
     return referees
 
 
+def strip_titles(name: str) -> str:
+    """Remove honorific titles such as Dr, Prof, Mr, etc."""
+    if not name:
+        return ""
+    cleaned = re.sub(
+        r"^(?:\s*(?:dr|prof|professor|mr|ms|mrs|shri|smt)\.?\s+)+",
+        "",
+        name.strip(),
+        flags=re.IGNORECASE
+    )
+    return cleaned.strip()
+
+
+def parse_name_parts(name: str) -> Tuple[str, List[str]]:
+    """Parse name into normalized (surname, [given_name_tokens]).
+    Handles both 'First Middle Last' and 'Last, First Middle'.
+    """
+    cleaned = strip_titles(name)
+    if not cleaned:
+        return "", []
+    if "," in cleaned:
+        parts = [p.strip() for p in cleaned.split(",", 1)]
+        surname = re.sub(r"[^\w]", "", parts[0]).lower()
+        given_str = parts[1] if len(parts) > 1 else ""
+        given_tokens = [re.sub(r"[^\w]", "", t).lower() for t in given_str.split() if re.sub(r"[^\w]", "", t)]
+    else:
+        tokens = [re.sub(r"[^\w]", "", t).lower() for t in cleaned.split() if re.sub(r"[^\w]", "", t)]
+        if not tokens:
+            return "", []
+        surname = tokens[-1]
+        given_tokens = tokens[:-1]
+    return surname, given_tokens
+
+
+def match_referee_name(input_name: str, target_name: str) -> bool:
+    """Check if input_name matches target_name exactly or via half-initials with full surname.
+    Examples:
+      'Y. Gupta' matches 'Yashwant Gupta'
+      'J. Chengalur' matches 'Jayaram Chengalur'
+      'P. Dutta' matches 'Prasun Dutta'
+    """
+    sur1, giv1 = parse_name_parts(input_name)
+    sur2, giv2 = parse_name_parts(target_name)
+
+    if not sur1 or not sur2 or sur1 != sur2:
+        return False
+
+    if not giv1 and not giv2:
+        return True
+
+    if not giv1 or not giv2:
+        return False
+
+    min_len = min(len(giv1), len(giv2))
+    for i in range(min_len):
+        g1 = giv1[i]
+        g2 = giv2[i]
+        if len(g1) == 1 or len(g2) == 1:
+            if g1[0] != g2[0]:
+                return False
+        else:
+            if g1 != g2 and not g1.startswith(g2) and not g2.startswith(g1):
+                return False
+
+    return True
+
+
 def get_next_referee_id() -> str:
     """Generate the next unique REF_XXXX ID."""
     referees = load_referees()
@@ -113,29 +180,60 @@ def get_next_referee_id() -> str:
     return f"REF_{max_id + 1:04d}"
 
 
-def save_referee_entry(entry: Dict[str, str]) -> str:
-    """Add or update a referee in Referee_database_A.csv."""
+def save_referee_entry(entry: Dict[str, Any], is_self: bool = False) -> str:
+    """Add or update a referee in Referee_database_A.csv.
+    Strips titles (Dr, Prof, etc.). If is_self is True, self entry gets preference.
+    Cross-checks by email, exact name, and half-initials with full surname.
+    """
     referees = load_referees()
-    existing_idx = None
-    target_email = entry.get("email", "").strip().lower()
-    target_name = entry.get("referee_name", "").strip().lower()
+    raw_name = entry.get("referee_name", "").strip()
+    clean_name = strip_titles(raw_name)
+    entry["referee_name"] = clean_name
 
-    for idx, r in enumerate(referees):
-        r_email = r.get("email", "").strip().lower()
-        r_name = r.get("referee_name", "").strip().lower()
-        if (target_email and r_email == target_email) or (target_name and r_name == target_name):
-            existing_idx = idx
-            break
+    target_email = entry.get("email", "").strip().lower()
+    target_name = clean_name.lower()
+
+    existing_idx = None
+
+    # 1. First check exact email match
+    if target_email:
+        for idx, r in enumerate(referees):
+            if r.get("email", "").strip().lower() == target_email:
+                existing_idx = idx
+                break
+
+    # 2. Check exact name match
+    if existing_idx is None and target_name:
+        for idx, r in enumerate(referees):
+            r_name = strip_titles(r.get("referee_name", "")).strip().lower()
+            if r_name and r_name == target_name:
+                existing_idx = idx
+                break
+
+    # 3. Check half-initials + surname match
+    if existing_idx is None and target_name:
+        for idx, r in enumerate(referees):
+            r_name = strip_titles(r.get("referee_name", "")).strip()
+            if match_referee_name(clean_name, r_name):
+                existing_idx = idx
+                break
 
     if existing_idx is not None:
-        # If already verified, do not overwrite verified status
         curr = referees[existing_idx]
-        if curr.get("referee_status") == "verified":
-            return curr.get("unique_id", "")
-        # Update entry if suggested
-        curr.update(entry)
-        curr["unique_id"] = curr.get("unique_id") or get_next_referee_id()
-        unique_id = curr["unique_id"]
+
+        # If it is self entry, self entry gets preference!
+        if is_self:
+            curr.update(entry)
+            unique_id = curr.get("unique_id") or get_next_referee_id()
+            curr["unique_id"] = unique_id
+        else:
+            # If already verified peer referee, preserve verified status & data
+            if curr.get("referee_status") == "verified":
+                return curr.get("unique_id", "")
+            # Update suggested entry
+            curr.update(entry)
+            unique_id = curr.get("unique_id") or get_next_referee_id()
+            curr["unique_id"] = unique_id
     else:
         unique_id = get_next_referee_id()
         entry["unique_id"] = unique_id
@@ -153,7 +251,7 @@ def save_referee_entry(entry: Dict[str, str]) -> str:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         for r in referees:
-            row = {k: r.get(k, "") for k in fieldnames}
+            row = {k: strip_titles(str(r.get(k, ""))) if k == "referee_name" else str(r.get(k, "")) for k in fieldnames}
             writer.writerow(row)
 
     return unique_id
@@ -274,14 +372,17 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
 
         elif path == "/api/referees/lookup":
             qs = urllib.parse.parse_qs(parsed_url.query)
-            query = qs.get("q", [""])[0].strip().lower()
+            query = qs.get("q", [""])[0].strip()
             referees = load_referees()
             matches = []
             if query:
+                query_clean = strip_titles(query).lower()
                 for r in referees:
-                    r_name = r.get("referee_name", "").lower()
+                    r_name = strip_titles(r.get("referee_name", "")).strip()
                     r_email = r.get("email", "").lower()
-                    if query in r_name or query in r_email:
+                    if query_clean in r_name.lower() or query.lower() in r_email:
+                        matches.append(r)
+                    elif match_referee_name(query, r_name):
                         matches.append(r)
             self.send_json_response({"matches": matches})
             return
@@ -360,8 +461,9 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
                         elif e:
                             resolved_r_exp.append(e)
 
+                    is_self = bool(r.get("is_self", False))
                     ref_entry = {
-                        "referee_name": r_name,
+                        "referee_name": strip_titles(r_name),
                         "email": r_email,
                         "affiliation": r_aff,
                         "expertise": ";".join(resolved_r_exp),
@@ -369,7 +471,7 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
                         "referee_status": r.get("referee_status", "suggested"),
                         "available": str(r.get("available", "true")).lower()
                     }
-                    unique_id = save_referee_entry(ref_entry)
+                    unique_id = save_referee_entry(ref_entry, is_self=is_self)
                     saved_ids.append(unique_id)
 
                 body_data["suggested_referees_ids"] = saved_ids

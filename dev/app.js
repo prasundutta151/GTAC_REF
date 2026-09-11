@@ -271,10 +271,10 @@ function useEmbeddedDatabase() {
       { id: 'CAR_07', label: 'Others' }
     ];
     state.referees = [
-      { unique_id: 'REF_0001', referee_name: 'Prof. Yashwant Gupta', email: 'ygupta@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_01;EXP_14', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
-      { unique_id: 'REF_0002', referee_name: 'Prof. Jayaram Chengalur', email: 'chengalur@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_03;EXP_11', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
-      { unique_id: 'REF_0003', referee_name: 'Prof. Somak Raychaudhury', email: 'somak@iucaa.in', affiliation: 'AFF_002', expertise: 'EXP_04;EXP_05', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
-      { unique_id: 'REF_0008', referee_name: 'Dr. Ananda Hota', email: 'ananda.hota@cbs.ac.in', affiliation: 'AFF_005', expertise: 'EXP_03;EXP_04', career_status: 'CAR_05', referee_status: 'suggested', available: 'true' }
+      { unique_id: 'REF_0001', referee_name: 'Yashwant Gupta', email: 'ygupta@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_01;EXP_14', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
+      { unique_id: 'REF_0002', referee_name: 'Jayaram Chengalur', email: 'chengalur@ncra.tifr.res.in', affiliation: 'AFF_001', expertise: 'EXP_03;EXP_11', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
+      { unique_id: 'REF_0003', referee_name: 'Somak Raychaudhury', email: 'somak@iucaa.in', affiliation: 'AFF_002', expertise: 'EXP_04;EXP_05', career_status: 'CAR_04', referee_status: 'verified', available: 'true' },
+      { unique_id: 'REF_0008', referee_name: 'Ananda Hota', email: 'ananda.hota@cbs.ac.in', affiliation: 'AFF_005', expertise: 'EXP_03;EXP_04', career_status: 'CAR_05', referee_status: 'suggested', available: 'true' }
     ];
   }
   populateAllSelects();
@@ -541,7 +541,8 @@ function syncSelfRefereeIfApplicable() {
  */
 function syncCardWithUserProfile(cardEl) {
   if (!cardEl) return;
-  const userName = document.getElementById('user_name').value.trim();
+  const rawUserName = document.getElementById('user_name').value.trim();
+  const userName = stripTitles(rawUserName);
   const userEmail = document.getElementById('user_email').value.trim();
   const userAff = userAffiliationSelect.value;
   const userAffOther = userAffOtherInput.value.trim();
@@ -569,6 +570,22 @@ function syncCardWithUserProfile(cardEl) {
 
   if (cardEl.expPicker && userExpPicker) {
     cardEl.expPicker.setSelected(userExpPicker.getSelected(), userExpPicker.getOtherText());
+  }
+
+  // Self entry preference: If submitter matches a DB record, note it in the banner without overwriting user data
+  if (cardEl.dataset.isSelf === 'true' && (userName || userEmail)) {
+    const matched = findMatchingReferee(userName) || (userEmail ? findMatchingReferee(userEmail) : null);
+    const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
+    const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
+    const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
+
+    if (matched && !isWilling) {
+      const banner = cardEl.querySelector('.referee-alert-banner');
+      if (banner) {
+        banner.className = 'referee-alert-banner alert-self';
+        banner.innerHTML = `<span>👤 <strong>Your Entry (Submitter):</strong> Matched existing database record <code>${matched.unique_id}</code> (${stripTitles(matched.referee_name)}). Your submitted profile details take preference.</span>`;
+      }
+    }
   }
 }
 
@@ -727,6 +744,21 @@ function setupRefereeCardListeners(card, blockIndex) {
   setupAutocomplete(card, nameInput, 'referee_name');
   setupAutocomplete(card, emailInput, 'email');
 
+  // Real-time cross check on change and blur
+  nameInput.addEventListener('change', () => {
+    checkAndAutoFillCard(card, nameInput.value.trim());
+  });
+  nameInput.addEventListener('blur', () => {
+    checkAndAutoFillCard(card, nameInput.value.trim());
+  });
+
+  emailInput.addEventListener('change', () => {
+    checkAndAutoFillCard(card, emailInput.value.trim());
+  });
+  emailInput.addEventListener('blur', () => {
+    checkAndAutoFillCard(card, emailInput.value.trim());
+  });
+
   // AI Suggestion
   btnAi.addEventListener('click', async () => {
     const nameVal = nameInput.value.trim();
@@ -868,6 +900,136 @@ function updateRemoveButtonsVisibility() {
 }
 
 /**
+ * Remove honorific titles (Dr, Prof, Mr, etc.) from a name
+ */
+function stripTitles(name) {
+  if (!name) return '';
+  return name.replace(/^(?:\s*(?:dr|prof|professor|mr|ms|mrs|shri|smt)\.?\s+)+/gi, '').trim();
+}
+
+/**
+ * Parse a name into normalized (surname, [given_tokens])
+ */
+function parseNameParts(name) {
+  const cleaned = stripTitles(name);
+  if (!cleaned) return { surname: '', given: [] };
+  if (cleaned.includes(',')) {
+    const parts = cleaned.split(',', 2).map(p => p.trim());
+    const surname = (parts[0].replace(/[^\w]/g, '')).toLowerCase();
+    const givenStr = parts[1] || '';
+    const given = givenStr.split(/\s+/).map(t => t.replace(/[^\w]/g, '').toLowerCase()).filter(Boolean);
+    return { surname, given };
+  } else {
+    const tokens = cleaned.split(/\s+/).map(t => t.replace(/[^\w]/g, '').toLowerCase()).filter(Boolean);
+    if (tokens.length === 0) return { surname: '', given: [] };
+    const surname = tokens[tokens.length - 1];
+    const given = tokens.slice(0, tokens.length - 1);
+    return { surname, given };
+  }
+}
+
+/**
+ * Cross-check if inputName matches targetName exactly or via half-initials with full surname.
+ * Examples: 'Y. Gupta' matches 'Yashwant Gupta', 'J. Chengalur' matches 'Jayaram Chengalur', 'P. Dutta' matches 'Prasun Dutta'.
+ */
+function matchRefereeName(inputName, targetName) {
+  const p1 = parseNameParts(inputName);
+  const p2 = parseNameParts(targetName);
+
+  if (!p1.surname || !p2.surname || p1.surname !== p2.surname) {
+    return false;
+  }
+
+  if (p1.given.length === 0 && p2.given.length === 0) {
+    return true;
+  }
+
+  if (p1.given.length === 0 || p2.given.length === 0) {
+    return false;
+  }
+
+  const minLen = Math.min(p1.given.length, p2.given.length);
+  for (let i = 0; i < minLen; i++) {
+    const g1 = p1.given[i];
+    const g2 = p2.given[i];
+    if (g1.length === 1 || g2.length === 1) {
+      if (g1[0] !== g2[0]) return false;
+    } else {
+      if (g1 !== g2 && !g1.startsWith(g2) && !g2.startsWith(g1)) return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Find matching referee in database cache by email, exact name, or half-initials + surname
+ */
+function findMatchingReferee(query) {
+  if (!query || query.trim().length < 2) return null;
+  const cleanQ = stripTitles(query).trim().toLowerCase();
+
+  // 1. Exact email match
+  if (cleanQ.includes('@')) {
+    const byEmail = state.referees.find(r => (r.email || '').toLowerCase() === cleanQ);
+    if (byEmail) return byEmail;
+  }
+
+  // 2. Exact clean name match
+  const exact = state.referees.find(r => stripTitles(r.referee_name || '').toLowerCase() === cleanQ);
+  if (exact) return exact;
+
+  // 3. Surname + half-initials match
+  const initialMatch = state.referees.find(r => matchRefereeName(query, r.referee_name || ''));
+  if (initialMatch) return initialMatch;
+
+  return null;
+}
+
+/**
+ * Cross-check if referee exists in database (exact, email, or surname + half-initials).
+ * If matched, pre-fills card details and shows mention that referee already exists.
+ * If card is self entry, self entry always gets preference.
+ */
+function checkAndAutoFillCard(card, query) {
+  if (!query || query.length < 2) return;
+
+  // Rule: "If it is self obviously self entry gets preference"
+  if (card.dataset.isSelf === 'true') {
+    const matched = findMatchingReferee(query);
+    if (matched) {
+      const banner = card.querySelector('.referee-alert-banner');
+      const thisCycle = document.querySelector('input[name="review_this_cycle"]:checked')?.value;
+      const futureCycles = document.querySelector('input[name="review_future_cycles"]:checked')?.value;
+      const isWilling = (thisCycle === 'yes' || futureCycles === 'yes');
+
+      if (banner && !isWilling) {
+        banner.className = 'referee-alert-banner alert-self';
+        banner.innerHTML = `<span>👤 <strong>Your Entry (Submitter):</strong> Matched existing database record <code>${matched.unique_id}</code> (${stripTitles(matched.referee_name)}). Your submitted profile details take preference.</span>`;
+      }
+    }
+    return;
+  }
+
+  // Check if user is entering their own name in an "Others" suggestion block
+  const submitterName = stripTitles(document.getElementById('user_name').value.trim());
+  const submitterEmail = document.getElementById('user_email').value.trim().toLowerCase();
+  if ((submitterName && matchRefereeName(query, submitterName)) || (submitterEmail && query.toLowerCase() === submitterEmail)) {
+    const banner = card.querySelector('.referee-alert-banner');
+    if (banner) {
+      banner.className = 'referee-alert-banner alert-self';
+      banner.innerHTML = `<span>⚠️ <strong>Self Profile:</strong> This name matches your submitter profile. Your self entry in Block 1 takes preference.</span>`;
+    }
+    return;
+  }
+
+  // Cross-check against existing referees in database
+  const matched = findMatchingReferee(query);
+  if (matched) {
+    populateCardWithReferee(card, matched);
+  }
+}
+
+/**
  * Autocomplete and Real-Time Database Verification
  */
 function setupAutocomplete(card, inputEl, fieldKey) {
@@ -878,7 +1040,8 @@ function setupAutocomplete(card, inputEl, fieldKey) {
 
   inputEl.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    const query = inputEl.value.trim().toLowerCase();
+    const rawVal = inputEl.value.trim();
+    const query = stripTitles(rawVal).toLowerCase();
     if (query.length < 2) {
       dropdown.classList.add('hidden');
       dropdown.innerHTML = '';
@@ -887,16 +1050,22 @@ function setupAutocomplete(card, inputEl, fieldKey) {
     }
 
     debounceTimer = setTimeout(async () => {
-      // 1. Search in-memory database cache
+      // 1. Search in-memory database cache with title stripping and half-initials matching
       let matches = state.referees.filter(r => {
-        const val = (r[fieldKey] || '').toLowerCase();
-        return val.includes(query);
+        const rName = stripTitles(r.referee_name || '');
+        const rEmail = (r.email || '').toLowerCase();
+        if (fieldKey === 'email') {
+          return rEmail.includes(query);
+        }
+        return rName.toLowerCase().includes(query) ||
+               rEmail.includes(query) ||
+               matchRefereeName(rawVal, rName);
       });
 
       // 2. If live server is connected, query API for freshest entries
       if (state.isLiveServer) {
         try {
-          const res = await fetch(`/api/referees/lookup?q=${encodeURIComponent(query)}`);
+          const res = await fetch(`/api/referees/lookup?q=${encodeURIComponent(rawVal)}`);
           if (res.ok) {
             const apiData = await res.json();
             if (apiData.matches && apiData.matches.length > 0) {
@@ -937,10 +1106,11 @@ function renderAutocompleteDropdown(card, dropdown, matches, inputEl) {
     const isVer = (ref.referee_status === 'verified');
     const badgeClass = isVer ? 'badge-verified' : 'badge-suggested';
     const badgeText = isVer ? 'Verified' : 'Suggested';
+    const cleanDisplayName = stripTitles(ref.referee_name);
 
     item.innerHTML = `
       <div>
-        <div class="ac-name">${ref.referee_name}</div>
+        <div class="ac-name">${cleanDisplayName}</div>
         <div class="ac-meta">${ref.email} • ${ref.affiliation || 'Unknown Affiliation'}</div>
       </div>
       <span class="status-badge ${badgeClass}">${badgeText}</span>
@@ -959,8 +1129,14 @@ function renderAutocompleteDropdown(card, dropdown, matches, inputEl) {
 
 /**
  * Populate Card with existing Referee data and apply Verified / Suggested rules
+ * Mentions that this referee already exists in the database.
  */
 function populateCardWithReferee(card, ref) {
+  if (card.dataset.isSelf === 'true') {
+    // Self entry gets preference - do not overwrite!
+    return;
+  }
+
   const nameInput = card.querySelector('.ref-name');
   const emailInput = card.querySelector('.ref-email');
   const affSelect = card.querySelector('.ref-aff');
@@ -969,7 +1145,8 @@ function populateCardWithReferee(card, ref) {
   const banner = card.querySelector('.referee-alert-banner');
   const btnAi = card.querySelector('.btn-ai-suggest');
 
-  nameInput.value = ref.referee_name || '';
+  const cleanName = stripTitles(ref.referee_name || '');
+  nameInput.value = cleanName;
   emailInput.value = ref.email || '';
   if (ref.affiliation) affSelect.value = ref.affiliation;
   if (ref.career_status) careerSelect.value = ref.career_status;
@@ -985,11 +1162,11 @@ function populateCardWithReferee(card, ref) {
     // Verified rule: non-editable
     card.className = 'referee-card is-verified';
     badge.className = 'status-badge badge-verified';
-    badge.textContent = 'Verified (Locked)';
+    badge.textContent = 'Verified in DB (Locked)';
 
     banner.className = 'referee-alert-banner alert-verified';
     banner.innerHTML = `
-      <span>✅ <strong>Referee Exists & Verified:</strong> <code>${ref.unique_id}</code> - ${ref.referee_name} is a verified GTAC referee (Non-editable).</span>
+      <span>✅ <strong>Referee Exists in Database (Verified):</strong> <code>${ref.unique_id}</code> - ${cleanName} is already a verified GTAC referee (Non-editable).</span>
     `;
 
     setCardInputsDisabled(card, true);
@@ -999,11 +1176,11 @@ function populateCardWithReferee(card, ref) {
     // Suggested rule: editable suggestion
     card.className = 'referee-card is-suggested';
     badge.className = 'status-badge badge-suggested';
-    badge.textContent = 'Suggested in DB';
+    badge.textContent = 'Already in DB';
 
     banner.className = 'referee-alert-banner alert-suggested';
     banner.innerHTML = `
-      <span>ℹ️ <strong>Existing Suggested Referee:</strong> <code>${ref.unique_id}</code> found in database. Fields pre-filled as suggestion; you may verify or edit.</span>
+      <span>ℹ️ <strong>Referee Already Exists in Database:</strong> <code>${ref.unique_id}</code> - ${cleanName} found in database. Fields have been pre-filled from database; you may verify or edit.</span>
     `;
 
     setCardInputsDisabled(card, false);
@@ -1068,7 +1245,8 @@ async function handleFormSubmit(e) {
   e.preventDefault();
 
   // Validate Submitter
-  const userName = document.getElementById('user_name').value.trim();
+  const rawUserName = document.getElementById('user_name').value.trim();
+  const userName = stripTitles(rawUserName);
   const userEmail = document.getElementById('user_email').value.trim();
   const userAff = userAffiliationSelect.value;
   const userAffOther = userAffOtherInput.value.trim();
@@ -1119,7 +1297,8 @@ async function handleFormSubmit(e) {
     const card = document.getElementById(blockId);
     if (!card) return;
 
-    const rName = card.querySelector('.ref-name').value.trim();
+    const rawRName = card.querySelector('.ref-name').value.trim();
+    const rName = stripTitles(rawRName);
     const rEmail = card.querySelector('.ref-email').value.trim();
     const rAff = card.querySelector('.ref-aff').value;
     const rAffOther = card.querySelector('.ref-aff-other').value.trim();
@@ -1224,19 +1403,30 @@ function handleLocalSubmission(payload) {
 
   const assignedIds = [];
   payload.referees.forEach(r => {
-    // Check if already in DB
+    const cleanName = stripTitles(r.name);
+    // Check if already in DB (email, exact name, or half-initials + surname)
     const existing = state.referees.find(x =>
-      x.email.toLowerCase() === r.email.toLowerCase() ||
-      x.referee_name.toLowerCase() === r.name.toLowerCase()
+      (x.email && x.email.toLowerCase() === r.email.toLowerCase()) ||
+      matchRefereeName(cleanName, x.referee_name)
     );
 
     let uid = existing ? existing.unique_id : null;
-    if (!uid) {
+    if (existing) {
+      if (r.is_self) {
+        // Self entry gets preference!
+        existing.referee_name = cleanName;
+        existing.email = r.email;
+        existing.affiliation = r.affiliation;
+        existing.expertise = (r.expertise || []).join(';');
+        existing.career_status = r.career_status;
+        existing.available = 'true';
+      }
+    } else {
       maxId += 1;
       uid = `REF_${String(maxId).padStart(4, '0')}`;
       state.referees.push({
         unique_id: uid,
-        referee_name: r.name,
+        referee_name: cleanName,
         email: r.email,
         affiliation: r.affiliation,
         expertise: (r.expertise || []).join(';'),
