@@ -77,6 +77,33 @@ Notes
 
 ---
 
+## 2026-09-11 19:05:00 IST
+
+Prompt / Request
+- Change version, make wiki changes documenting the Referee Directory & Lookup, and push everything to GitHub.
+
+Changes Made
+- Version Management:
+  - Bumped project version to `01.00.12` in `VERSION`.
+- `wiki/` (GitHub Wiki Suite):
+  - Created `wiki/Referee-Directory.md`: Comprehensive wiki guide for the Referee Directory & Lookup (`referees.html` / `lookup.html`), multi-criteria selection form, color-coded rectangular cards (Orange: Verified, Yellow: Suggested, Red: Unavailable), font typography, and dual execution modes.
+  - Updated `wiki/_Sidebar.md`: Added navigation link to `[[Referee-Directory|🔍 Referee Directory & Lookup]]` and updated release version to `v01.00.12`.
+  - Updated `wiki/Home.md`: Added `Referee-Directory` to Wiki Contents list and live links table.
+  - Pushed all 7 wiki markdown files to `git@github.com:prasundutta151/GTAC_REF.wiki.git` via `./util --wiki-push`.
+- HTML Documentation (`doc/` & `docs/`):
+  - Updated release version badges to `v01.00.12` across `doc/README.html`, `doc/form_guide.html`, `doc/database_guide.html`, and `doc/api_guide.html`.
+  - Re-synchronized `docs/` bundle via `./util --sync-docs`.
+
+Verification
+- Executed `./util --wiki-push`: Confirmed clean push of all 7 wiki pages to remote `master` on `GTAC_REF.wiki.git`.
+- Executed `./util --sync-docs`: Confirmed all files and HTML manuals updated in `docs/`.
+- Verified working tree status via `./util --status`.
+
+Notes
+- Both `main` and `creation` remote branches updated on GitHub.
+
+---
+
 ## 2026-09-11 19:00:00 IST
 
 Prompt / Request

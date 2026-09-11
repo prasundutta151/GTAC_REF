@@ -23,8 +23,9 @@ Anyone can access and use the form or browse the documentation via these public 
 ## 📚 Wiki Contents
 
 1. **[[Form-Guide|📋 Form System Guide]]**: Detailed breakdown of every input field, Question 6 review volunteering, dark add-bar interaction, real-time Gemini validation, half-initials matching, and ordered submission summaries.
-2. **[[Database-Architecture|🗄️ Database Architecture]]**: Overview of plain-text ASCII taxonomies (`affiliations.txt`, `expertise.txt`, `career_status.txt`, `cycle.txt`), relational CSV registries (`Referee_database_A.csv`, `form_submissions.csv`), and offline bundles (`db_data.js`).
-3. **[[REST-API-and-CLI|⚡ REST API & CLI Reference]]**: Detailed documentation of the Python backend REST API and the `util` developer command-line tool.
+2. **[[Referee-Directory|🔍 Referee Directory & Lookup]]**: Comprehensive guide for the live reviewer registry, multi-criteria filtering (Name, Email, Affiliation, Career, Expertise), color-coded row cards (Orange, Yellow, Red), and font typography.
+3. **[[Database-Architecture|🗄️ Database Architecture]]**: Overview of plain-text ASCII taxonomies (`affiliations.txt`, `expertise.txt`, `career_status.txt`, `cycle.txt`), relational CSV registries (`Referee_database_A.csv`, `form_submissions.csv`), and offline bundles (`db_data.js`).
+4. **[[REST-API-and-CLI|⚡ REST API & CLI Reference]]**: Detailed documentation of the Python backend REST API and the `util` developer command-line tool.
 
 ---
 
