@@ -918,7 +918,7 @@ async function handleFormSubmit(e) {
     alert('Submission error: ' + err.message);
   } finally {
     btnSubmit.disabled = false;
-    btnSubmit.textContent = 'Submit Proposal & Referees';
+    btnSubmit.textContent = 'Submit Referee Registration / Suggestions';
   }
 }
 

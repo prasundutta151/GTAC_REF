@@ -11,7 +11,7 @@ The following table summarizes all files and directories in this repository and 
 | Path | Type | Description |
 | :--- | :--- | :--- |
 | `dev/` | Directory | Dedicated development workspace where all active development and experimentation take place. |
-| `dev/index.html` | File | Main responsive HTML5 form for proposal submitters and referee suggestions. |
+| `dev/index.html` | File | Main responsive HTML5 form for GTAC referee registration and suggestions. |
 | `dev/style.css` | File | Modern stylesheet featuring GTAC branding, card layouts, and verified/suggested status badges. |
 | `dev/app.js` | File | Client-side application logic: dynamic referee cards, self-referee auto-fill & locking, and live DB lookup. |
 | `dev/server.py` | Executable | Lightweight zero-dependency Python 3 HTTP & REST API server handling static assets, lookup, and submissions. |
@@ -24,7 +24,7 @@ The following table summarizes all files and directories in this repository and 
 | `database/expertise.txt` | File | ASCII file mapping expertise IDs (`EXP_XX`) to astronomy/instrumentation fields; extendable via "Others". |
 | `database/career_status.txt` | File | ASCII file listing career stages (`CAR_XX`) from Undergraduate to Faculty and Others. |
 | `database/Referee_database_A.csv` | File | Primary referee registry (`unique_id`, `referee_name`, `email`, `affiliation`, `expertise`, `career_status`, `referee_status`, `available`). |
-| `database/form_submissions.csv` | File | Records of all proposal submitter responses and referee recommendations. |
+| `database/form_submissions.csv` | File | Audit log of all referee registration and suggestion submissions. |
 | `index.html` | Symlink | Root convenience link pointing to `dev/index.html`. |
 | `util` | Executable | Python 3 CLI management tool supporting `--version`, `--serve`, `--git-push`, `--change-branch`, and `--release`. |
 | `VERSION` | File | Plaintext file containing current release version in `ZZ.YY.XX` format. |
@@ -51,6 +51,34 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-11 16:18:00 IST
+
+Prompt / Request
+- Remove the proposal references so the form is dedicated purely as the "GTAC Referee Registration / Suggestion Form".
+
+Changes Made
+- `dev/index.html`:
+  - Updated page title to `GTAC Referee Registration / Suggestion Form`.
+  - Updated main heading to `GTAC Referee Registration / Suggestion Form`.
+  - Updated subtitle to `Giant Metrewave Radio Telescope Time Allocation Committee (GTAC)`.
+  - Updated question 6 prompt to `6. Do you wish to review for GTAC?`.
+  - Updated submit button to `Submit Referee Registration / Suggestions`.
+- `dev/app.js`:
+  - Updated submit button label in the completion handler to `Submit Referee Registration / Suggestions`.
+- `README.md`:
+  - Updated `database/form_submissions.csv` description to reflect referee registration and suggestions.
+- `util`:
+  - Bumped version to `01.00.02`.
+
+Verification
+- Inspected HTML markup and verified zero remaining mentions of "proposal".
+- Verified `./util --status` reflects clean updated version `01.00.02`.
+
+Notes
+- The form is now exclusively dedicated to GTAC referee registration, volunteer profiling, and peer suggestions.
 
 ---
 

@@ -17,7 +17,7 @@ This repository is dedicated to the development and maintenance of the **GTAC Re
   - `database/expertise.txt`: ASCII list of astrophysics/instrumentation topics (extendable via "Others").
   - `database/career_status.txt`: ASCII list of career stages.
   - `database/Referee_database_A.csv`: Main referee registry (`unique_id`, `referee_name`, `email`, `affiliation`, `expertise`, `career_status`, `referee_status`, `available`).
-  - `database/form_submissions.csv`: Proposal submissions log.
+  - `database/form_submissions.csv`: Referee registration and suggestion submissions log.
 - `util`: Standalone CLI utility for project operations.
 - `VERSION`: Plaintext tracking file maintaining the active version in `ZZ.YY.XX` format.
 - `AGENT_RULES.md`: Development guidelines and multi-agent coordination standards.
