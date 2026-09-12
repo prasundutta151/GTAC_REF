@@ -746,6 +746,44 @@
   display: inline-block;
 }
 
+/* FONT 7: ATTRIBUTION (Suggested / Verified by and Date/Time) */
+.detail-row-attribution {
+  font-size: 0.88rem;
+  color: #475569;
+}
+
+.attribution-value {
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.88rem;
+  color: #334155;
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
+  min-width: 0;
+}
+
+.attribution-value strong {
+  color: #0f172a;
+  font-weight: 600;
+}
+
+.attribution-dot {
+  color: #94a3b8;
+  margin: 0 4px;
+}
+
+.attribution-time code {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.82rem;
+  font-weight: 600;
+  background: #f1f5f9;
+  color: #0f172a;
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid #e2e8f0;
+}
+
 /* Card Expertise Row */
 .card-expertise-section {
   display: flex;
@@ -1098,6 +1136,13 @@
   }
   .referee-stats-table td.row-period-label {
     font-size: 0.64rem;
+  }
+  .detail-row-attribution {
+    font-size: 0.82rem;
+  }
+  .attribution-time code {
+    font-size: 0.76rem;
+    padding: 1px 5px;
   }
 }
 

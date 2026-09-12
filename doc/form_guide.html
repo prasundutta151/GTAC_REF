@@ -24,7 +24,7 @@
       <a href="api_guide.html" class="doc-nav-link">API & CLI</a>
       <a href="../index.html" class="doc-nav-link cta-link" target="_blank">Launch App ↗</a>
       <a href="../referees.html" class="doc-nav-link cta-link" style="background: #ea580c; border-color: #ea580c;" target="_blank">Directory ↗</a>
-      <span class="version-badge">v01.00.16</span>
+      <span class="version-badge">v01.00.17</span>
     </nav>
   </header>
 
@@ -125,16 +125,28 @@
           <li><strong>Future cycles</strong> (Yes / No radio)</li>
         </ul>
 
-        <h3>Automated Synchronization Rule:</h3>
+        <h3>Automated Synchronization & Recommendation Rules:</h3>
         <p>
-          If the submitter selects <strong>"Yes"</strong> for either the current cycle or future cycles:
+          The system cleanly decouples peer referee recommendations from the submitter's personal review volunteering:
         </p>
-        <ol>
-          <li>The system automatically creates or designates <strong>Referee Suggestion - 1</strong> as the submitter's own entry.</li>
-          <li>The card is tagged with badge <span class="badge badge-self">Self - Review Volunteer (Locked)</span>.</li>
-          <li>Submitter fields from Section 1 are mirrored into the card.</li>
-          <li>If the user switches both back to <strong>"No"</strong>, the block is unlocked and converted back to an editable entry.</li>
-        </ol>
+        <ul>
+          <li><strong>When Volunteering ("Yes" for either cycle):</strong>
+            <ol style="margin-top: 6px;">
+              <li>The system designates or creates <strong>Referee Suggestion - 1</strong> as the submitter's self-entry.</li>
+              <li>The card is locked with badge <span class="badge badge-self">Self - Review Volunteer (Locked)</span> and mirrors the submitter's profile.</li>
+              <li>The add-bar adapts to <code>＋ Add Referee Suggestion (Others Entry)</code> to append additional peer recommendations.</li>
+            </ol>
+          </li>
+          <li><strong>When Not Volunteering ("No" for both cycles):</strong>
+            <ol style="margin-top: 6px;">
+              <li>The submitter can recommend one or more colleagues without volunteering themselves.</li>
+              <li>No self-entry card is created or required. The add-bar displays <code>＋ Add Referee Recommendation</code>.</li>
+              <li>Clicking appends a blank peer recommendation card with active Gemini AI assistance and zero locks.</li>
+              <li>The submitter's profile is recorded as nominator attribution (<code>suggested_or_verified_by</code>) with a <code>DD/MM/YY|HH:MM</code> timestamp, and is never entered as a reviewer in the database.</li>
+              <li>If switching from "Yes" to "No", any self-entry block is cleanly removed or converted into an open peer suggestion.</li>
+            </ol>
+          </li>
+        </ul>
       </section>
 
       <section id="add-bar" class="doc-section">
@@ -145,20 +157,20 @@
 
         <div class="card-grid">
           <div class="feature-card">
-            <h3>State 1: Initial Click (Own Entry)</h3>
-            <p>When zero referee cards are present, the bar displays:</p>
-            <p><code>＋ Add Referee Suggestion (Own Entry)</code></p>
+            <h3>Mode A: Peer Recommendations (Non-Volunteer)</h3>
+            <p>When Question 6 is answered "No", the button invites peer recommendations:</p>
+            <p><code>＋ Add Referee Recommendation</code></p>
             <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
-              Clicking creates Block 1 pre-populated with the submitter's profile details.
+              Clicking appends clean, blank peer recommendation cards with instant autocomplete and AI suggestion support.
             </p>
           </div>
 
           <div class="feature-card">
-            <h3>State 2: Subsequent Clicks (Others Entry)</h3>
-            <p>When one or more cards already exist, the bar adapts to:</p>
+            <h3>Mode B: Volunteer + Peer Suggestions</h3>
+            <p>When Question 6 is answered "Yes", the button handles sequential intake:</p>
             <p><code>＋ Add Referee Suggestion (Others Entry)</code></p>
             <p style="margin-top: 8px; font-size: 0.85rem; color: var(--text-muted);">
-              Clicking appends blank referee cards for suggesting external peer reviewers.
+              Block 1 holds the submitter's volunteer profile while additional clicks add peer reviewer recommendations.
             </p>
           </div>
         </div>

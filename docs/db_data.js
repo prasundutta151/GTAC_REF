@@ -237,7 +237,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_04",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:3/2/2;51:4/4/4;50:3/3/3;49:5/4/4;48:4/4/4;47:3/3/3;46:4/3/3;45:3/3/3;44:4/4/4"
+      "cycle_stats": "52:3/2/2;51:4/4/4;50:3/3/3;49:5/4/4;48:4/4/4;47:3/3/3;46:4/3/3;45:3/3/3;44:4/4/4",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0002",
@@ -248,7 +250,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_04",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:4/3/3;51:3/3/2;50:3/3/3;49:4/3/3;48:3/2/2;47:3/3/3;46:2/2/2;45:3/3/2"
+      "cycle_stats": "52:4/3/3;51:3/3/2;50:3/3/3;49:4/3/3;48:3/2/2;47:3/3/3;46:2/2/2;45:3/3/2",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0003",
@@ -259,7 +263,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_04",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:2/1/1;51:3/2/2;50:2/2/2;49:3/2/2;48:2/1/1;47:2/2/1;46:3/2/2"
+      "cycle_stats": "52:2/1/1;51:3/2/2;50:2/2/2;49:3/2/2;48:2/1/1;47:2/2/1;46:3/2/2",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0004",
@@ -270,7 +276,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_05",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:3/3/3;51:2/2/2;50:3/3/2;49:2/2/2;48:3/3/3;47:2/2/2;46:2/2/2"
+      "cycle_stats": "52:3/3/3;51:2/2/2;50:3/3/2;49:2/2/2;48:3/3/3;47:2/2/2;46:2/2/2",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0005",
@@ -281,7 +289,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_04",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:2/2/2;51:3/2/2;50:2/2/1;49:2/1/1;48:2/2/2;47:3/2/2;46:2/2/2"
+      "cycle_stats": "52:2/2/2;51:3/2/2;50:2/2/1;49:2/1/1;48:2/2/2;47:3/2/2;46:2/2/2",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0006",
@@ -292,7 +302,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_05",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:3/2/2;51:3/3/3;50:2/2/2;49:3/2/2;48:2/2/2;47:2/1/1;46:2/2/2"
+      "cycle_stats": "52:3/2/2;51:3/3/3;50:2/2/2;49:3/2/2;48:2/2/2;47:2/1/1;46:2/2/2",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0007",
@@ -303,7 +315,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_05",
       "referee_status": "verified",
       "available": "true",
-      "cycle_stats": "52:2/0/0;51:3/1/0;50:2/1/1;49:2/0/0;48:2/1/1;47:1/0/0;46:2/1/1"
+      "cycle_stats": "52:2/0/0;51:3/1/0;50:2/1/1;49:2/0/0;48:2/1/1;47:1/0/0;46:2/1/1",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     },
     {
       "unique_id": "REF_0008",
@@ -314,7 +328,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_05",
       "referee_status": "suggested",
       "available": "true",
-      "cycle_stats": "52:1/1/1;51:2/1/1;50:1/0/0;49:2/1/1;48:1/1/1;47:1/1/0;46:1/1/1"
+      "cycle_stats": "52:1/1/1;51:2/1/1;50:1/0/0;49:2/1/1;48:1/1/1;47:1/1/0;46:1/1/1",
+      "suggested_or_verified_by": "Jayaram Chengalur",
+      "date_time": "11/09/26|14:30"
     },
     {
       "unique_id": "REF_0009",
@@ -325,7 +341,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_05",
       "referee_status": "suggested",
       "available": "true",
-      "cycle_stats": "52:2/2/1;51:1/1/1;50:2/1/1;49:1/0/0;48:2/1/1;47:1/1/1;46:1/1/1"
+      "cycle_stats": "52:2/2/1;51:1/1/1;50:2/1/1;49:1/0/0;48:2/1/1;47:1/1/1;46:1/1/1",
+      "suggested_or_verified_by": "Yashwant Gupta",
+      "date_time": "11/09/26|15:15"
     },
     {
       "unique_id": "REF_0010",
@@ -336,7 +354,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_04",
       "referee_status": "suggested",
       "available": "true",
-      "cycle_stats": ""
+      "cycle_stats": "",
+      "suggested_or_verified_by": "Somak Raychaudhury",
+      "date_time": "11/09/26|16:45"
     },
     {
       "unique_id": "REF_0011",
@@ -347,7 +367,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_06",
       "referee_status": "suggested",
       "available": "true",
-      "cycle_stats": "52:2/2/2;51:1/1/1;50:2/2/2;49:1/1/1;48:2/1/1;47:1/1/1;46:1/1/1"
+      "cycle_stats": "52:2/2/2;51:1/1/1;50:2/2/2;49:1/1/1;48:2/1/1;47:1/1/1;46:1/1/1",
+      "suggested_or_verified_by": "Prasun Dutta",
+      "date_time": "11/09/26|18:18"
     },
     {
       "unique_id": "REF_0012",
@@ -358,7 +380,9 @@ window.GTAC_DATABASE = {
       "career_status": "CAR_05",
       "referee_status": "verified",
       "available": "false",
-      "cycle_stats": "52:0/0/0;51:1/0/0;50:2/1/1;49:1/0/0;48:2/1/1;47:1/0/0;46:2/1/0"
+      "cycle_stats": "52:0/0/0;51:1/0/0;50:2/1/1;49:1/0/0;48:2/1/1;47:1/0/0;46:2/1/0",
+      "suggested_or_verified_by": "GTAC Committee",
+      "date_time": "11/09/26|12:00"
     }
   ]
 };

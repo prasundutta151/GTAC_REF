@@ -256,11 +256,16 @@ def save_referee_entry(entry: Dict[str, Any], is_self: bool = False) -> str:
             entry["referee_status"] = "suggested"
         if "available" not in entry:
             entry["available"] = "true"
+        if "suggested_or_verified_by" not in entry or not entry["suggested_or_verified_by"]:
+            entry["suggested_or_verified_by"] = "GTAC Submitter"
+        if "date_time" not in entry or not entry["date_time"]:
+            entry["date_time"] = datetime.now().strftime("%d/%m/%y|%H:%M")
         referees.append(entry)
 
     fieldnames = [
         "unique_id", "referee_name", "email", "affiliation",
-        "expertise", "career_status", "referee_status", "available", "cycle_stats"
+        "expertise", "career_status", "referee_status", "available",
+        "cycle_stats", "suggested_or_verified_by", "date_time"
     ]
     with open(REFEREE_DB_FILE, mode="w", encoding="utf-8", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -581,6 +586,9 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
                             resolved_r_exp.append(e)
 
                     is_self = bool(r.get("is_self", False))
+                    submitter_name = strip_titles(body_data.get("user_name", "")).strip() or "GTAC Submitter"
+                    timestamp_formatted = datetime.now().strftime("%d/%m/%y|%H:%M")
+
                     ref_entry = {
                         "referee_name": strip_titles(r_name),
                         "email": r_email,
@@ -588,7 +596,9 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
                         "expertise": ";".join(resolved_r_exp),
                         "career_status": r.get("career_status", ""),
                         "referee_status": r.get("referee_status", "suggested"),
-                        "available": str(r.get("available", "true")).lower()
+                        "available": str(r.get("available", "true")).lower(),
+                        "suggested_or_verified_by": submitter_name,
+                        "date_time": timestamp_formatted
                     }
                     unique_id = save_referee_entry(ref_entry, is_self=is_self)
                     saved_ids.append(unique_id)

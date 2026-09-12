@@ -1,13 +1,13 @@
-unique_id,referee_name,email,affiliation,expertise,career_status,referee_status,available,cycle_stats
-REF_0001,Yashwant Gupta,ygupta@ncra.tifr.res.in,AFF_001,EXP_01;EXP_14,CAR_04,verified,true,52:3/2/2;51:4/4/4;50:3/3/3;49:5/4/4;48:4/4/4;47:3/3/3;46:4/3/3;45:3/3/3;44:4/4/4
-REF_0002,Jayaram Chengalur,chengalur@ncra.tifr.res.in,AFF_001,EXP_03;EXP_11,CAR_04,verified,true,52:4/3/3;51:3/3/2;50:3/3/3;49:4/3/3;48:3/2/2;47:3/3/3;46:2/2/2;45:3/3/2
-REF_0003,Somak Raychaudhury,somak@iucaa.in,AFF_002,EXP_04;EXP_05,CAR_04,verified,true,52:2/1/1;51:3/2/2;50:2/2/2;49:3/2/2;48:2/1/1;47:2/2/1;46:3/2/2
-REF_0004,Bhaswati Bhattacharyya,bhaswati@ncra.tifr.res.in,AFF_001,EXP_01;EXP_10,CAR_05,verified,true,52:3/3/3;51:2/2/2;50:3/3/2;49:2/2/2;48:3/3/3;47:2/2/2;46:2/2/2
-REF_0005,Nirupam Roy,nroy@iisc.ac.in,AFF_004,EXP_03;EXP_07,CAR_04,verified,true,52:2/2/2;51:3/2/2;50:2/2/1;49:2/1/1;48:2/2/2;47:3/2/2;46:2/2/2
-REF_0006,Preeti Kharb,kharb@ncra.tifr.res.in,AFF_001,EXP_04;EXP_15,CAR_05,verified,true,52:3/2/2;51:3/3/3;50:2/2/2;49:3/2/2;48:2/2/2;47:2/1/1;46:2/2/2
-REF_0007,Ruta Kale,ruta@ncra.tifr.res.in,AFF_001,EXP_05;EXP_12,CAR_05,verified,true,52:2/0/0;51:3/1/0;50:2/1/1;49:2/0/0;48:2/1/1;47:1/0/0;46:2/1/1
-REF_0008,Ananda Hota,ananda.hota@cbs.ac.in,AFF_005,EXP_03;EXP_04,CAR_05,suggested,true,52:1/1/1;51:2/1/1;50:1/0/0;49:2/1/1;48:1/1/1;47:1/1/0;46:1/1/1
-REF_0009,Kuntal Misra,kuntal@aries.res.in,AFF_007,EXP_10;EXP_15,CAR_05,suggested,true,52:2/2/1;51:1/1/1;50:2/1/1;49:1/0/0;48:2/1/1;47:1/1/1;46:1/1/1
-REF_0010,Abhirup Datta,abhirup.datta@iiti.ac.in,AFF_014,EXP_02;EXP_12,CAR_04,suggested,true,
-REF_0011,Prasun Dutta,pd@aa,AFF_002,EXP_02;EXP_07,CAR_06,suggested,true,52:2/2/2;51:1/1/1;50:2/2/2;49:1/1/1;48:2/1/1;47:1/1/1;46:1/1/1
-REF_0012,Dilip G. Kulkarni,kulkarni@tifr.res.in,AFF_003,EXP_06;EXP_08,CAR_05,verified,false,52:0/0/0;51:1/0/0;50:2/1/1;49:1/0/0;48:2/1/1;47:1/0/0;46:2/1/0
+unique_id,referee_name,email,affiliation,expertise,career_status,referee_status,available,cycle_stats,suggested_or_verified_by,date_time
+REF_0001,Yashwant Gupta,ygupta@ncra.tifr.res.in,AFF_001,EXP_01;EXP_14,CAR_04,verified,true,52:3/2/2;51:4/4/4;50:3/3/3;49:5/4/4;48:4/4/4;47:3/3/3;46:4/3/3;45:3/3/3;44:4/4/4,GTAC Committee,11/09/26|12:00
+REF_0002,Jayaram Chengalur,chengalur@ncra.tifr.res.in,AFF_001,EXP_03;EXP_11,CAR_04,verified,true,52:4/3/3;51:3/3/2;50:3/3/3;49:4/3/3;48:3/2/2;47:3/3/3;46:2/2/2;45:3/3/2,GTAC Committee,11/09/26|12:00
+REF_0003,Somak Raychaudhury,somak@iucaa.in,AFF_002,EXP_04;EXP_05,CAR_04,verified,true,52:2/1/1;51:3/2/2;50:2/2/2;49:3/2/2;48:2/1/1;47:2/2/1;46:3/2/2,GTAC Committee,11/09/26|12:00
+REF_0004,Bhaswati Bhattacharyya,bhaswati@ncra.tifr.res.in,AFF_001,EXP_01;EXP_10,CAR_05,verified,true,52:3/3/3;51:2/2/2;50:3/3/2;49:2/2/2;48:3/3/3;47:2/2/2;46:2/2/2,GTAC Committee,11/09/26|12:00
+REF_0005,Nirupam Roy,nroy@iisc.ac.in,AFF_004,EXP_03;EXP_07,CAR_04,verified,true,52:2/2/2;51:3/2/2;50:2/2/1;49:2/1/1;48:2/2/2;47:3/2/2;46:2/2/2,GTAC Committee,11/09/26|12:00
+REF_0006,Preeti Kharb,kharb@ncra.tifr.res.in,AFF_001,EXP_04;EXP_15,CAR_05,verified,true,52:3/2/2;51:3/3/3;50:2/2/2;49:3/2/2;48:2/2/2;47:2/1/1;46:2/2/2,GTAC Committee,11/09/26|12:00
+REF_0007,Ruta Kale,ruta@ncra.tifr.res.in,AFF_001,EXP_05;EXP_12,CAR_05,verified,true,52:2/0/0;51:3/1/0;50:2/1/1;49:2/0/0;48:2/1/1;47:1/0/0;46:2/1/1,GTAC Committee,11/09/26|12:00
+REF_0008,Ananda Hota,ananda.hota@cbs.ac.in,AFF_005,EXP_03;EXP_04,CAR_05,suggested,true,52:1/1/1;51:2/1/1;50:1/0/0;49:2/1/1;48:1/1/1;47:1/1/0;46:1/1/1,Jayaram Chengalur,11/09/26|14:30
+REF_0009,Kuntal Misra,kuntal@aries.res.in,AFF_007,EXP_10;EXP_15,CAR_05,suggested,true,52:2/2/1;51:1/1/1;50:2/1/1;49:1/0/0;48:2/1/1;47:1/1/1;46:1/1/1,Yashwant Gupta,11/09/26|15:15
+REF_0010,Abhirup Datta,abhirup.datta@iiti.ac.in,AFF_014,EXP_02;EXP_12,CAR_04,suggested,true,,Somak Raychaudhury,11/09/26|16:45
+REF_0011,Prasun Dutta,pd@aa,AFF_002,EXP_02;EXP_07,CAR_06,suggested,true,52:2/2/2;51:1/1/1;50:2/2/2;49:1/1/1;48:2/1/1;47:1/1/1;46:1/1/1,Prasun Dutta,11/09/26|18:18
+REF_0012,Dilip G. Kulkarni,kulkarni@tifr.res.in,AFF_003,EXP_06;EXP_08,CAR_05,verified,false,52:0/0/0;51:1/0/0;50:2/1/1;49:1/0/0;48:2/1/1;47:1/0/0;46:2/1/0,GTAC Committee,11/09/26|12:00

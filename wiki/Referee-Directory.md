@@ -109,8 +109,9 @@ Information on each referee card is structured using distinct typography:
 3. **Email Address**: Rendered in **`JetBrains Mono`** (monospace, clickable `mailto:` link in sky blue `#0284c7`).
 4. **Career Status Bubble**: Colored pill bubble beside Email (**`Inter`**, `700` uppercase tracking, e.g. `[ FACULTY MEMBER ]`, without any redundant "Status:" text).
 5. **Affiliation**: Placed directly below the email field, rendered in **`Inter`** (`600` weight, dark slate `#1e293b`) with institutional building icon `🏛️`.
-6. **Review History Table**: Positioned in the open white space on the right, directly underneath the status badges.
-7. **Scientific Expertise**: Rendered as distinct rounded tag chips with borders (`#cbd5e1`) and scientific tag icon `🏷️`.
+6. **Nominator / Verification Attribution**: Positioned directly below the affiliation field, indicating who suggested or verified the reviewer (e.g. `GTAC Committee` or `Prasun Dutta`) along with a structured `DD/MM/YY|HH:MM` timestamp (e.g. `11/09/26|12:00`).
+7. **Review History Table**: Positioned in the open white space on the right, directly underneath the status badges.
+8. **Scientific Expertise**: Rendered as distinct rounded tag chips with borders (`#cbd5e1`) and scientific tag icon `🏷️`.
 
 ---
 

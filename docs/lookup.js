@@ -448,6 +448,25 @@
         return `<span class="expertise-chip">🏷️ ${escapeHtml(label)}</span>`;
       }).join('');
 
+      // Attribution Record: who suggested/verified the referee and date/time (DD/MM/YY|HH:MM)
+      const attributionWho = ref.suggested_or_verified_by || (refStatus === 'verified' ? 'GTAC Committee' : '');
+      const attributionWhen = ref.date_time || '';
+      let attributionHtml = '';
+      if (attributionWho || attributionWhen) {
+        const actionVerb = refStatus === 'verified' ? 'Verified by:' : 'Suggested by:';
+        const icon = refStatus === 'verified' ? '🛡️' : '👤';
+        attributionHtml = `
+          <div class="detail-item detail-row-attribution">
+            <span class="detail-icon">${icon}</span>
+            <span class="detail-label">${actionVerb}</span>
+            <span class="attribution-value">
+              <strong>${escapeHtml(attributionWho || 'GTAC Submitter')}</strong>
+              ${attributionWhen ? `<span class="attribution-time"><span class="attribution-dot">•</span><code>${escapeHtml(attributionWhen)}</code></span>` : ''}
+            </span>
+          </div>
+        `;
+      }
+
       // Build Review History Table (3 cols: suggested, accepted, submitted; rows: overall, Cycle A-B, Cycle C, Cycle D)
       const statsTableHtml = buildReviewHistoryTableHtml(ref.cycle_stats, database.cycle);
 
@@ -483,6 +502,8 @@
               <span class="detail-label">Affiliation:</span>
               <span class="affiliation-value">${escapeHtml(affLabel)}</span>
             </div>
+
+            ${attributionHtml}
           </div>
 
           <!-- Review History Table in white space under badges -->

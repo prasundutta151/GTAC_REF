@@ -89,6 +89,8 @@ Authoritative table of all verified and suggested referees:
 | `referee_status` | Enum | `verified` or `suggested` | `verified` |
 | `available` | Boolean | `true` or `false` | `true` |
 | `cycle_stats` | Semicolon List | Historical review performance (`cycle:suggested/accepted/submitted`) | `52:3/2/2;51:4/4/4` |
+| `suggested_or_verified_by` | String | Nominator or verification authority | `Prasun Dutta` / `GTAC Committee` |
+| `date_time` | `DD/MM/YY\|HH:MM` | Timestamp of suggestion or verification | `12/09/26\|17:30` |
 
 ### Title Stripping Protocol:
 All honorific prefixes (`Dr`, `Dr.`, `Prof`, `Prof.`, `Professor`, `Mr`, `Ms`, `Mrs`, `Shri`, `Smt`) are stripped prior to writing to this file.

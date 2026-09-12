@@ -28,10 +28,9 @@ Captures whether the submitter wishes to volunteer as a reviewer:
 * **For Cycle: 52** (Yes / No radio) — The cycle number is read dynamically from `database/cycle.txt`.
 * **Future cycles** (Yes / No radio)
 
-### Linking Logic:
-* Selecting **"Yes"** for either cycle automatically designates and locks Block 1 as the submitter's Own Entry (`Self - Review Volunteer (Locked)`).
-* Submitter edits in Section 1 mirror directly into Block 1 in real time.
-* Switching back to **"No"** unlocks the block and reverts it to an editable card.
+### Linking & Recommendation Logic:
+* **Volunteering ("Yes" for either cycle)**: Designates and locks Block 1 as the submitter's Own Entry (`Self - Review Volunteer (Locked)`). Submitter profile changes in Section 1 mirror into Block 1. Additional clicks on the add-bar append peer recommendations (`Add Referee Suggestion (Others Entry)`).
+* **Non-Volunteering ("No" for both cycles)**: Submitters can recommend colleagues without volunteering themselves. No self-entry block is created or locked; the add-bar displays `Add Referee Recommendation`. Clicking it creates clean, blank peer recommendation cards with zero locks. The submitter's name is stored as attribution (`suggested_or_verified_by`) with a `DD/MM/YY|HH:MM` timestamp and is never added as a reviewer.
 
 ![Validation and Question 6 Volunteering](images/screenshot_02_validation_and_volunteering.png)
 *Figure 2: Real-time Gemini email validation badge (`✓ Validated email`) and dynamic Question 6 volunteering for Cycle 52.*
@@ -44,12 +43,12 @@ Positioned directly after the last active referee block:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│      ＋  Add Referee Suggestion (Own Entry / Others Entry)   │
+│    ＋  Add Referee Recommendation / Suggestions             │
 └─────────────────────────────────────────────────────────────┘
 ```
 
-* **When 0 blocks exist**: Label reads `Add Referee Suggestion (Own Entry)`. Clicking creates Block 1 pre-populated with submitter data.
-* **When 1+ blocks exist**: Label reads `Add Referee Suggestion (Others Entry)`. Clicking appends blank peer reviewer recommendation cards.
+* **When not volunteering (Question 6 is "No")**: Label reads `Add Referee Recommendation`. Clicking appends clean, blank peer recommendation cards.
+* **When volunteering (Question 6 is "Yes")**: Block 1 holds the volunteer's own entry, and the label reads `Add Referee Suggestion (Others Entry)`. Clicking appends peer recommendation cards.
 
 ---
 

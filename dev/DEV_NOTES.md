@@ -24,7 +24,7 @@ The following table summarizes all files and directories in this repository and 
 | `database/affiliations.txt` | File | ASCII file mapping affiliation IDs (`AFF_XXX`) to institutions/observatories; extendable via "Others". |
 | `database/expertise.txt` | File | ASCII file mapping expertise IDs (`EXP_XX`) to astronomy/instrumentation fields; extendable via "Others". |
 | `database/career_status.txt` | File | ASCII file listing career stages (`CAR_XX`) from Undergraduate to Faculty and Others. |
-| `database/Referee_database_A.csv` | File | Primary referee registry (`unique_id`, `referee_name`, `email`, `affiliation`, `expertise`, `career_status`, `referee_status`, `available`). |
+| `database/Referee_database_A.csv` | File | Primary referee registry (`unique_id`, `referee_name`, `email`, `affiliation`, `expertise`, `career_status`, `referee_status`, `available`, `cycle_stats`, `suggested_or_verified_by`, `date_time`). |
 | `database/form_submissions.csv` | File | Audit log of all referee registration and suggestion submissions. |
 | `database/cycle.txt` | File | ASCII file storing current GTAC cycle number (e.g. `52`). |
 | `cycle.txt` | Symlink | Root convenience link pointing to `database/cycle.txt`. |
@@ -74,6 +74,60 @@ Verification
 Notes
 - Relevant context, edge cases, or next steps.
 ```
+
+---
+
+## 2026-09-12 17:35:00 IST
+
+Prompt / Request
+- 1. One should be able to submit a referee recommendation without saying yes for himself as a referee (Q6 "No" / "No" should not force submitter into Referee_database_A.csv or lock Block 1 to submitter).
+- 2. The referee database needs to have an entry that says who has suggested/verified the referee and the date/time in DD/MM/YY|HH:MM format.
+- Update cards to display attribution record, capture updated screenshots, update documentation, bump version, push to git and wiki.
+
+Changes Made
+- `database/Referee_database_A.csv`:
+  - Added schema columns `suggested_or_verified_by` and `date_time`.
+  - Backfilled all 12 existing referee entries with historical attribution (`GTAC Committee` or nominating submitter) and `DD/MM/YY|HH:MM` timestamps.
+- `dev/server.py`:
+  - Updated `save_referee_entry()` to parse and persist `suggested_or_verified_by` and `date_time`.
+  - Updated `/api/submit` handler in `do_POST`:
+    - Checks `review_this_cycle` and `review_future_cycles`. Only records submitter into `Referee_database_A.csv` if they volunteered.
+    - Attaches submitter's full name to `suggested_or_verified_by` and current timestamp formatted as `%d/%m/%y|%H:%M` to `date_time` for all suggested referee entries.
+- `dev/app.js`:
+  - Added `isReviewVolunteer()` helper to inspect Question 6 responses.
+  - Decoupled `btnAddReferee` and `updateRefereeBarText()`: displays `Add Referee Recommendation` when Question 6 is "No", creating blank peer recommendation cards without locking or filling submitter details.
+  - Added `resetBlockToPeerSuggestion()` to unlock and reset cards when switching between volunteering states.
+  - Updated `handleFormSubmit()`: flags `is_self: false` when submitter does not volunteer.
+  - Updated `handleLocalSubmission()`: sets `suggested_or_verified_by` to submitter name and `date_time` formatted with `formatDateTimeEntry()` (`DD/MM/YY|HH:MM`).
+- `dev/lookup.js` & `dev/lookup.css`:
+  - Added attribution record display below affiliation row: `Verified by: GTAC Committee • 11/09/26|12:00` (orange/shield) or `Suggested by: ... • DD/MM/YY|HH:MM` (blue/user icon).
+  - Styled `.detail-row-attribution`, `.attribution-value`, and `.attribution-time code` with responsive text-wrapping and mobile scaling.
+- `dev/db_data.js`:
+  - Refreshed export bundle with the new schema columns and backfilled attribution data.
+- Screenshots & Media:
+  - Refreshed `screenshot_05_referee_directory_overview.png`, `screenshot_06_referee_directory_filtered.png`, `screenshot_07_referee_card.png`, and `screenshot_08_mobile_referee_card.png`.
+  - Synchronized across `assets/screenshots/`, `doc/images/`, `docs/images/`, and `wiki/images/`.
+- Documentation & Wiki:
+  - `doc/database_guide.html`, `wiki/Database-Architecture.md`: Documented new schema columns `suggested_or_verified_by` and `date_time`.
+  - `doc/form_guide.html`, `wiki/Form-Guide.md`: Documented peer recommendation submission without self-volunteering.
+  - `doc/README.html`, `wiki/Referee-Directory.md`, `wiki/_Sidebar.md`: Updated typography specs and bumped version badge to `v01.00.17`.
+- `util`:
+  - Bumped version to `01.00.17`.
+  - Synchronized GitHub Pages bundle via `./util --sync-docs`.
+  - Published wiki via `./util --wiki-push`.
+
+Verification
+- Tested backend submission via Python and curl: verified submitter is NOT added to `Referee_database_A.csv` when Question 6 is "No", and peer referee IS added with attribution name and formatted `DD/MM/YY|HH:MM` timestamp.
+- Verified client-side card generation: Block 1 renders as blank editable peer suggestion when Question 6 is "No", and self-entry locking only occurs when Question 6 is "Yes".
+- Verified directory cards render `Verified by:` and `Suggested by:` with attribution name and timestamp.
+- Verified mobile responsive layout with zero overflow.
+- Synchronized docs via `./util --sync-docs` and published wiki via `./util --wiki-push`.
+
+Notes
+- Format `DD/MM/YY|HH:MM` uses literal pipe `|` between date and time (e.g. `12/09/26|17:35`).
+- Live Web Form: `https://prasundutta151.github.io/GTAC_REF/`
+- Live Referee Directory: `https://prasundutta151.github.io/GTAC_REF/referees.html`
+- GitHub Wiki: `https://github.com/prasundutta151/GTAC_REF/wiki`
 
 ---
 
