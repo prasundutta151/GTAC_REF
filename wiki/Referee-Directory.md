@@ -141,6 +141,20 @@ The table cells are dynamically styled to surface referee responsiveness at a gl
 
 ---
 
+## 📱 Mobile Responsiveness & Phone Layout
+
+When accessed on mobile smartphones or when the browser window width is shrunk, the referee cards and tables automatically scale responsively:
+
+1. **Zero Clipping & Overflow**: Long email addresses (e.g. `ygupta@ncra.tifr.res.in`), institutional affiliations, and research domains wrap cleanly across all phone widths (down to 320px) using `min-width: 0`, `word-break: break-all`, and `overflow-wrap: anywhere`.
+2. **Compact Review History Headers**: On narrower screens ($\le 768$px and $\le 480$px), the column titles automatically transition from full text (`Suggested`, `Accepted`, `Submitted`) to compact labels (`Sugg`, `Acc`, `Subm`), ensuring all metrics fit comfortably side-by-side.
+3. **Touch-Safe Table Container**: Review History tables are enclosed in a `.stats-table-wrapper` container with `table-layout: fixed; width: 100%;` and horizontal scrolling safety (`overflow-x: auto`) to guarantee that cards never blow out screen boundaries.
+4. **Adaptive Card Padding**: Padding smoothly transitions from desktop (`22px 26px`) down to `14px 12px` on standard mobile screens and `12px 8px` on ultra-narrow phones ($\le 360$px).
+
+![Mobile Responsive Referee Card](images/screenshot_08_mobile_referee_card.png)
+*Figure 4: Mobile phone layout demonstrating responsive card shrinkage, wrapped identity details, and compact review history table without any cutoff.*
+
+---
+
 ## ⚡ Execution Modes
 
 The directory operates in two complementary environments:

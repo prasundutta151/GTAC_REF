@@ -77,6 +77,53 @@ Notes
 
 ---
 
+## 2026-09-12 15:40:00 IST
+
+Prompt / Request
+- Fix referee cards on mobile phones / narrow viewport widths where lines and review history tables cut off when the window is shrunk.
+- Ensure lines and tables are correctly displayed without clipping or horizontal overflow.
+- Capture responsive screenshots, update documentation and wiki, bump version, push to git and publish to GitHub Wiki.
+
+Changes Made
+- `dev/lookup.js`:
+  - Wrapped referee review history table in a responsive container `.stats-table-wrapper`.
+  - Added responsive table headers with `.col-label-full` and `.col-label-short` (`Suggested` / `Sugg`, `Accepted` / `Acc`, `Submitted` / `Subm`).
+  - Added `mobile=1` parameter support to `demo=card` in `handleDemoParam()` for responsive previewing.
+- `dev/lookup.css`:
+  - Added `.stats-table-wrapper` with `overflow-x: auto` and smooth touch scrolling.
+  - Configured `.referee-stats-table` to `table-layout: fixed; width: 100%;` with proportional column widths (`31%`, `23%`, `23%`, `23%`).
+  - Added `min-width: 0`, `word-break: break-all`, and `overflow-wrap: anywhere` to `.referee-email-link`, `.affiliation-value`, and `.detail-item`.
+  - Added comprehensive responsive media queries for `768px`, `640px`, `480px`, and `360px`.
+  - Switched table header labels to `.col-label-short` on screens $\le 768$px and $\le 480$px.
+  - Scaled card padding down from desktop (`22px 26px`) to `14px 12px` and `12px 8px` on phones $\le 360$px.
+- `dev/style.css`:
+  - Added mobile responsive queries for the registration form, cards, top navigation, headers, and submission modal.
+- Screenshots & Media:
+  - Captured pixel-perfect mobile referee card screenshot `assets/screenshots/screenshot_08_mobile_referee_card.png`.
+  - Synchronized screenshots to `wiki/images/`, `doc/images/`, and `docs/images/`.
+- Documentation & Wiki:
+  - `wiki/Referee-Directory.md`: Added "Mobile Responsiveness & Phone Layout" section with Figure 4.
+  - `wiki/Home.md`: Added Figure 8 to Visual Walkthrough gallery.
+  - `wiki/_Sidebar.md`: Added Figure 8 navigation link and updated version badge to `v01.00.16`.
+  - `doc/README.html`: Added Figure 8 under Application Screenshots section.
+- `util`:
+  - Bumped version to `01.00.16` via `./util --version`.
+  - Synchronized GitHub Pages bundle via `./util --sync-docs`.
+  - Published wiki via `./util --wiki-push`.
+
+Verification
+- Executed automated DOM shrinkage test across viewport widths 340px, 300px, 270px, 240px, and 200px: verified zero horizontal overflow (`overflows: false` across all widths).
+- Verified rendering and visual balance on mobile phone screenshot `screenshot_08_mobile_referee_card.png`.
+- Executed `./util --sync-docs` and verified all assets synced into `docs/`.
+- Executed `./util --wiki-push` and verified all 15 files successfully committed and pushed to GitHub Wiki remote.
+
+Notes
+- Live Web Form: `https://prasundutta151.github.io/GTAC_REF/`
+- Live Referee Directory: `https://prasundutta151.github.io/GTAC_REF/referees.html`
+- GitHub Wiki: `https://github.com/prasundutta151/GTAC_REF/wiki`
+
+---
+
 ## 2026-09-11 19:30:00 IST
 
 Prompt / Request

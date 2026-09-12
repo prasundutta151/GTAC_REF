@@ -102,6 +102,14 @@ Each referee card displays a compact Review History table in the white space dir
 
 ---
 
+### 8. Mobile Phone Responsive Layout
+When viewed on smartphones or in shrunk browser windows, referee cards and review history tables adapt seamlessly with compact column headers (`Sugg`, `Acc`, `Subm`), wrapped contact details, and touch-friendly padding.
+
+![Mobile Responsive Referee Card](images/screenshot_08_mobile_referee_card.png)
+*Figure 8: Mobile-optimized referee card layout showing responsive adaptation with zero clipping.*
+
+---
+
 ## ⚡ Quick Start for Developers
 
 ```bash

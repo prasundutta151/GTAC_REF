@@ -610,42 +610,53 @@
             <span class="stats-box-title">📊 Review History</span>
             <span class="stats-badge-na">Data Not Available</span>
           </div>
-          <table class="referee-stats-table">
-            <thead>
-              <tr>
-                <th class="col-period">Period</th>
-                <th class="col-stat">Suggested</th>
-                <th class="col-stat">Accepted</th>
-                <th class="col-stat">Submitted</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="row-period-label">Overall</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-              </tr>
-              <tr>
-                <td class="row-period-label">Cycle ${A}–${B}</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-              </tr>
-              <tr>
-                <td class="row-period-label">Cycle ${C}</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-              </tr>
-              <tr>
-                <td class="row-period-label">Cycle ${D}</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-                <td class="cell-na">—</td>
-              </tr>
-            </tbody>
-          </table>
+          <div class="stats-table-wrapper">
+            <table class="referee-stats-table">
+              <thead>
+                <tr>
+                  <th class="col-period">Period</th>
+                  <th class="col-stat" title="Suggested Referees">
+                    <span class="col-label-full">Suggested</span>
+                    <span class="col-label-short">Sugg</span>
+                  </th>
+                  <th class="col-stat" title="Accepted Reviews">
+                    <span class="col-label-full">Accepted</span>
+                    <span class="col-label-short">Acc</span>
+                  </th>
+                  <th class="col-stat" title="Submitted Reports">
+                    <span class="col-label-full">Submitted</span>
+                    <span class="col-label-short">Subm</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td class="row-period-label">Overall</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                </tr>
+                <tr>
+                  <td class="row-period-label">Cycle ${A}–${B}</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                </tr>
+                <tr>
+                  <td class="row-period-label">Cycle ${C}</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                </tr>
+                <tr>
+                  <td class="row-period-label">Cycle ${D}</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                  <td class="cell-na">—</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       `;
     }
@@ -680,42 +691,53 @@
         <div class="stats-box-header">
           <span class="stats-box-title">📊 Review History</span>
         </div>
-        <table class="referee-stats-table">
-          <thead>
-            <tr>
-              <th class="col-period">Period</th>
-              <th class="col-stat" title="Proposals where referee was suggested">Suggested</th>
-              <th class="col-stat" title="Review invitations accepted by referee">Accepted</th>
-              <th class="col-stat" title="Completed review reports submitted">Submitted</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr>
-              <td class="row-period-label">Overall</td>
-              <td class="${getStatCellClass('suggested', overall.suggested, overall)}">${overall.suggested}</td>
-              <td class="${getStatCellClass('accepted', overall.accepted, overall)}">${overall.accepted}</td>
-              <td class="${getStatCellClass('submitted', overall.submitted, overall)}">${overall.submitted}</td>
-            </tr>
-            <tr>
-              <td class="row-period-label">Cycle ${A}–${B}</td>
-              <td class="${getStatCellClass('suggested', sumAB.suggested, sumAB)}">${sumAB.suggested}</td>
-              <td class="${getStatCellClass('accepted', sumAB.accepted, sumAB)}">${sumAB.accepted}</td>
-              <td class="${getStatCellClass('submitted', sumAB.submitted, sumAB)}">${sumAB.submitted}</td>
-            </tr>
-            <tr>
-              <td class="row-period-label">Cycle ${C}</td>
-              <td class="${getStatCellClass('suggested', dataC.suggested, dataC)}">${dataC.suggested}</td>
-              <td class="${getStatCellClass('accepted', dataC.accepted, dataC)}">${dataC.accepted}</td>
-              <td class="${getStatCellClass('submitted', dataC.submitted, dataC)}">${dataC.submitted}</td>
-            </tr>
-            <tr>
-              <td class="row-period-label">Cycle ${D}</td>
-              <td class="${getStatCellClass('suggested', dataD.suggested, dataD)}">${dataD.suggested}</td>
-              <td class="${getStatCellClass('accepted', dataD.accepted, dataD)}">${dataD.accepted}</td>
-              <td class="${getStatCellClass('submitted', dataD.submitted, dataD)}">${dataD.submitted}</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="stats-table-wrapper">
+          <table class="referee-stats-table">
+            <thead>
+              <tr>
+                <th class="col-period">Period</th>
+                <th class="col-stat" title="Proposals where referee was suggested">
+                  <span class="col-label-full">Suggested</span>
+                  <span class="col-label-short">Sugg</span>
+                </th>
+                <th class="col-stat" title="Review invitations accepted by referee">
+                  <span class="col-label-full">Accepted</span>
+                  <span class="col-label-short">Acc</span>
+                </th>
+                <th class="col-stat" title="Completed review reports submitted">
+                  <span class="col-label-full">Submitted</span>
+                  <span class="col-label-short">Subm</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="row-period-label">Overall</td>
+                <td class="${getStatCellClass('suggested', overall.suggested, overall)}">${overall.suggested}</td>
+                <td class="${getStatCellClass('accepted', overall.accepted, overall)}">${overall.accepted}</td>
+                <td class="${getStatCellClass('submitted', overall.submitted, overall)}">${overall.submitted}</td>
+              </tr>
+              <tr>
+                <td class="row-period-label">Cycle ${A}–${B}</td>
+                <td class="${getStatCellClass('suggested', sumAB.suggested, sumAB)}">${sumAB.suggested}</td>
+                <td class="${getStatCellClass('accepted', sumAB.accepted, sumAB)}">${sumAB.accepted}</td>
+                <td class="${getStatCellClass('submitted', sumAB.submitted, sumAB)}">${sumAB.submitted}</td>
+              </tr>
+              <tr>
+                <td class="row-period-label">Cycle ${C}</td>
+                <td class="${getStatCellClass('suggested', dataC.suggested, dataC)}">${dataC.suggested}</td>
+                <td class="${getStatCellClass('accepted', dataC.accepted, dataC)}">${dataC.accepted}</td>
+                <td class="${getStatCellClass('submitted', dataC.submitted, dataC)}">${dataC.submitted}</td>
+              </tr>
+              <tr>
+                <td class="row-period-label">Cycle ${D}</td>
+                <td class="${getStatCellClass('suggested', dataD.suggested, dataD)}">${dataD.suggested}</td>
+                <td class="${getStatCellClass('accepted', dataD.accepted, dataD)}">${dataD.accepted}</td>
+                <td class="${getStatCellClass('submitted', dataD.submitted, dataD)}">${dataD.submitted}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     `;
   }
@@ -773,8 +795,14 @@
         if (filterCard) filterCard.style.display = 'none';
         if (count) count.style.display = 'none';
         const appContainer = document.querySelector('.app-container');
-        if (appContainer) appContainer.style.maxWidth = '1100px';
-        document.body.style.padding = '24px';
+        const customWidth = params.get('width');
+        const isMobileDemo = params.get('mobile') === '1' || params.get('mobile') === 'true';
+        if (appContainer) {
+          appContainer.style.maxWidth = customWidth ? `${customWidth}px` : (isMobileDemo ? '375px' : '1100px');
+          appContainer.style.width = '100%';
+          appContainer.style.boxSizing = 'border-box';
+        }
+        document.body.style.padding = (isMobileDemo || window.innerWidth <= 640) ? '12px 8px' : '24px';
         document.body.style.background = '#f8fafc';
       }, 300);
     }

@@ -1030,3 +1030,138 @@ select:disabled {
   font-weight: 600;
 }
 
+/* ==========================================================================
+   Responsive Adjustments for Phones and Narrow Viewports
+   ========================================================================== */
+
+@media (max-width: 640px) {
+  body {
+    padding: 12px 8px;
+  }
+
+  .app-container {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  /* Top Navigation */
+  .top-nav {
+    padding: 10px 12px;
+    margin-bottom: 14px;
+    gap: 8px;
+  }
+  .nav-brand {
+    font-size: 0.95rem;
+  }
+  .nav-links {
+    gap: 6px;
+  }
+  .nav-link {
+    padding: 6px 10px;
+    font-size: 0.82rem;
+  }
+
+  /* App Header */
+  .app-header {
+    padding: 22px 16px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-md);
+  }
+  .app-header h1 {
+    font-size: 1.35rem;
+    line-height: 1.25;
+    word-break: break-word;
+  }
+  .app-header .subtitle {
+    font-size: 0.88rem;
+  }
+  .brand-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+  .connection-badge {
+    font-size: 0.72rem;
+    padding: 3px 8px;
+  }
+
+  /* Form Cards */
+  .card {
+    padding: 16px 12px;
+    margin-bottom: 16px;
+    border-radius: var(--radius-md);
+  }
+  .card-header {
+    margin-bottom: 16px;
+    padding-bottom: 12px;
+    gap: 10px;
+  }
+  .step-num {
+    width: 30px;
+    height: 30px;
+    font-size: 0.95rem;
+  }
+  .card-header h2 {
+    font-size: 1.15rem;
+  }
+
+  /* Referee Cards in Form */
+  .referee-card {
+    padding: 14px 10px;
+    border-radius: var(--radius-sm);
+  }
+  .referee-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+  }
+  .referee-title-area {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .referee-number {
+    font-size: 1.05rem;
+  }
+  .status-badge {
+    font-size: 0.72rem;
+    padding: 2px 8px;
+  }
+  .referee-alert-banner {
+    padding: 8px 10px;
+    font-size: 0.82rem;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  /* Form Elements */
+  input[type="text"],
+  input[type="email"],
+  select,
+  textarea {
+    font-size: 0.88rem;
+    padding: 9px 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .btn-submit {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+  }
+
+  /* Submission Modal */
+  .modal-card {
+    padding: 18px 12px;
+    width: 95%;
+    max-height: 90vh;
+  }
+  .modal-header h2 {
+    font-size: 1.25rem;
+  }
+}
+

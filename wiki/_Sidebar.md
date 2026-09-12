@@ -18,6 +18,7 @@
 * **[[Home#5-referee-directory--live-lookup|🔍 5. Referee Directory]]**
 * **[[Home#6-real-time-multi-criteria-filtering|⚡ 6. Instant Filtering]]**
 * **[[Home#7-referee-card-with-review-history-table|📊 7. Referee Card & Stats]]**
+* **[[Home#8-mobile-phone-responsive-layout|📱 8. Mobile Responsive Card]]**
 
 #### 🃏 Live Referee Card Preview:
 ![GTAC Referee Card Preview](images/screenshot_07_referee_card.png)
@@ -32,4 +33,4 @@
 * [💻 **GitHub Repository**](https://github.com/prasundutta151/GTAC_REF)
 
 ---
-*Release Version: `v01.00.15`*
+*Release Version: `v01.00.16`*
