@@ -556,14 +556,14 @@ function lockBlockAsSelf(cardEl) {
   // Badge & Banner
   const badge = cardEl.querySelector('.status-badge');
   if (badge) {
-    badge.className = 'status-badge badge-self';
-    badge.textContent = 'Self - Review Volunteer (Locked)';
+    badge.className = 'status-badge badge-verified';
+    badge.textContent = 'Verified (Self)';
   }
 
   const banner = cardEl.querySelector('.referee-alert-banner');
   if (banner) {
-    banner.className = 'referee-alert-banner alert-self';
-    banner.innerHTML = '<span>🔒 <strong>Review Volunteer (Self):</strong> Automatically populated from your personal profile and locked.</span>';
+    banner.className = 'referee-alert-banner alert-verified';
+    banner.innerHTML = '<span>🔒 <strong>Review Volunteer (Verified):</strong> Automatically populated from your personal profile and registered as verified.</span>';
   }
 
   // Populate data from user fields
@@ -593,14 +593,14 @@ function populateCardWithOwnEntry(cardEl) {
   // Badge & Banner
   const badge = cardEl.querySelector('.status-badge');
   if (badge) {
-    badge.className = 'status-badge badge-self';
-    badge.textContent = 'Own Entry (Submitter)';
+    badge.className = 'status-badge badge-verified';
+    badge.textContent = 'Verified (Self)';
   }
 
   const banner = cardEl.querySelector('.referee-alert-banner');
   if (banner) {
-    banner.className = 'referee-alert-banner alert-self';
-    banner.innerHTML = '<span>👤 <strong>Your Entry (Submitter):</strong> Auto-populated with your details. Select "Yes" in question 6 above to formally volunteer.</span>';
+    banner.className = 'referee-alert-banner alert-verified';
+    banner.innerHTML = '<span>👤 <strong>Your Entry (Verified):</strong> Auto-populated with your details. Submitting your own name is considered verified.</span>';
   }
 
   // Populate data from user fields
@@ -1354,14 +1354,24 @@ function checkAndAutoFillCard(card, query) {
     return;
   }
 
-  // Check if user is entering their own name in an "Others" suggestion block
+  // Check if user is entering their own name in a suggestion block
   const submitterName = stripTitles(document.getElementById('user_name').value.trim());
   const submitterEmail = document.getElementById('user_email').value.trim().toLowerCase();
-  if ((submitterName && matchRefereeName(query, submitterName)) || (submitterEmail && query.toLowerCase() === submitterEmail)) {
+  const isEnteringSelf = Boolean(
+    (submitterName && matchRefereeName(query, submitterName)) ||
+    (submitterEmail && query.toLowerCase() === submitterEmail)
+  );
+  if (isEnteringSelf) {
+    card.dataset.isSelf = 'true';
+    const badge = card.querySelector('.status-badge');
+    if (badge) {
+      badge.className = 'status-badge badge-verified';
+      badge.textContent = 'Verified (Self)';
+    }
     const banner = card.querySelector('.referee-alert-banner');
     if (banner) {
-      banner.className = 'referee-alert-banner alert-self';
-      banner.innerHTML = `<span>⚠️ <strong>Self Profile:</strong> This name matches your submitter profile. Your self entry in Block 1 takes preference.</span>`;
+      banner.className = 'referee-alert-banner alert-verified';
+      banner.innerHTML = `<span>🛡️ <strong>Self Profile (Verified):</strong> This name matches your submitter profile. Submitting your own name is considered verified.</span>`;
     }
     return;
   }
@@ -1673,6 +1683,17 @@ async function handleFormSubmit(e) {
       hasError = true;
     }
 
+    const cleanRName = stripTitles(rName);
+    const cleanSubName = stripTitles(userName);
+    const cleanREmail = rEmail.trim().toLowerCase();
+    const cleanSubEmail = userEmail.trim().toLowerCase();
+    const isSelfByDetails = Boolean(
+      (cleanRName && cleanSubName && matchRefereeName(cleanRName, cleanSubName)) ||
+      (cleanREmail && cleanSubEmail && cleanREmail === cleanSubEmail)
+    );
+    const isSelfVolunteer = (card.dataset.isSelf === 'true' && (thisCycle === 'yes' || futureCycles === 'yes'));
+    const isOwnEntry = Boolean(isSelfVolunteer || isSelfByDetails);
+
     refereesData.push({
       name: rName,
       email: rEmail,
@@ -1681,7 +1702,8 @@ async function handleFormSubmit(e) {
       career_status: rCareer,
       expertise: rExp,
       expertise_other: rExpOtherText,
-      is_self: (card.dataset.isSelf === 'true' && (thisCycle === 'yes' || futureCycles === 'yes'))
+      is_self: isOwnEntry,
+      referee_status: isOwnEntry ? 'verified' : 'suggested'
     });
   });
 
@@ -1767,21 +1789,32 @@ function handleLocalSubmission(payload) {
   const dtStr = formatDateTimeEntry(new Date());
   payload.referees.forEach(r => {
     const cleanName = stripTitles(r.name);
+    const cleanSubName = stripTitles(payload.user_name || '');
+    const cleanEmail = (r.email || '').trim().toLowerCase();
+    const cleanSubEmail = (payload.user_email || '').trim().toLowerCase();
+
+    const isSelfEntry = Boolean(
+      r.is_self ||
+      (cleanName && cleanSubName && matchRefereeName(cleanName, cleanSubName)) ||
+      (cleanEmail && cleanSubEmail && cleanEmail === cleanSubEmail)
+    );
+
     // Check if already in DB (email, exact name, or half-initials + surname)
     const existing = state.referees.find(x =>
-      (x.email && x.email.toLowerCase() === r.email.toLowerCase()) ||
+      (x.email && x.email.toLowerCase() === cleanEmail) ||
       matchRefereeName(cleanName, x.referee_name)
     );
 
     let uid = existing ? existing.unique_id : null;
     if (existing) {
-      if (r.is_self) {
-        // Self entry gets preference!
+      if (isSelfEntry) {
+        // Self entry gets preference and is verified!
         existing.referee_name = cleanName;
         existing.email = r.email;
         existing.affiliation = r.affiliation;
         existing.expertise = (r.expertise || []).join(';');
         existing.career_status = r.career_status;
+        existing.referee_status = 'verified';
         existing.available = 'true';
         existing.suggested_or_verified_by = payload.user_name || 'GTAC Submitter';
         existing.date_time = dtStr;
@@ -1799,7 +1832,7 @@ function handleLocalSubmission(payload) {
         affiliation: r.affiliation,
         expertise: (r.expertise || []).join(';'),
         career_status: r.career_status,
-        referee_status: 'suggested',
+        referee_status: isSelfEntry ? 'verified' : 'suggested',
         available: 'true',
         cycle_stats: '',
         suggested_or_verified_by: payload.user_name || 'GTAC Submitter',
@@ -1890,8 +1923,13 @@ function showSuccessModal(result, payload) {
     const affLabel = resolveAffiliationLabel(r.affiliation, r.affiliation_other);
     const careerLabel = resolveCareerLabel(r.career_status);
     const expChips = renderExpertiseChipsHtml(r.expertise, r.expertise_other);
-    const typeLabel = r.is_self ? 'Submitter (Own Entry)' : 'Peer Referee';
-    const typeBadgeClass = r.is_self ? 'badge-self' : 'badge-verified';
+    const isSelfEntry = Boolean(
+      r.is_self ||
+      (r.name && payload.user_name && matchRefereeName(stripTitles(r.name), stripTitles(payload.user_name))) ||
+      (r.email && payload.user_email && r.email.trim().toLowerCase() === payload.user_email.trim().toLowerCase())
+    );
+    const typeLabel = isSelfEntry ? 'Verified (Self)' : (r.referee_status === 'verified' ? 'Verified Referee' : 'Suggested Referee');
+    const typeBadgeClass = (isSelfEntry || r.referee_status === 'verified') ? 'badge-verified' : 'badge-suggested';
 
     refCardsHtml += `
       <div class="summary-referee-card">

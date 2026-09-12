@@ -365,7 +365,7 @@ window.GTAC_DATABASE = {
       "affiliation": "AFF_002",
       "expertise": "EXP_02;EXP_07",
       "career_status": "CAR_06",
-      "referee_status": "suggested",
+      "referee_status": "verified",
       "available": "true",
       "cycle_stats": "52:2/2/2;51:1/1/1;50:2/2/2;49:1/1/1;48:2/1/1;47:1/1/1;46:1/1/1",
       "suggested_or_verified_by": "Prasun Dutta",

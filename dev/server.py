@@ -233,12 +233,24 @@ def save_referee_entry(entry: Dict[str, Any], is_self: bool = False) -> str:
                 existing_idx = idx
                 break
 
+    clean_sugg_by = strip_titles(entry.get("suggested_or_verified_by", "")).strip()
+
+    # Rule: If somebody writes his own name as referee, it is considered verified, not suggested!
+    is_self_entry = bool(
+        is_self or
+        (clean_name and clean_sugg_by and match_referee_name(clean_name, clean_sugg_by))
+    )
+
+    if is_self_entry:
+        entry["referee_status"] = "verified"
+
     if existing_idx is not None:
         curr = referees[existing_idx]
 
-        # If it is self entry, self entry gets preference!
-        if is_self:
+        # If it is self entry, self entry gets preference and is verified!
+        if is_self_entry:
             curr.update(entry)
+            curr["referee_status"] = "verified"
             unique_id = curr.get("unique_id") or get_next_referee_id()
             curr["unique_id"] = unique_id
         else:
@@ -252,7 +264,9 @@ def save_referee_entry(entry: Dict[str, Any], is_self: bool = False) -> str:
     else:
         unique_id = get_next_referee_id()
         entry["unique_id"] = unique_id
-        if "referee_status" not in entry:
+        if is_self_entry or entry.get("referee_status") == "verified":
+            entry["referee_status"] = "verified"
+        else:
             entry["referee_status"] = "suggested"
         if "available" not in entry:
             entry["available"] = "true"
@@ -587,20 +601,33 @@ class GTACRequestHandler(http.server.SimpleHTTPRequestHandler):
 
                     is_self = bool(r.get("is_self", False))
                     submitter_name = strip_titles(body_data.get("user_name", "")).strip() or "GTAC Submitter"
+                    submitter_email = body_data.get("user_email", "").strip().lower()
                     timestamp_formatted = datetime.now().strftime("%d/%m/%y|%H:%M")
 
+                    clean_r_name = strip_titles(r_name).strip()
+                    clean_sub_name = strip_titles(submitter_name).strip()
+                    clean_r_email = r_email.strip().lower()
+
+                    is_own_name = bool(
+                        is_self or
+                        (clean_r_name and clean_sub_name and match_referee_name(clean_r_name, clean_sub_name)) or
+                        (clean_r_email and submitter_email and clean_r_email == submitter_email)
+                    )
+
+                    ref_status = "verified" if is_own_name else r.get("referee_status", "suggested")
+
                     ref_entry = {
-                        "referee_name": strip_titles(r_name),
+                        "referee_name": clean_r_name,
                         "email": r_email,
                         "affiliation": r_aff,
                         "expertise": ";".join(resolved_r_exp),
                         "career_status": r.get("career_status", ""),
-                        "referee_status": r.get("referee_status", "suggested"),
+                        "referee_status": ref_status,
                         "available": str(r.get("available", "true")).lower(),
                         "suggested_or_verified_by": submitter_name,
                         "date_time": timestamp_formatted
                     }
-                    unique_id = save_referee_entry(ref_entry, is_self=is_self)
+                    unique_id = save_referee_entry(ref_entry, is_self=is_own_name)
                     saved_ids.append(unique_id)
 
                 body_data["suggested_referees_ids"] = saved_ids

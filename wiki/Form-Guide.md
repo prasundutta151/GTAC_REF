@@ -29,7 +29,7 @@ Captures whether the submitter wishes to volunteer as a reviewer:
 * **Future cycles** (Yes / No radio)
 
 ### Linking & Recommendation Logic:
-* **Volunteering ("Yes" for either cycle)**: Designates and locks Block 1 as the submitter's Own Entry (`Self - Review Volunteer (Locked)`). Submitter profile changes in Section 1 mirror into Block 1. Additional clicks on the add-bar append peer recommendations (`Add Referee Suggestion (Others Entry)`).
+* **Volunteering ("Yes" for either cycle)**: Designates and locks Block 1 as the submitter's Own Entry with badge `Verified (Self)`. When somebody writes or registers their own name as referee, it is considered **verified**, not suggested. Submitter profile changes in Section 1 mirror into Block 1. Additional clicks on the add-bar append peer recommendations (`Add Referee Suggestion (Others Entry)`).
 * **Non-Volunteering ("No" for both cycles)**: Submitters can recommend colleagues without volunteering themselves. No self-entry block is created or locked; the add-bar displays `Add Referee Recommendation`. Clicking it creates clean, blank peer recommendation cards with zero locks. The submitter's name is stored as attribution (`suggested_or_verified_by`) with a `DD/MM/YY|HH:MM` timestamp and is never added as a reviewer.
 
 ![Validation and Question 6 Volunteering](images/screenshot_02_validation_and_volunteering.png)

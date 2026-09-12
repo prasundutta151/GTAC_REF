@@ -77,6 +77,52 @@ Notes
 
 ---
 
+## 2026-09-12 17:45:00 IST
+
+Prompt / Request
+- If somebody writes his own name as referee, it will be considered verified, not suggested.
+- Update form handling, backend submission, database registry, and documentation so self-entered referees are registered as `verified`.
+
+Changes Made
+- `database/Referee_database_A.csv`:
+  - Updated `REF_0011` (`Prasun Dutta`) status from `suggested` to `verified` since it was self-submitted.
+- `dev/server.py`:
+  - `save_referee_entry()`: Checks if referee name matches nominator/submitter name (`match_referee_name(clean_name, clean_sugg_by)`) or `is_self=True`. Sets `referee_status = "verified"` on new and updated entries.
+  - `/api/submit`: Inspects each suggested referee. If the name matches `user_name` or email matches `user_email`, sets `is_own_name = True`, `ref_status = "verified"`, and invokes `save_referee_entry(..., is_self=True)`.
+- `dev/app.js`:
+  - `lockBlockAsSelf()`: Displays badge `Verified (Self)` and banner `Review Volunteer (Verified)`.
+  - `populateCardWithOwnEntry()`: Displays badge `Verified (Self)` and banner `Your Entry (Verified)`.
+  - `checkAndAutoFillCard()`: Detects if entered name or email matches submitter profile; updates card to `Verified (Self)` with alert banner.
+  - `handleFormSubmit()`: Flags `referee_status: "verified"` whenever an entry matches the submitter's identity.
+  - `handleLocalSubmission()`: Sets `referee_status: "verified"` on new and existing self-referee records.
+  - `showSuccessModal()`: Renders `Verified (Self)` badge with green styling for own entries.
+- `dev/db_data.js`:
+  - Synchronized via `sync_db_data_js()`: reflects `REF_0011` as `verified`.
+- Screenshots & Media:
+  - Re-captured `screenshot_05_referee_directory_overview.png`, `screenshot_06_referee_directory_filtered.png`, `screenshot_07_referee_card.png`, and `screenshot_08_mobile_referee_card.png`.
+  - Synchronized across `assets/screenshots/`, `doc/images/`, `docs/images/`, and `wiki/images/`.
+- Documentation & Wiki:
+  - `doc/form_guide.html`, `doc/database_guide.html`: Documented that writing own name as referee assigns `verified` status.
+  - `wiki/Form-Guide.md`, `wiki/Database-Architecture.md`: Documented self-entry verification rule.
+  - Updated version badges to `v01.00.19`.
+- `util`:
+  - Bumped version to `01.00.19`.
+  - Synchronized GitHub Pages bundle via `./util --sync-docs`.
+  - Published wiki via `./util --wiki-push`.
+
+Verification
+- Verified via Python unit test: submitting entry with matching name and nominator automatically persists with `referee_status: "verified"`.
+- Verified `REF_0011` is classified as `verified` and renders with `Verified Referee` badge and `🛡️ Verified by: Prasun Dutta • 11/09/26|18:18`.
+- Verified `./util --sync-docs` synchronizes all assets into `docs/`.
+- Verified `./util --wiki-push` published updated wiki documentation to GitHub Wiki remote.
+
+Notes
+- Live Web Form: `https://prasundutta151.github.io/GTAC_REF/`
+- Live Referee Directory: `https://prasundutta151.github.io/GTAC_REF/referees.html`
+- GitHub Wiki: `https://github.com/prasundutta151/GTAC_REF/wiki`
+
+---
+
 ## 2026-09-12 17:40:00 IST
 
 Prompt / Request

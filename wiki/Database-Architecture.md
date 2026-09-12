@@ -86,7 +86,7 @@ Authoritative table of all verified and suggested referees:
 | `affiliation` | String | Institution ID or custom name | `AFF_001` |
 | `expertise` | Semicolon List | Expertise IDs | `EXP_01;EXP_14` |
 | `career_status` | String | Career status ID | `CAR_04` |
-| `referee_status` | Enum | `verified` or `suggested` | `verified` |
+| `referee_status` | Enum | `verified` or `suggested` (Rule: writing own name is `verified`) | `verified` |
 | `available` | Boolean | `true` or `false` | `true` |
 | `cycle_stats` | Semicolon List | Historical review performance (`cycle:suggested/accepted/submitted`) | `52:3/2/2;51:4/4/4` |
 | `suggested_or_verified_by` | String | Nominator or verification authority | `Prasun Dutta` / `GTAC Committee` |
