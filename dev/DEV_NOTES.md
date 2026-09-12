@@ -77,6 +77,35 @@ Notes
 
 ---
 
+## 2026-09-12 17:40:00 IST
+
+Prompt / Request
+- Update the version, update the HTML documentation and wiki, and push all commits to Git (`creation` and `main` branches).
+
+Changes Made
+- `VERSION`:
+  - Bumped version to `01.00.18` via `./util --version`.
+- HTML Documentation (`doc/` & `docs/doc/`):
+  - Updated release version badges to `v01.00.18` across `doc/README.html`, `doc/form_guide.html`, `doc/database_guide.html`, and `doc/api_guide.html`.
+- Wiki Documentation (`wiki/`):
+  - Updated release version badge to `v01.00.18` in `wiki/_Sidebar.md`.
+- `util`:
+  - Executed `./util --sync-docs` to synchronize changes to the `docs/` GitHub Pages bundle.
+  - Executed `./util --wiki-push` to publish the updated wiki documentation to GitHub Wiki remote.
+
+Verification
+- Verified `./util --version` cleanly incremented version to `01.00.18`.
+- Verified all HTML documentation badges render `v01.00.18`.
+- Verified `./util --sync-docs` synchronized all assets into `docs/`.
+- Verified `./util --wiki-push` successfully committed and pushed 15 wiki files to `git@github.com:prasundutta151/GTAC_REF.wiki.git`.
+
+Notes
+- Live Web Form: `https://prasundutta151.github.io/GTAC_REF/`
+- Live Referee Directory: `https://prasundutta151.github.io/GTAC_REF/referees.html`
+- GitHub Wiki: `https://github.com/prasundutta151/GTAC_REF/wiki`
+
+---
+
 ## 2026-09-12 17:35:00 IST
 
 Prompt / Request
